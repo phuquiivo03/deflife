@@ -1,23 +1,59 @@
 # devlife
 
-A cozy 2D pixel-art developer life-sim for the web: a Vietnamese dev's journey from student to junior to senior, told through the room they work in.
+A cozy 2D pixel-art developer life-sim for the web: decorate your room as you grow from **student → junior → senior** developer.
 
-**Status: planning.** No app code yet. Milestone 1 (one room scene, stage switching, furniture swapping, a seated character) is specified in [`docs/PLAN.md`](docs/PLAN.md).
+## Run locally
 
-## What's here
+```bash
+pnpm install
+pnpm assets          # cut character sprites + build texture atlas (committed outputs included)
+pnpm dev             # http://localhost:4317
+```
 
-- `public/assets/` holds the runtime art:
-  - rooms (427×240 native);
-  - v2 furniture sprites and shadows;
-  - the character sheet;
-  - furnished reference layouts.
-- `docs/PLAN.md` covers the scale & coordinate system, rendering approach, data model, UI and a step-by-step task list.
-- `docs/data-draft/` has draft content JSON (items, room slots and anchors) measured from the provided composites.
-- `docs/tools/render_preview.py` is an offline reference renderer that implements the plan's draw rules. It writes target images to `docs/art/expected_*.png`:
-  ```bash
-  pip install pillow numpy
-  python3 docs/tools/render_preview.py
-  ```
-- `docs/art/` holds asset diagnostics: composites, the mismatch report, v1 originals and scale studies.
+Other commands:
 
-Planned stack: Next.js (App Router, TypeScript), Tailwind, shadcn/ui, Canvas2D renderer, Zustand. Deploys on Vercel; Supabase comes later.
+| Command | Purpose |
+|---------|---------|
+| `pnpm typecheck` | TypeScript |
+| `pnpm lint` | ESLint |
+| `pnpm test` | Vitest unit tests |
+| `pnpm test:e2e` | Playwright (starts dev server) |
+| `pnpm assets:check` | Regenerate atlas + validate content |
+| `pnpm build && pnpm start` | Production build |
+
+## Milestone 1
+
+- **World resolution:** 427×240 native pixels (`src/game/config.ts` — single source of truth).
+- **Rendering:** Canvas2D, integer device-pixel upscale, data-driven layout JSON.
+- **State:** Zustand + `localStorage` (`devlife:v1`), per-stage loadouts.
+- **UI:** Stage tabs, customize panel (docked ≥1280px, sheet on tablet/desktop, bottom section on portrait mobile).
+
+### Debug overlay
+
+Add `?debug=1` to the URL (or press **D**) to draw anchors, baselines, and room bounds on the scene.
+
+Dev-only full-canvas route: `/debug?stage=student&scale=3&character=1` (404 in production).
+
+### Asset pipeline
+
+```
+public/assets/          Source art (rooms, furniture v2, character sheet)
+public/atlas/           Generated sprite atlas (devlife.png + devlife.json)
+public/assets/character/derived/   Chroma-cut poses (pnpm assets:cut)
+scripts/assets/         cut-character.ts, build-atlas.ts, validate.ts
+```
+
+Reference renders: `docs/art/expected_*.png` (from `docs/tools/render_preview.py`).
+
+Planning doc: [`docs/PLAN.md`](docs/PLAN.md). Art backlog: [`docs/ART_TODO.md`](docs/ART_TODO.md).
+
+## Folder map
+
+```
+src/game/           config, content JSON, layout (resolveScene), view, render, store
+src/components/     GameShell, SceneCanvas, CustomizePanel, shadcn/ui
+app/                Next.js App Router pages
+tests/              unit + e2e
+```
+
+Deploys on Vercel with no extra config (static assets + client bundle).

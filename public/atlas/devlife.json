@@ -1,0 +1,1620 @@
+{
+  "meta": {
+    "image": "devlife.png",
+    "size": {
+      "w": 469,
+      "h": 467
+    },
+    "scale": "1"
+  },
+  "frames": {
+    "furniture/senior/rug": {
+      "frame": {
+        "x": 1,
+        "y": 1,
+        "w": 170,
+        "h": 64
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 2,
+        "y": 2,
+        "w": 170,
+        "h": 64
+      },
+      "sourceSize": {
+        "w": 174,
+        "h": 68
+      },
+      "pivot": {
+        "x": 85,
+        "y": 64
+      }
+    },
+    "furniture/senior/standing_desk_shadow": {
+      "frame": {
+        "x": 1,
+        "y": 68,
+        "w": 169,
+        "h": 20
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 169,
+        "h": 20
+      },
+      "sourceSize": {
+        "w": 169,
+        "h": 20
+      },
+      "pivot": {
+        "x": 84,
+        "y": 20
+      }
+    },
+    "furniture/senior/standing_desk": {
+      "frame": {
+        "x": 1,
+        "y": 91,
+        "w": 161,
+        "h": 70
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 161,
+        "h": 70
+      },
+      "sourceSize": {
+        "w": 163,
+        "h": 72
+      },
+      "pivot": {
+        "x": 80,
+        "y": 70
+      }
+    },
+    "furniture/junior/desk_shadow": {
+      "frame": {
+        "x": 1,
+        "y": 164,
+        "w": 148,
+        "h": 20
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 148,
+        "h": 20
+      },
+      "sourceSize": {
+        "w": 148,
+        "h": 20
+      },
+      "pivot": {
+        "x": 74,
+        "y": 20
+      }
+    },
+    "furniture/junior/desk": {
+      "frame": {
+        "x": 174,
+        "y": 1,
+        "w": 140,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 2,
+        "y": 2,
+        "w": 140,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 144,
+        "h": 76
+      },
+      "pivot": {
+        "x": 70,
+        "y": 72
+      }
+    },
+    "furniture/junior/bed_shadow": {
+      "frame": {
+        "x": 173,
+        "y": 76,
+        "w": 121,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 121,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 121,
+        "h": 24
+      },
+      "pivot": {
+        "x": 60,
+        "y": 24
+      }
+    },
+    "furniture/student/mattress_shadow": {
+      "frame": {
+        "x": 165,
+        "y": 103,
+        "w": 119,
+        "h": 22
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 119,
+        "h": 22
+      },
+      "sourceSize": {
+        "w": 119,
+        "h": 22
+      },
+      "pivot": {
+        "x": 59,
+        "y": 22
+      }
+    },
+    "furniture/student/clothesline": {
+      "frame": {
+        "x": 165,
+        "y": 128,
+        "w": 116,
+        "h": 45
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 116,
+        "h": 45
+      },
+      "sourceSize": {
+        "w": 118,
+        "h": 47
+      },
+      "pivot": {
+        "x": 58,
+        "y": 45
+      }
+    },
+    "furniture/junior/bed": {
+      "frame": {
+        "x": 1,
+        "y": 187,
+        "w": 113,
+        "h": 91
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 113,
+        "h": 91
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 93
+      },
+      "pivot": {
+        "x": 56,
+        "y": 91
+      }
+    },
+    "furniture/student/mattress": {
+      "frame": {
+        "x": 117,
+        "y": 187,
+        "w": 111,
+        "h": 83
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 111,
+        "h": 83
+      },
+      "sourceSize": {
+        "w": 113,
+        "h": 85
+      },
+      "pivot": {
+        "x": 55,
+        "y": 83
+      }
+    },
+    "furniture/junior/wardrobe": {
+      "frame": {
+        "x": 1,
+        "y": 281,
+        "w": 78,
+        "h": 108
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 2,
+        "y": 2,
+        "w": 78,
+        "h": 108
+      },
+      "sourceSize": {
+        "w": 82,
+        "h": 112
+      },
+      "pivot": {
+        "x": 39,
+        "y": 108
+      }
+    },
+    "furniture/senior/bookshelf": {
+      "frame": {
+        "x": 82,
+        "y": 281,
+        "w": 76,
+        "h": 106
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 2,
+        "w": 76,
+        "h": 106
+      },
+      "sourceSize": {
+        "w": 78,
+        "h": 110
+      },
+      "pivot": {
+        "x": 38,
+        "y": 106
+      }
+    },
+    "furniture/student/folding_table_shadow": {
+      "frame": {
+        "x": 161,
+        "y": 273,
+        "w": 97,
+        "h": 17
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 97,
+        "h": 17
+      },
+      "sourceSize": {
+        "w": 97,
+        "h": 17
+      },
+      "pivot": {
+        "x": 48,
+        "y": 17
+      }
+    },
+    "furniture/senior/dual_monitor": {
+      "frame": {
+        "x": 161,
+        "y": 293,
+        "w": 94,
+        "h": 36
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 94,
+        "h": 36
+      },
+      "sourceSize": {
+        "w": 96,
+        "h": 38
+      },
+      "pivot": {
+        "x": 47,
+        "y": 36
+      }
+    },
+    "furniture/student/folding_table": {
+      "frame": {
+        "x": 317,
+        "y": 1,
+        "w": 89,
+        "h": 59
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 89,
+        "h": 59
+      },
+      "sourceSize": {
+        "w": 91,
+        "h": 61
+      },
+      "pivot": {
+        "x": 44,
+        "y": 59
+      }
+    },
+    "furniture/junior/wardrobe_shadow": {
+      "frame": {
+        "x": 317,
+        "y": 63,
+        "w": 86,
+        "h": 27
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 86,
+        "h": 27
+      },
+      "sourceSize": {
+        "w": 86,
+        "h": 27
+      },
+      "pivot": {
+        "x": 43,
+        "y": 27
+      }
+    },
+    "furniture/senior/bookshelf_shadow": {
+      "frame": {
+        "x": 297,
+        "y": 93,
+        "w": 84,
+        "h": 27
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 84,
+        "h": 27
+      },
+      "sourceSize": {
+        "w": 84,
+        "h": 27
+      },
+      "pivot": {
+        "x": 42,
+        "y": 27
+      }
+    },
+    "character/derived/char_back": {
+      "frame": {
+        "x": 231,
+        "y": 176,
+        "w": 34,
+        "h": 83
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 34,
+        "h": 83
+      },
+      "sourceSize": {
+        "w": 36,
+        "h": 85
+      },
+      "pivot": {
+        "x": 17,
+        "y": 83
+      }
+    },
+    "character/derived/char_front": {
+      "frame": {
+        "x": 258,
+        "y": 293,
+        "w": 35,
+        "h": 83
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 35,
+        "h": 83
+      },
+      "sourceSize": {
+        "w": 37,
+        "h": 85
+      },
+      "pivot": {
+        "x": 17,
+        "y": 83
+      }
+    },
+    "character/derived/char_left": {
+      "frame": {
+        "x": 268,
+        "y": 176,
+        "w": 35,
+        "h": 82
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 35,
+        "h": 82
+      },
+      "sourceSize": {
+        "w": 37,
+        "h": 84
+      },
+      "pivot": {
+        "x": 17,
+        "y": 82
+      }
+    },
+    "character/derived/char_right": {
+      "frame": {
+        "x": 296,
+        "y": 261,
+        "w": 35,
+        "h": 82
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 35,
+        "h": 82
+      },
+      "sourceSize": {
+        "w": 37,
+        "h": 84
+      },
+      "pivot": {
+        "x": 17,
+        "y": 82
+      }
+    },
+    "furniture/senior/ergo_chair": {
+      "frame": {
+        "x": 334,
+        "y": 123,
+        "w": 51,
+        "h": 81
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 51,
+        "h": 81
+      },
+      "sourceSize": {
+        "w": 53,
+        "h": 83
+      },
+      "pivot": {
+        "x": 25,
+        "y": 81
+      }
+    },
+    "furniture/senior/monstera": {
+      "frame": {
+        "x": 334,
+        "y": 207,
+        "w": 54,
+        "h": 77
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 54,
+        "h": 77
+      },
+      "sourceSize": {
+        "w": 56,
+        "h": 79
+      },
+      "pivot": {
+        "x": 27,
+        "y": 77
+      }
+    },
+    "furniture/senior/sideboard_shadow": {
+      "frame": {
+        "x": 161,
+        "y": 332,
+        "w": 76,
+        "h": 15
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 76,
+        "h": 15
+      },
+      "sourceSize": {
+        "w": 76,
+        "h": 15
+      },
+      "pivot": {
+        "x": 38,
+        "y": 15
+      }
+    },
+    "furniture/senior/armchair": {
+      "frame": {
+        "x": 334,
+        "y": 287,
+        "w": 63,
+        "h": 75
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 63,
+        "h": 75
+      },
+      "sourceSize": {
+        "w": 65,
+        "h": 77
+      },
+      "pivot": {
+        "x": 31,
+        "y": 75
+      }
+    },
+    "furniture/junior/bookshelf": {
+      "frame": {
+        "x": 1,
+        "y": 392,
+        "w": 63,
+        "h": 74
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 63,
+        "h": 74
+      },
+      "sourceSize": {
+        "w": 65,
+        "h": 76
+      },
+      "pivot": {
+        "x": 31,
+        "y": 74
+      }
+    },
+    "character/derived/char_sit_back": {
+      "frame": {
+        "x": 67,
+        "y": 392,
+        "w": 40,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 40,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 42,
+        "h": 74
+      },
+      "pivot": {
+        "x": 20,
+        "y": 72
+      }
+    },
+    "furniture/junior/bookshelf_shadow": {
+      "frame": {
+        "x": 161,
+        "y": 350,
+        "w": 71,
+        "h": 20
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 71,
+        "h": 20
+      },
+      "sourceSize": {
+        "w": 71,
+        "h": 20
+      },
+      "pivot": {
+        "x": 35,
+        "y": 20
+      }
+    },
+    "furniture/senior/armchair_shadow": {
+      "frame": {
+        "x": 161,
+        "y": 373,
+        "w": 71,
+        "h": 21
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 71,
+        "h": 21
+      },
+      "sourceSize": {
+        "w": 71,
+        "h": 21
+      },
+      "pivot": {
+        "x": 35,
+        "y": 21
+      }
+    },
+    "furniture/student/fan": {
+      "frame": {
+        "x": 110,
+        "y": 390,
+        "w": 36,
+        "h": 70
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 36,
+        "h": 70
+      },
+      "sourceSize": {
+        "w": 38,
+        "h": 72
+      },
+      "pivot": {
+        "x": 18,
+        "y": 70
+      }
+    },
+    "character/derived/char_sit_side": {
+      "frame": {
+        "x": 149,
+        "y": 397,
+        "w": 47,
+        "h": 68
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 47,
+        "h": 68
+      },
+      "sourceSize": {
+        "w": 49,
+        "h": 70
+      },
+      "pivot": {
+        "x": 23,
+        "y": 68
+      }
+    },
+    "furniture/junior/office_chair": {
+      "frame": {
+        "x": 199,
+        "y": 397,
+        "w": 49,
+        "h": 68
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 49,
+        "h": 68
+      },
+      "sourceSize": {
+        "w": 51,
+        "h": 71
+      },
+      "pivot": {
+        "x": 24,
+        "y": 68
+      }
+    },
+    "furniture/senior/sideboard": {
+      "frame": {
+        "x": 251,
+        "y": 379,
+        "w": 68,
+        "h": 49
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 68,
+        "h": 49
+      },
+      "sourceSize": {
+        "w": 70,
+        "h": 51
+      },
+      "pivot": {
+        "x": 34,
+        "y": 49
+      }
+    },
+    "furniture/senior/keyboard_mat": {
+      "frame": {
+        "x": 251,
+        "y": 431,
+        "w": 63,
+        "h": 22
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 63,
+        "h": 22
+      },
+      "sourceSize": {
+        "w": 65,
+        "h": 24
+      },
+      "pivot": {
+        "x": 31,
+        "y": 22
+      }
+    },
+    "furniture/senior/monstera_shadow": {
+      "frame": {
+        "x": 317,
+        "y": 431,
+        "w": 62,
+        "h": 21
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 62,
+        "h": 21
+      },
+      "sourceSize": {
+        "w": 62,
+        "h": 21
+      },
+      "pivot": {
+        "x": 31,
+        "y": 21
+      }
+    },
+    "furniture/junior/monitor": {
+      "frame": {
+        "x": 322,
+        "y": 365,
+        "w": 61,
+        "h": 41
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 61,
+        "h": 41
+      },
+      "sourceSize": {
+        "w": 63,
+        "h": 43
+      },
+      "pivot": {
+        "x": 30,
+        "y": 41
+      }
+    },
+    "furniture/junior/keyboard_mat": {
+      "frame": {
+        "x": 322,
+        "y": 409,
+        "w": 59,
+        "h": 19
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 59,
+        "h": 19
+      },
+      "sourceSize": {
+        "w": 59,
+        "h": 19
+      },
+      "pivot": {
+        "x": 29,
+        "y": 19
+      }
+    },
+    "furniture/senior/ergo_chair_shadow": {
+      "frame": {
+        "x": 409,
+        "y": 1,
+        "w": 59,
+        "h": 22
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 59,
+        "h": 22
+      },
+      "sourceSize": {
+        "w": 59,
+        "h": 22
+      },
+      "pivot": {
+        "x": 29,
+        "y": 22
+      }
+    },
+    "furniture/junior/office_chair_shadow": {
+      "frame": {
+        "x": 409,
+        "y": 26,
+        "w": 57,
+        "h": 19
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 57,
+        "h": 19
+      },
+      "sourceSize": {
+        "w": 57,
+        "h": 19
+      },
+      "pivot": {
+        "x": 28,
+        "y": 19
+      }
+    },
+    "furniture/student/laptop": {
+      "frame": {
+        "x": 384,
+        "y": 409,
+        "w": 53,
+        "h": 51
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 53,
+        "h": 51
+      },
+      "sourceSize": {
+        "w": 55,
+        "h": 53
+      },
+      "pivot": {
+        "x": 26,
+        "y": 51
+      }
+    },
+    "furniture/student/backpack": {
+      "frame": {
+        "x": 409,
+        "y": 48,
+        "w": 42,
+        "h": 52
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 42,
+        "h": 52
+      },
+      "sourceSize": {
+        "w": 44,
+        "h": 54
+      },
+      "pivot": {
+        "x": 21,
+        "y": 52
+      }
+    },
+    "furniture/student/backpack_shadow": {
+      "frame": {
+        "x": 384,
+        "y": 103,
+        "w": 50,
+        "h": 16
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 50,
+        "h": 16
+      },
+      "sourceSize": {
+        "w": 50,
+        "h": 16
+      },
+      "pivot": {
+        "x": 25,
+        "y": 16
+      }
+    },
+    "furniture/student/books_stack_shadow": {
+      "frame": {
+        "x": 400,
+        "y": 122,
+        "w": 50,
+        "h": 14
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 50,
+        "h": 14
+      },
+      "sourceSize": {
+        "w": 50,
+        "h": 14
+      },
+      "pivot": {
+        "x": 25,
+        "y": 14
+      }
+    },
+    "furniture/student/bedside_cabinet_shadow": {
+      "frame": {
+        "x": 400,
+        "y": 139,
+        "w": 48,
+        "h": 14
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 48,
+        "h": 14
+      },
+      "sourceSize": {
+        "w": 48,
+        "h": 14
+      },
+      "pivot": {
+        "x": 24,
+        "y": 14
+      }
+    },
+    "furniture/student/plastic_stool_shadow": {
+      "frame": {
+        "x": 284,
+        "y": 128,
+        "w": 45,
+        "h": 14
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 45,
+        "h": 14
+      },
+      "sourceSize": {
+        "w": 45,
+        "h": 14
+      },
+      "pivot": {
+        "x": 22,
+        "y": 14
+      }
+    },
+    "furniture/senior/espresso_machine": {
+      "frame": {
+        "x": 388,
+        "y": 156,
+        "w": 32,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 32,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 34,
+        "h": 46
+      },
+      "pivot": {
+        "x": 16,
+        "y": 44
+      }
+    },
+    "furniture/student/bedside_cabinet": {
+      "frame": {
+        "x": 423,
+        "y": 156,
+        "w": 40,
+        "h": 44
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 40,
+        "h": 44
+      },
+      "sourceSize": {
+        "w": 42,
+        "h": 46
+      },
+      "pivot": {
+        "x": 20,
+        "y": 44
+      }
+    },
+    "furniture/student/fan_shadow": {
+      "frame": {
+        "x": 284,
+        "y": 145,
+        "w": 44,
+        "h": 20
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 44,
+        "h": 20
+      },
+      "sourceSize": {
+        "w": 44,
+        "h": 20
+      },
+      "pivot": {
+        "x": 22,
+        "y": 20
+      }
+    },
+    "furniture/student/books_stack": {
+      "frame": {
+        "x": 400,
+        "y": 203,
+        "w": 42,
+        "h": 43
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 42,
+        "h": 43
+      },
+      "sourceSize": {
+        "w": 44,
+        "h": 45
+      },
+      "pivot": {
+        "x": 21,
+        "y": 43
+      }
+    },
+    "furniture/junior/laptop_stand": {
+      "frame": {
+        "x": 400,
+        "y": 249,
+        "w": 39,
+        "h": 42
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 39,
+        "h": 42
+      },
+      "sourceSize": {
+        "w": 41,
+        "h": 44
+      },
+      "pivot": {
+        "x": 19,
+        "y": 42
+      }
+    },
+    "furniture/student/plastic_stool": {
+      "frame": {
+        "x": 400,
+        "y": 294,
+        "w": 37,
+        "h": 42
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 37,
+        "h": 42
+      },
+      "sourceSize": {
+        "w": 39,
+        "h": 44
+      },
+      "pivot": {
+        "x": 18,
+        "y": 42
+      }
+    },
+    "furniture/junior/drawer_pedestal": {
+      "frame": {
+        "x": 386,
+        "y": 365,
+        "w": 30,
+        "h": 35
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 30,
+        "h": 35
+      },
+      "sourceSize": {
+        "w": 30,
+        "h": 35
+      },
+      "pivot": {
+        "x": 15,
+        "y": 35
+      }
+    },
+    "furniture/student/mirror": {
+      "frame": {
+        "x": 306,
+        "y": 168,
+        "w": 25,
+        "h": 34
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 25,
+        "h": 34
+      },
+      "sourceSize": {
+        "w": 27,
+        "h": 36
+      },
+      "pivot": {
+        "x": 12,
+        "y": 34
+      }
+    },
+    "furniture/senior/drawer_pedestal": {
+      "frame": {
+        "x": 445,
+        "y": 203,
+        "w": 21,
+        "h": 33
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 21,
+        "h": 33
+      },
+      "sourceSize": {
+        "w": 23,
+        "h": 35
+      },
+      "pivot": {
+        "x": 10,
+        "y": 33
+      }
+    },
+    "furniture/junior/poster_1": {
+      "frame": {
+        "x": 445,
+        "y": 239,
+        "w": 23,
+        "h": 32
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 23,
+        "h": 32
+      },
+      "sourceSize": {
+        "w": 25,
+        "h": 34
+      },
+      "pivot": {
+        "x": 11,
+        "y": 32
+      }
+    },
+    "furniture/senior/coffee_grinder": {
+      "frame": {
+        "x": 268,
+        "y": 261,
+        "w": 17,
+        "h": 29
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 17,
+        "h": 29
+      },
+      "sourceSize": {
+        "w": 19,
+        "h": 31
+      },
+      "pivot": {
+        "x": 8,
+        "y": 29
+      }
+    },
+    "furniture/senior/frame_1": {
+      "frame": {
+        "x": 296,
+        "y": 346,
+        "w": 21,
+        "h": 28
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 21,
+        "h": 28
+      },
+      "sourceSize": {
+        "w": 21,
+        "h": 28
+      },
+      "pivot": {
+        "x": 10,
+        "y": 28
+      }
+    },
+    "furniture/senior/frame_2": {
+      "frame": {
+        "x": 306,
+        "y": 205,
+        "w": 21,
+        "h": 27
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 21,
+        "h": 27
+      },
+      "sourceSize": {
+        "w": 21,
+        "h": 27
+      },
+      "pivot": {
+        "x": 10,
+        "y": 27
+      }
+    },
+    "furniture/student/kettle": {
+      "frame": {
+        "x": 442,
+        "y": 274,
+        "w": 21,
+        "h": 24
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 21,
+        "h": 24
+      },
+      "sourceSize": {
+        "w": 23,
+        "h": 26
+      },
+      "pivot": {
+        "x": 10,
+        "y": 24
+      }
+    },
+    "furniture/junior/plant_small": {
+      "frame": {
+        "x": 240,
+        "y": 332,
+        "w": 15,
+        "h": 22
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 15,
+        "h": 22
+      },
+      "sourceSize": {
+        "w": 15,
+        "h": 22
+      },
+      "pivot": {
+        "x": 7,
+        "y": 22
+      }
+    },
+    "furniture/junior/poster_2": {
+      "frame": {
+        "x": 400,
+        "y": 339,
+        "w": 17,
+        "h": 22
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 17,
+        "h": 22
+      },
+      "sourceSize": {
+        "w": 17,
+        "h": 22
+      },
+      "pivot": {
+        "x": 8,
+        "y": 22
+      }
+    },
+    "furniture/senior/plant_small": {
+      "frame": {
+        "x": 235,
+        "y": 357,
+        "w": 13,
+        "h": 22
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 13,
+        "h": 22
+      },
+      "sourceSize": {
+        "w": 15,
+        "h": 24
+      },
+      "pivot": {
+        "x": 6,
+        "y": 22
+      }
+    },
+    "furniture/student/noodle_cup": {
+      "frame": {
+        "x": 453,
+        "y": 103,
+        "w": 15,
+        "h": 20
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 15,
+        "h": 20
+      },
+      "sourceSize": {
+        "w": 17,
+        "h": 22
+      },
+      "pivot": {
+        "x": 7,
+        "y": 20
+      }
+    },
+    "furniture/senior/smart_speaker": {
+      "frame": {
+        "x": 152,
+        "y": 164,
+        "w": 10,
+        "h": 19
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 10,
+        "h": 19
+      },
+      "sourceSize": {
+        "w": 12,
+        "h": 21
+      },
+      "pivot": {
+        "x": 5,
+        "y": 19
+      }
+    },
+    "furniture/junior/mug": {
+      "frame": {
+        "x": 297,
+        "y": 76,
+        "w": 14,
+        "h": 14
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 14,
+        "h": 14
+      },
+      "sourceSize": {
+        "w": 14,
+        "h": 14
+      },
+      "pivot": {
+        "x": 7,
+        "y": 14
+      }
+    },
+    "furniture/junior/mouse": {
+      "frame": {
+        "x": 251,
+        "y": 456,
+        "w": 10,
+        "h": 10
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 10,
+        "h": 10
+      },
+      "sourceSize": {
+        "w": 10,
+        "h": 10
+      },
+      "pivot": {
+        "x": 5,
+        "y": 10
+      }
+    },
+    "furniture/student/mouse": {
+      "frame": {
+        "x": 384,
+        "y": 93,
+        "w": 9,
+        "h": 7
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 9,
+        "h": 7
+      },
+      "sourceSize": {
+        "w": 11,
+        "h": 9
+      },
+      "pivot": {
+        "x": 4,
+        "y": 7
+      }
+    }
+  }
+}
