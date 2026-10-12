@@ -1,0 +1,238 @@
+{
+ "id": "senior",
+ "title": "Senior apartment",
+ "background": "rooms/room_senior_empty",
+ "size": [
+  427,
+  240
+ ],
+ "bounds": {
+  "backWall": [
+   27,
+   6,
+   400,
+   125
+  ],
+  "floorTopY": 131,
+  "leftWallFloorEdge": [
+   [
+    27,
+    131
+   ],
+   [
+    0,
+    200
+   ]
+  ],
+  "rightWallFloorEdge": [
+   [
+    400,
+    131
+   ],
+   [
+    427,
+    200
+   ]
+  ]
+ },
+ "focusX": 218,
+ "slots": [
+  {
+   "id": "wall_art_1",
+   "kind": "wall",
+   "accepts": [
+    "wall_art"
+   ],
+   "default": "senior.frame_1",
+   "anchor": [
+    100,
+    74
+   ]
+  },
+  {
+   "id": "wall_art_2",
+   "kind": "wall",
+   "accepts": [
+    "wall_art"
+   ],
+   "default": "senior.frame_2",
+   "anchor": [
+    310,
+    79
+   ]
+  },
+  {
+   "id": "rug",
+   "kind": "decal",
+   "accepts": [
+    "rug"
+   ],
+   "default": "senior.rug",
+   "anchor": [
+    217,
+    222
+   ]
+  },
+  {
+   "id": "cabinet",
+   "kind": "floor",
+   "accepts": [
+    "cabinet"
+   ],
+   "default": "senior.sideboard",
+   "anchor": [
+    60,
+    152
+   ]
+  },
+  {
+   "id": "cabinet_top",
+   "kind": "surface",
+   "accepts": [
+    "appliance"
+   ],
+   "default": "senior.espresso_machine",
+   "parent": "cabinet",
+   "socket": "top"
+  },
+  {
+   "id": "cabinet_top_2",
+   "kind": "surface",
+   "accepts": [
+    "appliance"
+   ],
+   "default": "senior.coffee_grinder",
+   "parent": "cabinet",
+   "socket": "top2"
+  },
+  {
+   "id": "lounge",
+   "kind": "floor",
+   "accepts": [
+    "lounge"
+   ],
+   "default": "senior.armchair",
+   "anchor": [
+    39,
+    220
+   ]
+  },
+  {
+   "id": "desk",
+   "kind": "floor",
+   "accepts": [
+    "desk"
+   ],
+   "default": "senior.standing_desk",
+   "anchor": [
+    218,
+    175
+   ],
+   "required": true
+  },
+  {
+   "id": "under_desk",
+   "kind": "surface",
+   "accepts": [
+    "under_desk"
+   ],
+   "default": "senior.drawer_pedestal",
+   "parent": "desk",
+   "socket": "under"
+  },
+  {
+   "id": "display",
+   "kind": "surface",
+   "accepts": [
+    "display"
+   ],
+   "default": "senior.dual_monitor",
+   "parent": "desk",
+   "socket": "display"
+  },
+  {
+   "id": "keyboard",
+   "kind": "surface",
+   "accepts": [
+    "keyboard"
+   ],
+   "default": "senior.keyboard_mat",
+   "parent": "desk",
+   "socket": "keyboard"
+  },
+  {
+   "id": "mouse",
+   "kind": "surface",
+   "accepts": [
+    "mouse"
+   ],
+   "default": null,
+   "parent": "desk",
+   "socket": "mouse"
+  },
+  {
+   "id": "cup",
+   "kind": "surface",
+   "accepts": [
+    "cup"
+   ],
+   "default": null,
+   "parent": "desk",
+   "socket": "cup"
+  },
+  {
+   "id": "desk_plant",
+   "kind": "surface",
+   "accepts": [
+    "desk_plant"
+   ],
+   "default": "senior.plant_small",
+   "parent": "desk",
+   "socket": "plant"
+  },
+  {
+   "id": "gadget",
+   "kind": "surface",
+   "accepts": [
+    "gadget"
+   ],
+   "default": "senior.smart_speaker",
+   "parent": "desk",
+   "socket": "gadget"
+  },
+  {
+   "id": "seat",
+   "kind": "seat",
+   "accepts": [
+    "chair"
+   ],
+   "default": "senior.ergo_chair",
+   "parent": "desk",
+   "socket": "seat"
+  },
+  {
+   "id": "shelf",
+   "kind": "floor",
+   "accepts": [
+    "shelf"
+   ],
+   "default": "senior.bookshelf",
+   "anchor": [
+    361,
+    149
+   ]
+  },
+  {
+   "id": "decor_1",
+   "kind": "floor",
+   "accepts": [
+    "floor_decor"
+   ],
+   "default": "senior.monstera",
+   "anchor": [
+    380,
+    171
+   ]
+  }
+ ]
+}
