@@ -1,0 +1,499 @@
+{
+ "version": 1,
+ "units": "px@427x240",
+ "items": [
+  {
+   "id": "student.mattress",
+   "stage": "student",
+   "category": "bed",
+   "kind": "floor",
+   "sprite": "furniture/student/mattress",
+   "shadow": "furniture/student/mattress_shadow"
+  },
+  {
+   "id": "junior.bed",
+   "stage": "junior",
+   "category": "bed",
+   "kind": "floor",
+   "sprite": "furniture/junior/bed",
+   "shadow": "furniture/junior/bed_shadow",
+   "notes": [
+    "proportions off vs reference; redraw later"
+   ]
+  },
+  {
+   "id": "student.folding_table",
+   "stage": "student",
+   "category": "desk",
+   "kind": "floor",
+   "sprite": "furniture/student/folding_table",
+   "shadow": "furniture/student/folding_table_shadow",
+   "sockets": {
+    "display": [
+     0,
+     -20
+    ],
+    "keyboard": [
+     0,
+     -16
+    ],
+    "mouse": [
+     24,
+     -26
+    ],
+    "cup": [
+     -32,
+     -26
+    ],
+    "plant": [
+     -36,
+     -34
+    ],
+    "side": [
+     -28,
+     -24
+    ],
+    "gadget": [
+     34,
+     -32
+    ]
+   },
+   "seat": [
+    26,
+    24
+   ]
+  },
+  {
+   "id": "junior.desk",
+   "stage": "junior",
+   "category": "desk",
+   "kind": "floor",
+   "sprite": "furniture/junior/desk",
+   "shadow": "furniture/junior/desk_shadow",
+   "sockets": {
+    "display": [
+     7,
+     -56
+    ],
+    "keyboard": [
+     8,
+     -37
+    ],
+    "mouse": [
+     32,
+     -45
+    ],
+    "cup": [
+     51,
+     -44
+    ],
+    "plant": [
+     60,
+     -56
+    ],
+    "side": [
+     -50,
+     -44
+    ],
+    "gadget": [
+     42,
+     -56
+    ],
+    "under": [
+     -56,
+     -1
+    ]
+   },
+   "seat": [
+    5,
+    22
+   ],
+   "notes": [
+    "drawn from a different angle than the reference; redraw later"
+   ]
+  },
+  {
+   "id": "senior.standing_desk",
+   "stage": "senior",
+   "category": "desk",
+   "kind": "floor",
+   "sprite": "furniture/senior/standing_desk",
+   "shadow": "furniture/senior/standing_desk_shadow",
+   "sockets": {
+    "display": [
+     2,
+     -57
+    ],
+    "keyboard": [
+     1,
+     -38
+    ],
+    "mouse": [
+     36,
+     -40
+    ],
+    "cup": [
+     46,
+     -44
+    ],
+    "plant": [
+     -62,
+     -59
+    ],
+    "side": [
+     -50,
+     -48
+    ],
+    "gadget": [
+     62,
+     -51
+    ],
+    "under": [
+     -58,
+     -1
+    ]
+   },
+   "seat": [
+    1,
+    35
+   ]
+  },
+  {
+   "id": "student.plastic_stool",
+   "stage": "student",
+   "category": "chair",
+   "kind": "floor",
+   "sprite": "furniture/student/plastic_stool",
+   "shadow": "furniture/student/plastic_stool_shadow",
+   "seatPoint": [
+    0,
+    -33
+   ]
+  },
+  {
+   "id": "junior.office_chair",
+   "stage": "junior",
+   "category": "chair",
+   "kind": "floor",
+   "sprite": "furniture/junior/office_chair",
+   "shadow": "furniture/junior/office_chair_shadow",
+   "seatPoint": [
+    0,
+    -25
+   ],
+   "overlayFromY": -48
+  },
+  {
+   "id": "senior.ergo_chair",
+   "stage": "senior",
+   "category": "chair",
+   "kind": "floor",
+   "sprite": "furniture/senior/ergo_chair",
+   "shadow": "furniture/senior/ergo_chair_shadow",
+   "seatPoint": [
+    0,
+    -31
+   ],
+   "overlayFromY": -55
+  },
+  {
+   "id": "student.laptop",
+   "stage": "student",
+   "category": "display",
+   "kind": "surface",
+   "sprite": "furniture/student/laptop"
+  },
+  {
+   "id": "junior.monitor",
+   "stage": "junior",
+   "category": "display",
+   "kind": "surface",
+   "sprite": "furniture/junior/monitor"
+  },
+  {
+   "id": "senior.dual_monitor",
+   "stage": "senior",
+   "category": "display",
+   "kind": "surface",
+   "sprite": "furniture/senior/dual_monitor"
+  },
+  {
+   "id": "junior.laptop_stand",
+   "stage": "junior",
+   "category": "side_device",
+   "kind": "surface",
+   "sprite": "furniture/junior/laptop_stand"
+  },
+  {
+   "id": "junior.keyboard_mat",
+   "stage": "junior",
+   "category": "keyboard",
+   "kind": "surface",
+   "sprite": "furniture/junior/keyboard_mat"
+  },
+  {
+   "id": "senior.keyboard_mat",
+   "stage": "senior",
+   "category": "keyboard",
+   "kind": "surface",
+   "sprite": "furniture/senior/keyboard_mat",
+   "notes": [
+    "sprite already contains a mouse"
+   ]
+  },
+  {
+   "id": "student.mouse",
+   "stage": "student",
+   "category": "mouse",
+   "kind": "surface",
+   "sprite": "furniture/student/mouse"
+  },
+  {
+   "id": "junior.mouse",
+   "stage": "junior",
+   "category": "mouse",
+   "kind": "surface",
+   "sprite": "furniture/junior/mouse"
+  },
+  {
+   "id": "junior.mug",
+   "stage": "junior",
+   "category": "cup",
+   "kind": "surface",
+   "sprite": "furniture/junior/mug"
+  },
+  {
+   "id": "student.noodle_cup",
+   "stage": "student",
+   "category": "cup",
+   "kind": "surface",
+   "sprite": "furniture/student/noodle_cup"
+  },
+  {
+   "id": "junior.plant_small",
+   "stage": "junior",
+   "category": "desk_plant",
+   "kind": "surface",
+   "sprite": "furniture/junior/plant_small"
+  },
+  {
+   "id": "senior.plant_small",
+   "stage": "senior",
+   "category": "desk_plant",
+   "kind": "surface",
+   "sprite": "furniture/senior/plant_small"
+  },
+  {
+   "id": "senior.smart_speaker",
+   "stage": "senior",
+   "category": "gadget",
+   "kind": "surface",
+   "sprite": "furniture/senior/smart_speaker"
+  },
+  {
+   "id": "junior.drawer_pedestal",
+   "stage": "junior",
+   "category": "under_desk",
+   "kind": "floor",
+   "sprite": "furniture/junior/drawer_pedestal"
+  },
+  {
+   "id": "senior.drawer_pedestal",
+   "stage": "senior",
+   "category": "under_desk",
+   "kind": "floor",
+   "sprite": "furniture/senior/drawer_pedestal"
+  },
+  {
+   "id": "student.bedside_cabinet",
+   "stage": "student",
+   "category": "cabinet",
+   "kind": "floor",
+   "sprite": "furniture/student/bedside_cabinet",
+   "shadow": "furniture/student/bedside_cabinet_shadow",
+   "sockets": {
+    "top": [
+     2,
+     -33
+    ],
+    "top2": [
+     -12,
+     -31
+    ]
+   }
+  },
+  {
+   "id": "senior.sideboard",
+   "stage": "senior",
+   "category": "cabinet",
+   "kind": "floor",
+   "sprite": "furniture/senior/sideboard",
+   "shadow": "furniture/senior/sideboard_shadow",
+   "sockets": {
+    "top": [
+     11,
+     -33
+    ],
+    "top2": [
+     -16,
+     -25
+    ]
+   }
+  },
+  {
+   "id": "student.kettle",
+   "stage": "student",
+   "category": "appliance",
+   "kind": "surface",
+   "sprite": "furniture/student/kettle"
+  },
+  {
+   "id": "senior.espresso_machine",
+   "stage": "senior",
+   "category": "appliance",
+   "kind": "surface",
+   "sprite": "furniture/senior/espresso_machine"
+  },
+  {
+   "id": "senior.coffee_grinder",
+   "stage": "senior",
+   "category": "appliance",
+   "kind": "surface",
+   "sprite": "furniture/senior/coffee_grinder"
+  },
+  {
+   "id": "junior.bookshelf",
+   "stage": "junior",
+   "category": "shelf",
+   "kind": "floor",
+   "sprite": "furniture/junior/bookshelf",
+   "shadow": "furniture/junior/bookshelf_shadow"
+  },
+  {
+   "id": "senior.bookshelf",
+   "stage": "senior",
+   "category": "shelf",
+   "kind": "floor",
+   "sprite": "furniture/senior/bookshelf",
+   "shadow": "furniture/senior/bookshelf_shadow"
+  },
+  {
+   "id": "junior.wardrobe",
+   "stage": "junior",
+   "category": "wardrobe",
+   "kind": "floor",
+   "sprite": "furniture/junior/wardrobe",
+   "shadow": "furniture/junior/wardrobe_shadow",
+   "notes": [
+    "drawn from a different angle than the reference; redraw later"
+   ]
+  },
+  {
+   "id": "student.fan",
+   "stage": "student",
+   "category": "floor_decor",
+   "kind": "floor",
+   "sprite": "furniture/student/fan",
+   "shadow": "furniture/student/fan_shadow"
+  },
+  {
+   "id": "senior.monstera",
+   "stage": "senior",
+   "category": "floor_decor",
+   "kind": "floor",
+   "sprite": "furniture/senior/monstera",
+   "shadow": "furniture/senior/monstera_shadow"
+  },
+  {
+   "id": "student.backpack",
+   "stage": "student",
+   "category": "floor_decor",
+   "kind": "floor",
+   "sprite": "furniture/student/backpack",
+   "shadow": "furniture/student/backpack_shadow"
+  },
+  {
+   "id": "student.books_stack",
+   "stage": "student",
+   "category": "floor_decor",
+   "kind": "floor",
+   "sprite": "furniture/student/books_stack",
+   "shadow": "furniture/student/books_stack_shadow"
+  },
+  {
+   "id": "senior.armchair",
+   "stage": "senior",
+   "category": "lounge",
+   "kind": "floor",
+   "sprite": "furniture/senior/armchair",
+   "shadow": "furniture/senior/armchair_shadow"
+  },
+  {
+   "id": "senior.rug",
+   "stage": "senior",
+   "category": "rug",
+   "kind": "decal",
+   "sprite": "furniture/senior/rug"
+  },
+  {
+   "id": "student.mirror",
+   "stage": "student",
+   "category": "wall_art",
+   "kind": "wall",
+   "sprite": "furniture/student/mirror"
+  },
+  {
+   "id": "junior.poster_1",
+   "stage": "junior",
+   "category": "wall_art",
+   "kind": "wall",
+   "sprite": "furniture/junior/poster_1"
+  },
+  {
+   "id": "junior.poster_2",
+   "stage": "junior",
+   "category": "wall_art",
+   "kind": "wall",
+   "sprite": "furniture/junior/poster_2"
+  },
+  {
+   "id": "senior.frame_1",
+   "stage": "senior",
+   "category": "wall_art",
+   "kind": "wall",
+   "sprite": "furniture/senior/frame_1",
+   "notes": [
+    "front-on: back wall only"
+   ]
+  },
+  {
+   "id": "senior.frame_2",
+   "stage": "senior",
+   "category": "wall_art",
+   "kind": "wall",
+   "sprite": "furniture/senior/frame_2",
+   "notes": [
+    "front-on: back wall only"
+   ]
+  },
+  {
+   "id": "student.clothesline",
+   "stage": "student",
+   "category": "wall_hanging",
+   "kind": "wall",
+   "sprite": "furniture/student/clothesline"
+  }
+ ],
+ "socketOrder": [
+  "under",
+  "display",
+  "side",
+  "plant",
+  "gadget",
+  "keyboard",
+  "cup",
+  "top",
+  "top2",
+  "mouse"
+ ]
+}

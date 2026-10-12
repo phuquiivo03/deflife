@@ -1,0 +1,22 @@
+export const WORLD = { w: 427, h: 240 } as const;
+export const UNITS = "px@427x240";
+
+export const MIN_VIEW_W = 200;
+export const PORTRAIT_SCENE_MAX_H = 0.62;
+
+export const DEFAULT_LETTERBOX = "#15111c";
+
+export const CHAR_DOWNSCALE = 3.5;
+export const CHAR_KEY = { r: 209, g: 17, b: 90 };
+export const SIT_HIP_FROM_BOTTOM = 9;
+export const FLOOR_SIT_OFFSET_Y = -4;
+
+export const STAGES = ["student", "junior", "senior"] as const;
+export type StageId = (typeof STAGES)[number];
+
+export const PERSIST_KEY = "devlife:v1";
+export const PERSIST_VERSION = 1;
+
+export const CHAR_POSE_SIT_BACK = "character/derived/char_sit_back";
+export const ATLAS_URL = "/atlas/devlife.png";
+export const ATLAS_JSON_URL = "/atlas/devlife.json";

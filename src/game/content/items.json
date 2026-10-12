@@ -1,0 +1,671 @@
+{
+  "version": 1,
+  "units": "px@427x240",
+  "items": [
+    {
+      "id": "student.mattress",
+      "stage": "student",
+      "category": "bed",
+      "kind": "floor",
+      "sprite": "furniture/student/mattress",
+      "shadow": "furniture/student/mattress_shadow",
+      "name": {
+        "en": "Floor mattress",
+        "vi": "Nệm sàn"
+      }
+    },
+    {
+      "id": "junior.bed",
+      "stage": "junior",
+      "category": "bed",
+      "kind": "floor",
+      "sprite": "furniture/junior/bed",
+      "shadow": "furniture/junior/bed_shadow",
+      "notes": [
+        "proportions off vs reference; redraw later"
+      ],
+      "name": {
+        "en": "Single bed",
+        "vi": "Giường đơn"
+      }
+    },
+    {
+      "id": "student.folding_table",
+      "stage": "student",
+      "category": "desk",
+      "kind": "floor",
+      "sprite": "furniture/student/folding_table",
+      "shadow": "furniture/student/folding_table_shadow",
+      "sockets": {
+        "display": [
+          0,
+          -20
+        ],
+        "keyboard": [
+          0,
+          -16
+        ],
+        "mouse": [
+          24,
+          -26
+        ],
+        "cup": [
+          -32,
+          -26
+        ],
+        "plant": [
+          -36,
+          -34
+        ],
+        "side": [
+          -28,
+          -24
+        ],
+        "gadget": [
+          34,
+          -32
+        ]
+      },
+      "seat": [
+        26,
+        24
+      ],
+      "name": {
+        "en": "Folding table",
+        "vi": "Bàn xếp"
+      }
+    },
+    {
+      "id": "junior.desk",
+      "stage": "junior",
+      "category": "desk",
+      "kind": "floor",
+      "sprite": "furniture/junior/desk",
+      "shadow": "furniture/junior/desk_shadow",
+      "sockets": {
+        "display": [
+          7,
+          -56
+        ],
+        "keyboard": [
+          8,
+          -37
+        ],
+        "mouse": [
+          32,
+          -45
+        ],
+        "cup": [
+          51,
+          -44
+        ],
+        "plant": [
+          60,
+          -56
+        ],
+        "side": [
+          -50,
+          -44
+        ],
+        "gadget": [
+          42,
+          -56
+        ],
+        "under": [
+          -56,
+          -1
+        ]
+      },
+      "seat": [
+        5,
+        22
+      ],
+      "notes": [
+        "drawn from a different angle than the reference; redraw later"
+      ],
+      "name": {
+        "en": "Wooden desk",
+        "vi": "Bàn gỗ"
+      }
+    },
+    {
+      "id": "senior.standing_desk",
+      "stage": "senior",
+      "category": "desk",
+      "kind": "floor",
+      "sprite": "furniture/senior/standing_desk",
+      "shadow": "furniture/senior/standing_desk_shadow",
+      "sockets": {
+        "display": [
+          2,
+          -57
+        ],
+        "keyboard": [
+          1,
+          -38
+        ],
+        "mouse": [
+          36,
+          -40
+        ],
+        "cup": [
+          46,
+          -44
+        ],
+        "plant": [
+          -62,
+          -59
+        ],
+        "side": [
+          -50,
+          -48
+        ],
+        "gadget": [
+          62,
+          -51
+        ],
+        "under": [
+          -58,
+          -1
+        ]
+      },
+      "seat": [
+        1,
+        35
+      ],
+      "name": {
+        "en": "Standing desk",
+        "vi": "Bàn nâng hạ"
+      }
+    },
+    {
+      "id": "student.plastic_stool",
+      "stage": "student",
+      "category": "chair",
+      "kind": "floor",
+      "sprite": "furniture/student/plastic_stool",
+      "shadow": "furniture/student/plastic_stool_shadow",
+      "seatPoint": [
+        0,
+        -33
+      ],
+      "name": {
+        "en": "Plastic stool",
+        "vi": "Ghế nhựa"
+      }
+    },
+    {
+      "id": "junior.office_chair",
+      "stage": "junior",
+      "category": "chair",
+      "kind": "floor",
+      "sprite": "furniture/junior/office_chair",
+      "shadow": "furniture/junior/office_chair_shadow",
+      "seatPoint": [
+        0,
+        -25
+      ],
+      "overlayFromY": -48,
+      "name": {
+        "en": "Office chair",
+        "vi": "Ghế văn phòng"
+      }
+    },
+    {
+      "id": "senior.ergo_chair",
+      "stage": "senior",
+      "category": "chair",
+      "kind": "floor",
+      "sprite": "furniture/senior/ergo_chair",
+      "shadow": "furniture/senior/ergo_chair_shadow",
+      "seatPoint": [
+        0,
+        -31
+      ],
+      "overlayFromY": -55,
+      "name": {
+        "en": "Ergonomic chair",
+        "vi": "Ghế công thái học"
+      }
+    },
+    {
+      "id": "student.laptop",
+      "stage": "student",
+      "category": "display",
+      "kind": "surface",
+      "sprite": "furniture/student/laptop",
+      "name": {
+        "en": "Laptop",
+        "vi": "Laptop"
+      }
+    },
+    {
+      "id": "junior.monitor",
+      "stage": "junior",
+      "category": "display",
+      "kind": "surface",
+      "sprite": "furniture/junior/monitor",
+      "name": {
+        "en": "Monitor",
+        "vi": "Màn hình"
+      }
+    },
+    {
+      "id": "senior.dual_monitor",
+      "stage": "senior",
+      "category": "display",
+      "kind": "surface",
+      "sprite": "furniture/senior/dual_monitor",
+      "name": {
+        "en": "Dual monitors",
+        "vi": "Hai màn hình"
+      }
+    },
+    {
+      "id": "junior.laptop_stand",
+      "stage": "junior",
+      "category": "side_device",
+      "kind": "surface",
+      "sprite": "furniture/junior/laptop_stand",
+      "name": {
+        "en": "Laptop stand",
+        "vi": "Giá laptop"
+      }
+    },
+    {
+      "id": "junior.keyboard_mat",
+      "stage": "junior",
+      "category": "keyboard",
+      "kind": "surface",
+      "sprite": "furniture/junior/keyboard_mat",
+      "name": {
+        "en": "Keyboard mat",
+        "vi": "Lót bàn phím"
+      }
+    },
+    {
+      "id": "senior.keyboard_mat",
+      "stage": "senior",
+      "category": "keyboard",
+      "kind": "surface",
+      "sprite": "furniture/senior/keyboard_mat",
+      "notes": [
+        "sprite already contains a mouse"
+      ],
+      "name": {
+        "en": "Desk mat + keyboard",
+        "vi": "Lót bàn + phím"
+      }
+    },
+    {
+      "id": "student.mouse",
+      "stage": "student",
+      "category": "mouse",
+      "kind": "surface",
+      "sprite": "furniture/student/mouse",
+      "name": {
+        "en": "Mouse",
+        "vi": "Chuột"
+      }
+    },
+    {
+      "id": "junior.mouse",
+      "stage": "junior",
+      "category": "mouse",
+      "kind": "surface",
+      "sprite": "furniture/junior/mouse",
+      "name": {
+        "en": "Mouse",
+        "vi": "Chuột"
+      }
+    },
+    {
+      "id": "junior.mug",
+      "stage": "junior",
+      "category": "cup",
+      "kind": "surface",
+      "sprite": "furniture/junior/mug",
+      "name": {
+        "en": "Coffee mug",
+        "vi": "Cốc cà phê"
+      }
+    },
+    {
+      "id": "student.noodle_cup",
+      "stage": "student",
+      "category": "cup",
+      "kind": "surface",
+      "sprite": "furniture/student/noodle_cup",
+      "name": {
+        "en": "Instant noodles",
+        "vi": "Mì ly"
+      }
+    },
+    {
+      "id": "junior.plant_small",
+      "stage": "junior",
+      "category": "desk_plant",
+      "kind": "surface",
+      "sprite": "furniture/junior/plant_small",
+      "name": {
+        "en": "Desk plant",
+        "vi": "Cây bàn"
+      }
+    },
+    {
+      "id": "senior.plant_small",
+      "stage": "senior",
+      "category": "desk_plant",
+      "kind": "surface",
+      "sprite": "furniture/senior/plant_small",
+      "name": {
+        "en": "Desk plant",
+        "vi": "Cây bàn"
+      }
+    },
+    {
+      "id": "senior.smart_speaker",
+      "stage": "senior",
+      "category": "gadget",
+      "kind": "surface",
+      "sprite": "furniture/senior/smart_speaker",
+      "name": {
+        "en": "Smart speaker",
+        "vi": "Loa thông minh"
+      }
+    },
+    {
+      "id": "junior.drawer_pedestal",
+      "stage": "junior",
+      "category": "under_desk",
+      "kind": "floor",
+      "sprite": "furniture/junior/drawer_pedestal",
+      "name": {
+        "en": "Drawer pedestal",
+        "vi": "Tủ kéo"
+      }
+    },
+    {
+      "id": "senior.drawer_pedestal",
+      "stage": "senior",
+      "category": "under_desk",
+      "kind": "floor",
+      "sprite": "furniture/senior/drawer_pedestal",
+      "name": {
+        "en": "Drawer pedestal",
+        "vi": "Tủ kéo"
+      }
+    },
+    {
+      "id": "student.bedside_cabinet",
+      "stage": "student",
+      "category": "cabinet",
+      "kind": "floor",
+      "sprite": "furniture/student/bedside_cabinet",
+      "shadow": "furniture/student/bedside_cabinet_shadow",
+      "sockets": {
+        "top": [
+          2,
+          -33
+        ],
+        "top2": [
+          -12,
+          -31
+        ]
+      },
+      "name": {
+        "en": "Bedside cabinet",
+        "vi": "Tủ đầu giường"
+      }
+    },
+    {
+      "id": "senior.sideboard",
+      "stage": "senior",
+      "category": "cabinet",
+      "kind": "floor",
+      "sprite": "furniture/senior/sideboard",
+      "shadow": "furniture/senior/sideboard_shadow",
+      "sockets": {
+        "top": [
+          11,
+          -33
+        ],
+        "top2": [
+          -16,
+          -25
+        ]
+      },
+      "name": {
+        "en": "Sideboard",
+        "vi": "Tủ trà"
+      }
+    },
+    {
+      "id": "student.kettle",
+      "stage": "student",
+      "category": "appliance",
+      "kind": "surface",
+      "sprite": "furniture/student/kettle",
+      "name": {
+        "en": "Electric kettle",
+        "vi": "Ấm điện"
+      }
+    },
+    {
+      "id": "senior.espresso_machine",
+      "stage": "senior",
+      "category": "appliance",
+      "kind": "surface",
+      "sprite": "furniture/senior/espresso_machine",
+      "name": {
+        "en": "Espresso machine",
+        "vi": "Máy pha cà phê"
+      }
+    },
+    {
+      "id": "senior.coffee_grinder",
+      "stage": "senior",
+      "category": "appliance",
+      "kind": "surface",
+      "sprite": "furniture/senior/coffee_grinder",
+      "name": {
+        "en": "Coffee grinder",
+        "vi": "Máy xay cà"
+      }
+    },
+    {
+      "id": "junior.bookshelf",
+      "stage": "junior",
+      "category": "shelf",
+      "kind": "floor",
+      "sprite": "furniture/junior/bookshelf",
+      "shadow": "furniture/junior/bookshelf_shadow",
+      "name": {
+        "en": "Bookshelf",
+        "vi": "Kệ sách"
+      }
+    },
+    {
+      "id": "senior.bookshelf",
+      "stage": "senior",
+      "category": "shelf",
+      "kind": "floor",
+      "sprite": "furniture/senior/bookshelf",
+      "shadow": "furniture/senior/bookshelf_shadow",
+      "name": {
+        "en": "Bookshelf",
+        "vi": "Kệ sách"
+      }
+    },
+    {
+      "id": "junior.wardrobe",
+      "stage": "junior",
+      "category": "wardrobe",
+      "kind": "floor",
+      "sprite": "furniture/junior/wardrobe",
+      "shadow": "furniture/junior/wardrobe_shadow",
+      "notes": [
+        "drawn from a different angle than the reference; redraw later"
+      ],
+      "name": {
+        "en": "Wardrobe",
+        "vi": "Tủ quần áo"
+      }
+    },
+    {
+      "id": "student.fan",
+      "stage": "student",
+      "category": "floor_decor",
+      "kind": "floor",
+      "sprite": "furniture/student/fan",
+      "shadow": "furniture/student/fan_shadow",
+      "name": {
+        "en": "Standing fan",
+        "vi": "Quạt đứng"
+      }
+    },
+    {
+      "id": "senior.monstera",
+      "stage": "senior",
+      "category": "floor_decor",
+      "kind": "floor",
+      "sprite": "furniture/senior/monstera",
+      "shadow": "furniture/senior/monstera_shadow",
+      "name": {
+        "en": "Monstera plant",
+        "vi": "Cây trầu bà"
+      }
+    },
+    {
+      "id": "student.backpack",
+      "stage": "student",
+      "category": "floor_decor",
+      "kind": "floor",
+      "sprite": "furniture/student/backpack",
+      "shadow": "furniture/student/backpack_shadow",
+      "name": {
+        "en": "Backpack",
+        "vi": "Ba lô"
+      }
+    },
+    {
+      "id": "student.books_stack",
+      "stage": "student",
+      "category": "floor_decor",
+      "kind": "floor",
+      "sprite": "furniture/student/books_stack",
+      "shadow": "furniture/student/books_stack_shadow",
+      "name": {
+        "en": "Book stack",
+        "vi": "Chồng sách"
+      }
+    },
+    {
+      "id": "senior.armchair",
+      "stage": "senior",
+      "category": "lounge",
+      "kind": "floor",
+      "sprite": "furniture/senior/armchair",
+      "shadow": "furniture/senior/armchair_shadow",
+      "name": {
+        "en": "Armchair",
+        "vi": "Ghế bành"
+      }
+    },
+    {
+      "id": "senior.rug",
+      "stage": "senior",
+      "category": "rug",
+      "kind": "decal",
+      "sprite": "furniture/senior/rug",
+      "name": {
+        "en": "Area rug",
+        "vi": "Thảm"
+      }
+    },
+    {
+      "id": "student.mirror",
+      "stage": "student",
+      "category": "wall_art",
+      "kind": "wall",
+      "sprite": "furniture/student/mirror",
+      "name": {
+        "en": "Wall mirror",
+        "vi": "Gương treo"
+      }
+    },
+    {
+      "id": "junior.poster_1",
+      "stage": "junior",
+      "category": "wall_art",
+      "kind": "wall",
+      "sprite": "furniture/junior/poster_1",
+      "name": {
+        "en": "Poster A",
+        "vi": "Poster A"
+      }
+    },
+    {
+      "id": "junior.poster_2",
+      "stage": "junior",
+      "category": "wall_art",
+      "kind": "wall",
+      "sprite": "furniture/junior/poster_2",
+      "name": {
+        "en": "Poster B",
+        "vi": "Poster B"
+      }
+    },
+    {
+      "id": "senior.frame_1",
+      "stage": "senior",
+      "category": "wall_art",
+      "kind": "wall",
+      "sprite": "furniture/senior/frame_1",
+      "notes": [
+        "front-on: back wall only"
+      ],
+      "name": {
+        "en": "Wall frame",
+        "vi": "Khung tranh"
+      }
+    },
+    {
+      "id": "senior.frame_2",
+      "stage": "senior",
+      "category": "wall_art",
+      "kind": "wall",
+      "sprite": "furniture/senior/frame_2",
+      "notes": [
+        "front-on: back wall only"
+      ],
+      "name": {
+        "en": "Wall frame",
+        "vi": "Khung tranh"
+      }
+    },
+    {
+      "id": "student.clothesline",
+      "stage": "student",
+      "category": "wall_hanging",
+      "kind": "wall",
+      "sprite": "furniture/student/clothesline",
+      "name": {
+        "en": "Clothesline",
+        "vi": "Dây phơi đồ"
+      }
+    }
+  ],
+  "socketOrder": [
+    "under",
+    "display",
+    "side",
+    "plant",
+    "gadget",
+    "keyboard",
+    "cup",
+    "top",
+    "top2",
+    "mouse"
+  ]
+}

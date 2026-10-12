@@ -1,0 +1,184 @@
+{
+ "id": "junior",
+ "title": "Junior apartment",
+ "background": "rooms/room_junior_empty",
+ "size": [
+  427,
+  240
+ ],
+ "bounds": {
+  "backWall": [
+   14,
+   6,
+   427,
+   115
+  ],
+  "floorTopY": 122
+ },
+ "focusX": 205,
+ "slots": [
+  {
+   "id": "wall_art_1",
+   "kind": "wall",
+   "accepts": [
+    "wall_art"
+   ],
+   "default": "junior.poster_1",
+   "anchor": [
+    43,
+    60
+   ]
+  },
+  {
+   "id": "wall_art_2",
+   "kind": "wall",
+   "accepts": [
+    "wall_art"
+   ],
+   "default": "junior.poster_2",
+   "anchor": [
+    70,
+    59
+   ]
+  },
+  {
+   "id": "bed",
+   "kind": "floor",
+   "accepts": [
+    "bed"
+   ],
+   "default": "junior.bed",
+   "anchor": [
+    42,
+    203
+   ]
+  },
+  {
+   "id": "desk",
+   "kind": "floor",
+   "accepts": [
+    "desk"
+   ],
+   "default": "junior.desk",
+   "anchor": [
+    205,
+    153
+   ],
+   "required": true
+  },
+  {
+   "id": "under_desk",
+   "kind": "surface",
+   "accepts": [
+    "under_desk"
+   ],
+   "default": "junior.drawer_pedestal",
+   "parent": "desk",
+   "socket": "under"
+  },
+  {
+   "id": "side_device",
+   "kind": "surface",
+   "accepts": [
+    "side_device"
+   ],
+   "default": "junior.laptop_stand",
+   "parent": "desk",
+   "socket": "side"
+  },
+  {
+   "id": "display",
+   "kind": "surface",
+   "accepts": [
+    "display"
+   ],
+   "default": "junior.monitor",
+   "parent": "desk",
+   "socket": "display"
+  },
+  {
+   "id": "keyboard",
+   "kind": "surface",
+   "accepts": [
+    "keyboard"
+   ],
+   "default": "junior.keyboard_mat",
+   "parent": "desk",
+   "socket": "keyboard"
+  },
+  {
+   "id": "mouse",
+   "kind": "surface",
+   "accepts": [
+    "mouse"
+   ],
+   "default": "junior.mouse",
+   "parent": "desk",
+   "socket": "mouse"
+  },
+  {
+   "id": "cup",
+   "kind": "surface",
+   "accepts": [
+    "cup"
+   ],
+   "default": "junior.mug",
+   "parent": "desk",
+   "socket": "cup"
+  },
+  {
+   "id": "desk_plant",
+   "kind": "surface",
+   "accepts": [
+    "desk_plant"
+   ],
+   "default": "junior.plant_small",
+   "parent": "desk",
+   "socket": "plant"
+  },
+  {
+   "id": "gadget",
+   "kind": "surface",
+   "accepts": [
+    "gadget"
+   ],
+   "default": null,
+   "parent": "desk",
+   "socket": "gadget"
+  },
+  {
+   "id": "seat",
+   "kind": "seat",
+   "accepts": [
+    "chair"
+   ],
+   "default": "junior.office_chair",
+   "parent": "desk",
+   "socket": "seat"
+  },
+  {
+   "id": "shelf",
+   "kind": "floor",
+   "accepts": [
+    "shelf"
+   ],
+   "default": "junior.bookshelf",
+   "anchor": [
+    369,
+    133
+   ]
+  },
+  {
+   "id": "wardrobe",
+   "kind": "floor",
+   "accepts": [
+    "wardrobe"
+   ],
+   "default": "junior.wardrobe",
+   "anchor": [
+    408,
+    199
+   ]
+  }
+ ]
+}
