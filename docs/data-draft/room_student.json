@@ -1,0 +1,202 @@
+{
+ "id": "student",
+ "title": "Student room",
+ "background": "rooms/room_student_empty",
+ "size": [
+  427,
+  240
+ ],
+ "bounds": {
+  "backWall": [
+   12,
+   6,
+   427,
+   121
+  ],
+  "floorTopY": 122
+ },
+ "focusX": 184,
+ "slots": [
+  {
+   "id": "wall_hanging",
+   "kind": "wall",
+   "accepts": [
+    "wall_hanging"
+   ],
+   "default": "student.clothesline",
+   "anchor": [
+    66,
+    78
+   ]
+  },
+  {
+   "id": "wall_art_1",
+   "kind": "wall",
+   "accepts": [
+    "wall_art"
+   ],
+   "default": "student.mirror",
+   "anchor": [
+    84,
+    83
+   ]
+  },
+  {
+   "id": "bed",
+   "kind": "floor",
+   "accepts": [
+    "bed"
+   ],
+   "default": "student.mattress",
+   "anchor": [
+    45,
+    221
+   ]
+  },
+  {
+   "id": "decor_1",
+   "kind": "floor",
+   "accepts": [
+    "floor_decor"
+   ],
+   "default": "student.fan",
+   "anchor": [
+    126,
+    144
+   ]
+  },
+  {
+   "id": "cabinet",
+   "kind": "floor",
+   "accepts": [
+    "cabinet"
+   ],
+   "default": "student.bedside_cabinet",
+   "anchor": [
+    158,
+    139
+   ]
+  },
+  {
+   "id": "cabinet_top",
+   "kind": "surface",
+   "accepts": [
+    "appliance"
+   ],
+   "default": "student.kettle",
+   "parent": "cabinet",
+   "socket": "top"
+  },
+  {
+   "id": "snack_1",
+   "kind": "floor",
+   "accepts": [
+    "cup"
+   ],
+   "default": "student.noodle_cup",
+   "anchor": [
+    203,
+    128
+   ]
+  },
+  {
+   "id": "snack_2",
+   "kind": "floor",
+   "accepts": [
+    "cup"
+   ],
+   "default": "student.noodle_cup",
+   "anchor": [
+    189,
+    126
+   ]
+  },
+  {
+   "id": "desk",
+   "kind": "floor",
+   "accepts": [
+    "desk"
+   ],
+   "default": "student.folding_table",
+   "anchor": [
+    184,
+    198
+   ],
+   "required": true
+  },
+  {
+   "id": "display",
+   "kind": "surface",
+   "accepts": [
+    "display"
+   ],
+   "default": "student.laptop",
+   "parent": "desk",
+   "socket": "display"
+  },
+  {
+   "id": "mouse",
+   "kind": "surface",
+   "accepts": [
+    "mouse"
+   ],
+   "default": "student.mouse",
+   "parent": "desk",
+   "socket": "mouse"
+  },
+  {
+   "id": "keyboard",
+   "kind": "surface",
+   "accepts": [
+    "keyboard"
+   ],
+   "default": null,
+   "parent": "desk",
+   "socket": "keyboard"
+  },
+  {
+   "id": "cup",
+   "kind": "surface",
+   "accepts": [
+    "cup"
+   ],
+   "default": null,
+   "parent": "desk",
+   "socket": "cup"
+  },
+  {
+   "id": "seat",
+   "kind": "seat",
+   "accepts": [
+    "chair"
+   ],
+   "default": "student.plastic_stool",
+   "parent": "desk",
+   "socket": "seat"
+  },
+  {
+   "id": "decor_2",
+   "kind": "floor",
+   "accepts": [
+    "floor_decor"
+   ],
+   "default": "student.backpack",
+   "anchor": [
+    110,
+    221
+   ]
+  },
+  {
+   "id": "decor_3",
+   "kind": "floor",
+   "accepts": [
+    "floor_decor"
+   ],
+   "default": "student.books_stack",
+   "anchor": [
+    143,
+    235
+   ]
+  }
+ ]
+}
