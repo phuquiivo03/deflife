@@ -9,6 +9,7 @@
 - **Game:** *devlife*, a cozy 2D pixel-art developer life-sim. A Vietnamese dev progresses student → junior → senior.
 - **Milestone 1 scope:** one room scene, three stages (student / junior / senior), swap or toggle furniture per slot, a character seated at the desk. No auth, no DB, no game loop beyond redraw-on-change.
 - **Stack:** Next.js (App Router, TypeScript), Tailwind, shadcn/ui, Zustand, zod. Rendering is **Canvas2D**. Deploy on Vercel; Supabase comes later behind interfaces.
+- **UI chrome:** [`docs/design/DESIGN_SYSTEM.md`](design/DESIGN_SYSTEM.md) (Playful Geometric) governs all app shell UI. The canvas room is not restyled. The future in-game terminal is a scoped exception: [`docs/design/TERMINAL.md`](design/TERMINAL.md).
 - **World / logical resolution:** **427 × 240 native pixels**, exactly the native room PNGs. Everything is authored in this grid. It is upscaled by an **integer factor computed in device pixels** with nearest-neighbour sampling.
 - **Placement:** integer native-px coordinates. Floor items use a bottom-centre anchor and are z-sorted by baseline y. Surface items (monitor, mug…) attach to named sockets on their parent (desk, cabinet). Wall items and the rug sit on fixed layers below floor objects.
 - **Character:** chroma-keyed from the JPEG sheet and downscaled by **3.5** (not 3). That gives a 40×72 seated sprite. It is drawn between the chair and a "chair overlay" (the chair cropped below its backrest top) so the backrest covers his back.
@@ -455,6 +456,8 @@ type GameState = {
 ---
 
 ## 7. UI
+
+All shell chrome (header, side panels, tabs, buttons, cards, inputs) must follow **[`docs/design/DESIGN_SYSTEM.md`](design/DESIGN_SYSTEM.md)**. Do not apply those tokens to the Canvas2D scene. The CRT terminal surface, when built, follows **[`docs/design/TERMINAL.md`](design/TERMINAL.md)** instead.
 
 ### 7.1 Layout
 

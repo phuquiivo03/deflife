@@ -10,14 +10,25 @@ import { SceneCanvas } from "./SceneCanvas";
 import { CustomizePanel } from "./CustomizePanel";
 import { NotificationsPanel } from "./NotificationsPanel";
 import { PlayerInfoPanel } from "./PlayerInfoPanel";
+import { DecorativeShapes } from "@/components/design/DecorativeShapes";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { IconBadge } from "@/components/ui/icon-badge";
+import { t } from "@/lib/locale";
+import { STAGE_LABELS } from "@/lib/stage-labels";
 
 const stageIcons: Record<StageId, React.ReactNode> = {
-  student: <Backpack className="h-4 w-4" />,
-  junior: <Monitor className="h-4 w-4" />,
-  senior: <Coffee className="h-4 w-4" />,
+  student: <Backpack className="h-4 w-4" strokeWidth={2.5} />,
+  junior: <Monitor className="h-4 w-4" strokeWidth={2.5} />,
+  senior: <Coffee className="h-4 w-4" strokeWidth={2.5} />,
+};
+
+const stageIconTone: Record<StageId, "tertiary" | "accent" | "secondary"> = {
+  student: "tertiary",
+  junior: "accent",
+  senior: "secondary",
 };
 
 const DESKTOP_GAME_W = 768;
@@ -104,8 +115,8 @@ export function GameShell() {
 
   if (!hydrated) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#15111c] text-zinc-200">
-        Loading your room…
+      <div className="flex min-h-screen items-center justify-center bg-dot-grid font-heading text-lg font-extrabold text-foreground">
+        Đang tải phòng của bạn…
       </div>
     );
   }
@@ -115,9 +126,9 @@ export function GameShell() {
     : undefined;
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#f4f1ea]">
-      <header className="flex h-14 shrink-0 items-center gap-3 border-b border-zinc-200 bg-white px-3 md:px-4">
-        <span className="font-[family-name:var(--font-pixel)] text-lg tracking-tight">
+    <div className="flex min-h-screen flex-col bg-dot-grid">
+      <header className="relative z-10 flex min-h-14 shrink-0 items-center gap-3 border-b-2 border-foreground bg-card px-3 shadow-pop md:px-4">
+        <span className="font-heading text-xl font-extrabold tracking-tight text-foreground">
           devlife
         </span>
         <Tabs
@@ -125,41 +136,49 @@ export function GameShell() {
           onValueChange={(v) => setStage(v as StageId)}
           className="min-w-0 flex-1"
         >
-          <TabsList className="h-9 w-full max-w-xl">
+          <TabsList className="h-12 w-full max-w-xl md:h-10">
             {STAGES.map((s) => (
-              <TabsTrigger key={s} value={s} className="gap-1 capitalize">
-                {stageIcons[s]}
-                <span className="hidden sm:inline">
-                  {s === "student" ? "Student · Sinh viên" : s}
-                </span>
-                <span className="sm:hidden">{s[0]?.toUpperCase()}</span>
+              <TabsTrigger key={s} value={s} className="gap-1.5">
+                <IconBadge tone={stageIconTone[s]} className="h-7 w-7">
+                  {stageIcons[s]}
+                </IconBadge>
+                <span className="hidden sm:inline">{STAGE_LABELS[s]}</span>
+                <span className="sm:hidden">{STAGE_LABELS[s][0]}</span>
               </TabsTrigger>
             ))}
           </TabsList>
         </Tabs>
         <div className="flex shrink-0 items-center gap-2">
-          <label className="hidden items-center gap-2 text-xs text-zinc-600 sm:flex">
-            Character
+          <label className="hidden min-h-12 items-center gap-2 sm:flex">
+            <Label>Nhân vật</Label>
             <Switch
               checked={showCharacter}
               onCheckedChange={setShowCharacter}
             />
           </label>
-          <Button type="button" variant="outline" size="sm" onClick={resetStage}>
-            Reset room
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            showArrow={false}
+            onClick={resetStage}
+          >
+            Đặt lại phòng
           </Button>
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+      <div className="relative flex min-h-0 flex-1 flex-col lg:flex-row">
+        <DecorativeShapes />
+
         <aside
-          className="order-2 flex min-h-0 flex-col border-t border-zinc-200 bg-white p-4 lg:order-1 lg:flex-1 lg:border-r lg:border-t-0"
+          className="relative z-10 order-2 flex min-h-0 flex-col border-t-2 border-foreground bg-card/95 p-4 backdrop-blur-sm lg:order-1 lg:flex-1 lg:border-r lg:border-t-0"
         >
           <NotificationsPanel />
         </aside>
 
         <main
-          className="order-1 flex shrink-0 flex-col items-center justify-center bg-[#15111c] p-2 lg:order-2"
+          className="relative z-20 order-1 flex shrink-0 flex-col items-center justify-center bg-[var(--game-letterbox)] p-2 lg:order-2"
           style={gameColumnStyle}
         >
           <div
@@ -176,16 +195,16 @@ export function GameShell() {
           >
             <SceneCanvas areaRef={areaRef} debug={debug} />
           </div>
-          <p className="mt-1 w-full truncate px-2 text-center text-xs text-zinc-500">
-            {room.title}
-            {debug ? " · debug on (D)" : ""}
+          <p className="mt-2 w-full truncate px-2 text-center text-xs font-medium text-muted-foreground">
+            {t(room.title)}
+            {debug ? " · debug bật (D)" : ""}
           </p>
         </main>
 
         <aside
-          className="order-3 flex min-h-0 w-full flex-col border-t border-zinc-200 bg-white lg:max-w-[400px] lg:flex-1 lg:border-l lg:border-t-0"
+          className="relative z-10 order-3 flex min-h-0 w-full flex-col border-t-2 border-foreground bg-card/95 lg:max-w-[400px] lg:flex-1 lg:border-l lg:border-t-0"
         >
-          <div className="flex min-h-0 flex-1 flex-col p-4 lg:max-h-[calc(100vh-3.5rem)]">
+          <div className="flex min-h-0 flex-1 flex-col p-4 pt-6 lg:max-h-[calc(100vh-3.5rem)]">
             <Tabs
               value={sidebarTab}
               onValueChange={(v) => {
@@ -195,8 +214,8 @@ export function GameShell() {
               className="flex min-h-0 flex-1 flex-col gap-3"
             >
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="player">Player info</TabsTrigger>
-                <TabsTrigger value="edit-room">Edit room</TabsTrigger>
+                <TabsTrigger value="player">Thông tin nhân vật</TabsTrigger>
+                <TabsTrigger value="edit-room">Sửa phòng</TabsTrigger>
               </TabsList>
               <TabsContent value="player" className="mt-0 min-h-0 flex-1">
                 <PlayerInfoPanel />
@@ -210,7 +229,6 @@ export function GameShell() {
           </div>
         </aside>
       </div>
-
     </div>
   );
 }

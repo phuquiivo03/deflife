@@ -41,7 +41,7 @@ export const slotSchema = z.object({
 
 export const roomSchema = z.object({
   id: z.enum(STAGES),
-  title: z.string(),
+  title: localizedSchema,
   background: z.string(),
   size: vec,
   bounds: z.object({

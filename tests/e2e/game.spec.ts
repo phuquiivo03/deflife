@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 test("loads student room with integer canvas scale", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/");
-  await expect(page.getByText("Loading your room")).toBeHidden({ timeout: 15000 });
+  await expect(page.getByText("Đang tải phòng")).toBeHidden({ timeout: 15000 });
   const canvas = page.locator("canvas").first();
   await expect(canvas).toBeVisible();
   await expect(canvas).toHaveAttribute("data-scale", /.+/);
@@ -16,10 +16,10 @@ test("switches stage and persists desk variant", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/");
   await page.getByRole("tab", { name: /Junior/i }).click();
-  await page.getByRole("heading", { name: "Customize" }).waitFor();
-  await page.getByTitle("Standing desk").click();
+  await page.getByRole("heading", { name: "Tùy chỉnh" }).waitFor();
+  await page.getByTitle("Bàn nâng hạ").click();
   await page.reload();
-  await expect(page.getByTitle("Standing desk").first()).toBeVisible();
+  await expect(page.getByTitle("Bàn nâng hạ").first()).toBeVisible();
 });
 
 test("debug canvas renders", async ({ page }) => {

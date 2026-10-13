@@ -1,6 +1,9 @@
 {
   "id": "senior",
-  "title": "Senior apartment",
+  "title": {
+    "en": "Senior apartment",
+    "vi": "Căn hộ Senior"
+  },
   "background": "rooms/room_senior_empty",
   "size": [
     427,

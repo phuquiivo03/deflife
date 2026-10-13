@@ -11,6 +11,7 @@ import { focusCameraX } from "@/game/view/camera";
 import { buildSlotIndex, useGameStore } from "@/game/state/store";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { t } from "@/lib/locale";
 
 type Props = {
   areaRef: React.RefObject<HTMLDivElement | null>;
@@ -253,7 +254,7 @@ export function SceneCanvas({ areaRef, debug = false }: Props) {
   if (error) {
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-        Couldn&apos;t load the room art. {error}
+        Không tải được đồ họa phòng. {error}
       </div>
     );
   }
@@ -273,7 +274,7 @@ export function SceneCanvas({ areaRef, debug = false }: Props) {
             size="icon"
             className="absolute left-1 top-1/2 z-10 -translate-y-1/2 bg-white/90"
             onClick={() => pan(-1)}
-            aria-label="Pan left"
+            aria-label="Kéo sang trái"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -283,7 +284,7 @@ export function SceneCanvas({ areaRef, debug = false }: Props) {
             size="icon"
             className="absolute right-1 top-1/2 z-10 -translate-y-1/2 bg-white/90"
             onClick={() => pan(1)}
-            aria-label="Pan right"
+            aria-label="Kéo sang phải"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -293,7 +294,7 @@ export function SceneCanvas({ areaRef, debug = false }: Props) {
         ref={canvasRef}
         className="pixelated max-h-full max-w-full transition-opacity duration-120"
         role="img"
-        aria-label={`${room.title} scene`}
+        aria-label={`Cảnh ${t(room.title)}`}
         onPointerMove={onPointerMove}
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
