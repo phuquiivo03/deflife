@@ -1,3 +1,5 @@
+import type { IconName } from "@/lib/pixel-assets";
+
 /** Stub player stats for UI chrome until the sim loop exists. */
 export type SkillId = "frontend" | "backend" | "algorithms";
 
@@ -14,7 +16,12 @@ export type PlayerStats = {
   day: number;
   skills: Record<
     SkillId,
-    { label: string; value: number; icon: string; bar: "coral" | "mint" | "sky" }
+    {
+      label: string;
+      value: number;
+      icon: IconName;
+      bar: "coral" | "mint" | "sky";
+    }
   >;
 };
 
@@ -33,19 +40,19 @@ export const STUB_PLAYER: PlayerStats = {
     frontend: {
       label: "Frontend",
       value: 72,
-      icon: "code-window",
+      icon: "frontend",
       bar: "coral",
     },
     backend: {
       label: "Backend",
       value: 58,
-      icon: "server",
+      icon: "backend",
       bar: "mint",
     },
     algorithms: {
       label: "Thuật toán",
       value: 45,
-      icon: "brain",
+      icon: "algorithms",
       bar: "sky",
     },
   },

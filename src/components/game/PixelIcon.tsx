@@ -1,23 +1,24 @@
 import { cn } from "@/lib/utils";
+import { resolveIconAsset, type IconName } from "@/lib/pixel-assets";
 
 type Props = {
-  name: string;
+  name: IconName | string;
   size?: number;
   className?: string;
   alt?: string;
 };
 
-export function PixelIcon({ name, size = 20, className, alt = "" }: Props) {
-  const px = Math.round(size);
+export function PixelIcon({ name, size = 22, className, alt = "" }: Props) {
+  const { src, displayPx } = resolveIconAsset(name, size);
   return (
-    // eslint-disable-next-line @next/next/no-img-element -- tiny pixel icons must stay unoptimized
+    // eslint-disable-next-line @next/next/no-img-element -- pixel icons stay unoptimized
     <img
-      src={`/ui/icons/${name}.png`}
+      src={src}
       alt={alt}
-      width={px}
-      height={px}
+      width={displayPx}
+      height={displayPx}
       className={cn("pixelated shrink-0", className)}
-      style={{ width: px, height: px }}
+      style={{ width: displayPx, height: displayPx }}
       draggable={false}
     />
   );

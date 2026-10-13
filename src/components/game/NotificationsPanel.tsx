@@ -4,24 +4,29 @@ import { Bell } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PanelCard, PanelCardTitle } from "@/components/ui/panel-card";
 import { PixelIcon } from "./PixelIcon";
+import type { IconName } from "@/lib/pixel-assets";
 
-const NOTIFICATIONS = [
+const NOTIFICATIONS: {
+  icon: IconName;
+  title: string;
+  body: string;
+}[] = [
   {
-    icon: "star",
+    icon: "stars",
     title: "Nhiệm vụ hoàn thành",
     body: "Bạn đã nộp bài lab Frontend đúng hạn.",
   },
   {
-    icon: "house",
+    icon: "rent",
     title: "Vật phẩm mới",
     body: "Mua được bàn gấp mới cho phòng sinh viên.",
   },
   {
-    icon: "star-up",
+    icon: "skill_up",
     title: "Kỹ năng tăng",
     body: "Frontend +2 sau buổi pair programming.",
   },
-] as const;
+];
 
 export function NotificationsPanel() {
   return (
@@ -36,7 +41,7 @@ export function NotificationsPanel() {
           {NOTIFICATIONS.map((n) => (
             <li key={n.title}>
               <PanelCard className="flex gap-2.5 p-3">
-                <PixelIcon name={n.icon} size={24} className="mt-0.5" />
+                <PixelIcon name={n.icon} size={22} className="mt-0.5" />
                 <div className="min-w-0">
                   <p className="font-galmuri-11 text-galmuri-title text-[var(--foreground)]">
                     {n.title}
