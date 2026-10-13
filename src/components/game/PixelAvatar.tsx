@@ -21,8 +21,13 @@ export function PixelAvatar({ role, size = 48, className, alt = "" }: Props) {
       alt={alt}
       width={displayPx}
       height={displayPx}
-      className={cn("pixelated shrink-0 object-cover", className)}
-      style={{ width: displayPx, height: displayPx }}
+      className={cn("pixelated size-auto max-w-none shrink-0 object-cover", className)}
+      style={{
+        width: displayPx,
+        height: displayPx,
+        minWidth: displayPx,
+        minHeight: displayPx,
+      }}
       draggable={false}
     />
   );

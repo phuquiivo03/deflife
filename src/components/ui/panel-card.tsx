@@ -11,7 +11,7 @@ export function PanelCard({
   return (
     <div
       className={cn(
-        "rounded-[var(--radius-panel)] border border-[var(--panel-border)] bg-[var(--panel-bg)] shadow-[var(--shadow-panel)]",
+        "rounded-panel border border-panel-border bg-panel shadow-panel",
         className,
       )}
     >
@@ -32,7 +32,7 @@ export function PanelCardTitle({
   return (
     <div className={cn("flex items-center gap-2 font-galmuri-11 text-galmuri-title", className)}>
       {icon}
-      <h2 className="font-normal text-[var(--foreground)]">{children}</h2>
+      <h2 className="font-normal text-foreground">{children}</h2>
     </div>
   );
 }

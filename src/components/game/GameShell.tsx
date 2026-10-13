@@ -109,7 +109,7 @@ export function GameShell() {
 
   if (!hydrated) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-devlife bg-devlife-grid font-galmuri-11 text-galmuri-title text-white">
+      <div className="flex min-h-screen items-center justify-center font-galmuri-11 text-galmuri-title text-white">
         Đang tải phòng của bạn…
       </div>
     );
@@ -124,7 +124,7 @@ export function GameShell() {
     : { width: "100%", maxWidth: ROOM_VIEWPORT_W, minHeight: 200, aspectRatio: "427 / 240" };
 
   return (
-    <div className="flex min-h-screen flex-col bg-devlife bg-devlife-grid">
+    <div className="flex min-h-screen flex-col">
       <header className="relative z-10 flex min-h-14 shrink-0 items-center gap-3 border-b border-white/15 bg-[var(--panel-bg)]/90 px-3 backdrop-blur-sm md:px-4">
         <span className="font-galmuri-11 text-galmuri-title-lg text-[var(--foreground)]">
           devlife

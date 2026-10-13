@@ -17,8 +17,16 @@ export function PixelIcon({ name, size = 22, className, alt = "" }: Props) {
       alt={alt}
       width={displayPx}
       height={displayPx}
-      className={cn("pixelated shrink-0", className)}
-      style={{ width: displayPx, height: displayPx }}
+      className={cn(
+        "pixelated size-auto max-w-none shrink-0",
+        className,
+      )}
+      style={{
+        width: displayPx,
+        height: displayPx,
+        minWidth: displayPx,
+        minHeight: displayPx,
+      }}
       draggable={false}
     />
   );

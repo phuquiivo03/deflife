@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+@utility shadow-panel {
+  box-shadow: 0 8px 24px rgba(30, 20, 80, 0.25);
+}
+
 :root {
   --text-galmuri-body: 20px;
   --text-galmuri-title: 24px;
@@ -18,7 +22,7 @@
   --panel-bg: #f3f1f8;
   --panel-border: #d9d4e6;
   --radius-panel: 12px;
-  --shadow-panel: 0 4px 24px rgba(42, 37, 72, 0.12);
+  --shadow-panel: 0 8px 24px rgba(30, 20, 80, 0.25);
   --accent-coral: #f0625f;
   --accent-mint: #5ccb9a;
   --accent-sky: #4a90e2;
@@ -28,8 +32,8 @@
   --room-frame: #2d2858;
   --room-frame-glow: rgba(120, 100, 200, 0.45);
 
-  /* shadcn token bridge */
-  --background: #f3f1f8;
+  /* shadcn token bridge (avoid white page shell) */
+  --background: #5a63c4;
   --muted: #e8e2f4;
   --accent: var(--accent-violet);
   --accent-foreground: #ffffff;
@@ -53,10 +57,18 @@
   --color-secondary: var(--secondary);
   --color-border: var(--border);
   --color-card: var(--card);
+  --color-panel: var(--panel-bg);
+  --color-panel-border: var(--panel-border);
   --color-ring: var(--ring);
   --color-input: var(--input);
+  --radius-panel: 12px;
   --font-sans: var(--font-galmuri-9);
   --font-heading: var(--font-galmuri-11);
+}
+
+html,
+body {
+  min-height: 100vh;
 }
 
 body {
@@ -64,6 +76,20 @@ body {
   font-family: var(--font-galmuri-9), system-ui, sans-serif;
   font-size: var(--text-galmuri-body);
   line-height: 1.45;
+}
+
+/**
+ * Full-viewport shell: gradient + grid in ONE declaration.
+ * Do NOT split into two classes — the second background-image wins and hides the gradient.
+ */
+.devlife-page-bg {
+  background-color: #3b3f8f;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    var(--background-gradient);
+  background-size: 24px 24px, 24px 24px, auto;
+  background-attachment: fixed;
 }
 
 .font-galmuri-7 {
@@ -97,20 +123,6 @@ body {
 .pixelated {
   image-rendering: pixelated;
   image-rendering: crisp-edges;
-}
-
-.bg-devlife {
-  background: var(--background-gradient);
-  background-attachment: fixed;
-}
-
-.bg-devlife-grid {
-  background-color: transparent;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
-  background-size: 24px 24px;
-  background-attachment: fixed;
 }
 
 .room-stage-glow {

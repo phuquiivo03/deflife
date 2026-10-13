@@ -19,7 +19,7 @@ Prefer **CSS** for crisp scaling:
 - Radial glow behind the room stage (`.room-stage-glow`)
 - Reference/fallback image: `public/reference/background.jpg`
 
-Utility classes: `bg-devlife`, `bg-devlife-grid`.
+Utility class: `devlife-page-bg` on `html`/`body` (gradient + grid in **one** `background-image` stack — do not split into two classes or the grid layer hides the gradient).
 
 **No black letterbox void** — use violet frame + gradient in empty space.
 
@@ -53,7 +53,7 @@ Approximate **22% | 56% | 22%** three-column grid (`lg:grid-cols-[22fr_56fr_22fr
 | tab lavender | `#E8E2F4` | Inactive tabs |
 | room frame | `#2D2858` | Room border + glow |
 
-Shadow: `0 4px 24px rgba(42, 37, 72, 0.12)` (`--shadow-panel`).
+Shadow: `0 8px 24px rgba(30, 20, 80, 0.25)` (`shadow-panel` / `--shadow-panel`).
 
 Radius: **12px** on cards (`--radius-panel`).
 

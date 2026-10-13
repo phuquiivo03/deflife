@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-dot-grid font-heading text-lg font-extrabold text-foreground">
+        <div className="flex min-h-screen items-center justify-center font-galmuri-11 text-galmuri-title text-white">
           Đang tải phòng của bạn…
         </div>
       }

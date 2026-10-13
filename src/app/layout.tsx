@@ -35,7 +35,9 @@ export default function RootLayout({
       lang="vi"
       className={`${galmuri7.variable} ${galmuri9.variable} ${galmuri11.variable}`}
     >
-      <body className="font-galmuri-9 text-galmuri-body antialiased">{children}</body>
+      <body className="devlife-page-bg font-galmuri-9 text-galmuri-body antialiased">
+        {children}
+      </body>
     </html>
   );
 }
