@@ -1,187 +1,110 @@
-# Playful Geometric — PRIMARY design system
+# devlife UI — PRIMARY design system (Galmuri / soft gradient)
 
-**This is the PRIMARY design system for devlife.** ALL UI in this repository must follow it unless the owner explicitly names another style for a feature (for example, the in-game terminal uses [TERMINAL.md](./TERMINAL.md)).
+**This is the PRIMARY design system for devlife.** All UI in this repository must follow it unless the owner explicitly names another style for a feature (for example, the in-game terminal uses [TERMINAL.md](./TERMINAL.md)).
 
 ---
 
 ## Philosophy
 
-Antidote to sterile corporate minimalism: optimism, clarity, tactile fun.
-
-**Core concept — “Stable Grid, Wild Decoration”:** content lives in clean, readable areas; the world around it stays alive with shape and movement. Memphis Group (80s) cleaned up for screens.
-
-**Vibe:** Friendly, Tactile, Pop, Energetic — a well-organized sticker book that invites clicking.
+Cozy developer life-sim chrome: soft blue–violet–pink atmosphere, readable lavender cards, pixel art for world assets (room, icons, avatars). The **room canvas stays small** in the center column — never upscale it to fill the layout.
 
 ---
 
-## Visual signatures
+## Background
 
-- Primitive shapes (circles, triangles, squares, pills, squiggles) as backgrounds, masks, and icons
-- Hard offset shadows (no blur), sticker / cut-paper feel
-- Pattern fills (polka dots, grid lines, diagonal stripes)
-- Varied radii mixing full-round with sharp (leaf shapes, asymmetric blobs)
+Prefer **CSS** for crisp scaling:
 
----
+- Gradient: `linear-gradient(135deg, #3B3F8F 0%, #5A63C4 45%, #9A78CC 75%, #D08FCB 100%)`
+- Grid: `1px` lines `rgba(255,255,255,0.06)` every **24px**, fixed attachment
+- Radial glow behind the room stage (`.room-stage-glow`)
+- Reference/fallback image: `public/reference/background.jpg`
 
-## Colors (light)
+Utility classes: `bg-devlife`, `bg-devlife-grid`.
 
-| Token | Value |
-|-------|-------|
-| background | `#FFFDF5` |
-| foreground | `#1E293B` |
-| muted | `#F1F5F9` |
-| mutedForeground | `#64748B` |
-| accent (primary brand) | `#8B5CF6` |
-| accentForeground | `#FFFFFF` |
-| secondary | `#F472B6` |
-| tertiary | `#FBBF24` |
-| quaternary | `#34D399` |
-| border | `#E2E8F0` |
-| input | `#FFFFFF` |
-| card | `#FFFFFF` |
-| ring | `#8B5CF6` |
-
-**Rule:** use **accent** for primary actions; rotate **secondary**, **tertiary**, and **quaternary** for decorative shapes, icons, and emphasized words (confetti effect).
+**No black letterbox void** — use violet frame + gradient in empty space.
 
 ---
 
-## Typography
+## Layout (desktop)
 
-**Owner override:** [VT323](https://fonts.google.com/specimen/VT323) (Google Fonts, `latin` + `vietnamese` via `next/font/google`) is the **only UI typeface** — body, labels, buttons, and headings (`font-sans` / `font-heading` both resolve to VT323). Base size is bumped (~`1.125rem` on `body`) because VT323 reads small at default metrics. Load with `subsets: ["latin", "vietnamese"]` so Vietnamese diacritics render correctly.
+Approximate **22% | 56% | 22%** three-column grid (`lg:grid-cols-[22fr_56fr_22fr]`).
 
-- **All UI text:** VT323 400
-- **Readable fallback (optional):** Plus Jakarta Sans 400 / 500 (`font-readable`) — only for long helper copy if VT323 hurts legibility; also second in the body font stack
-- **Scale ratio:** 1.25
-- **Default locale:** Vietnamese (`vi`) for user-facing copy; see `src/lib/locale.ts`
+| Column | Content |
+|--------|---------|
+| Left | Notifications (`Thông báo`) |
+| Center | Small framed room, stage pill label, HUD card |
+| Right | Tabs `Nhân vật` / `Sửa phòng` |
 
----
-
-## Radius & border
-
-| Token | Value |
-|-------|-------|
-| sm | 8px |
-| md | 16px |
-| lg | 24px |
-| full | 9999px |
-| default border | 2px |
-
-**Blob radius examples:**
-
-- Speech bubble: `rounded-tl-2xl rounded-tr-2xl rounded-br-2xl rounded-bl-none`
-- Arch: `rounded-t-full rounded-b-none`
+**Mobile:** stack **room → HUD → panels** (notifications, then character/customize).
 
 ---
 
-## Pop shadow
+## Color tokens
 
-| State | Value |
-|-------|--------|
-| default | `4px 4px 0 0 #1E293B` |
-| hover | `6px 6px 0 0 #1E293B` |
-| active | `2px 2px 0 0 #1E293B` |
+| Token | Value | Use |
+|-------|-------|-----|
+| panel bg | `#F3F1F8` | Cards |
+| panel border | `#D9D4E6` | 1px borders |
+| foreground | `#2A2548` | Text |
+| muted foreground | `#5C5678` | Secondary text |
+| coral | `#F0625F` | Health, Frontend bars |
+| mint | `#5CCB9A` | Mood, Backend, EXP |
+| sky | `#4A90E2` | Energy, Thuật toán |
+| tab lavender | `#E8E2F4` | Inactive tabs |
+| room frame | `#2D2858` | Room border + glow |
 
-No blur.
+Shadow: `0 4px 24px rgba(42, 37, 72, 0.12)` (`--shadow-panel`).
 
----
-
-## Textures
-
-- Dot grid background
-- SVG squiggle dividers / heading underlines
-- Small SVG confetti shapes absolutely positioned **behind** content
-
----
-
-## Components
-
-### Primary “Candy” button
-
-- bg `#8B5CF6`, white bold text, pill shape
-- 2px `#1E293B` border
-- 4px pop shadow
-- hover: translate `-2px` / `-2px` + 6px shadow
-- active: translate `2px` / `2px` + 2px shadow
-- `ArrowRight` icon in white circle inside
-
-### Secondary button
-
-- transparent background, foreground text
-- 2px `#1E293B` border, pill, no shadow
-- hover: bg `#FBBF24`
-
-### Sticker card
-
-- white, 2px `#1E293B` border, `rounded-xl`
-- shadow `8px 8px 0 #E2E8F0` (or `#F472B6` when featured)
-- hover: rotate `-1deg`, scale `1.02`
-- bold VT323 title
-- floating circle icon half over the top border
-
-### Inputs
-
-- white, 2px `#CBD5E1` border, `rounded-lg`
-- focus: border accent + `4px 4px 0` accent shadow
-- labels: bold uppercase small tracking-wide
+Radius: **12px** on cards (`--radius-panel`).
 
 ---
 
-## Layout
+## Typography — Galmuri (OFL)
 
-- max-w-6xl container
-- py-24 spacing
-- 12-col grid grouped 6/6 or 4/4/4
+Self-hosted under `src/app/fonts/` (see `LICENSE.txt` in `public/fonts/`). **Do not use Galmuri11-Bold** (missing Vietnamese glyphs).
 
-### Marketing sections (if ever)
+| Role | Face | Design size | Desktop UI (integer multiple) |
+|------|------|-------------|-------------------------------|
+| Body | Galmuri9 | 10px | 20px (`--text-galmuri-body`) |
+| Titles | Galmuri11 | 12px | 24px (`--text-galmuri-title`) |
+| Small | Galmuri7 | 8px | 16px (`--text-galmuri-small`) |
 
-- Hero: text left / image right with big yellow circle and dotted pattern, blob-masked image
-- Features: grid of 3 linked by dashed SVG line, alternating violet / pink / yellow headers
-- Pricing: middle card scale 1.1 with yellow star “MOST POPULAR” badge rotated 15deg
+**Rule:** render at **integer px sizes** only (multiples of the design sizes for readability).
 
----
+Classes: `font-galmuri-7`, `font-galmuri-9`, `font-galmuri-11`, `text-galmuri-*`.
 
-## Motion
-
-- Bouncy: `transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]`
-- Entrance: pop-in scale 0 → 1 with bounce
-- Marquee for keywords
-- Icon wiggle: 0 → 3deg → -3deg → 0 on hover
+User-facing copy: **Vietnamese**; tech terms stay English (Frontend, Backend, Junior, …).
 
 ---
 
-## Icons
+## Pixel art
 
-- Lucide stroke **2.5**, round caps/joins
-- White on colored circle, or dark foreground
-- Always enclosed in shapes
+Room canvas, UI icons, avatars: `image-rendering: pixelated` (`.pixelated`). Do not blur or round canvas pixels.
 
----
-
-## Responsive
-
-- Stack on mobile
-- Shadows **2px** on mobile
-- Squiggles become vertical dividers
-- Buttons min **48px** tap height
-- Hide floating shapes that could overlap text
+Icons: `public/ui/icons/*.png` (chroma-keyed from owner sheet). Avatars: `public/ui/avatars/`.
 
 ---
 
-## Accessibility
+## HUD & stat bars
 
-- slate-800 on cream/white (AAA)
-- Never rely on color alone
-- Respect `prefers-reduced-motion` (disable bounce / wiggle)
-- High-contrast focus: thick colored border + hard shadow
+- HUD card under room: avatar, heart/mood/lightning bars, coins + `formatVnd`, game day.
+- Bars: 1px border, fill coral / mint / sky per stat.
+- Stub data: `src/game/state/playerStats.ts` until sim loop exists.
 
 ---
 
-## How this applies to devlife
+## Room viewport
 
-| Surface | Design system |
-|---------|----------------|
-| **Pixel-art canvas room** | **Not** restyled. Crisp pixels, integer scaling, no rounding or shadows on canvas pixels. |
-| **App chrome** | **Must** follow this doc: header, stage tabs, notifications panel, Player info / Edit room tabs, buttons, cards, inputs, dialogs. |
-| **In-game terminal (future)** | Scoped exception — see [TERMINAL.md](./TERMINAL.md). |
+`ROOM_VIEWPORT_W` in `GameShell` (~480px) caps CSS size; renderer still uses integer device-pixel scale internally. **Do not increase** to fill the center column without owner approval.
 
-The three-column shell (768px center game column) keeps existing behavior; only chrome styling changes to Playful Geometric.
+---
+
+## Canvas exception
+
+The **Canvas2D room renderer** is not restyled (integer scale, nearest-neighbour, no CSS shadows on canvas pixels). Debug route `/debug` unchanged.
+
+---
+
+## Motion & a11y
+
+Respect `prefers-reduced-motion`. Keep tap targets ≥ 44px on mobile where practical.

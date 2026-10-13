@@ -10,7 +10,7 @@
 
 devlife will add a **retro CRT terminal** as the primary “computer screen” metaphor: a phosphor-green monospace shell that presents player identity, tasks, skills, and life events as if they were command output. Visually it inherits a portfolio-site reference (see [Appendix A](#appendix-a-original-visual-reference-prompt)) but is **scoped to a terminal surface** inside the existing `GameShell` layout—not a full-page marketing site.
 
-The terminal is a **scoped exception** to the primary app chrome in [`DESIGN_SYSTEM.md`](./DESIGN_SYSTEM.md) (Playful Geometric: cream `#FFFDF5`, VT323 UI type, sticker cards, pop shadows). Only panels that represent “what’s on the monitor” use the CRT tokens below—not the global header, side panels, or stage tabs.
+The terminal is a **scoped exception** to the primary app chrome in [`DESIGN_SYSTEM.md`](./DESIGN_SYSTEM.md) (Galmuri, gradient/grid shell, lavender cards). Only panels that represent “what’s on the monitor” use the CRT tokens below—not the global header, side panels, or stage tabs.
 
 ---
 
