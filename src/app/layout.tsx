@@ -1,17 +1,23 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, VT323 } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const vt323 = VT323({
-  weight: "400",
-  subsets: ["latin", "vietnamese"],
-  variable: "--font-body",
+const galmuri7 = localFont({
+  src: "./fonts/Galmuri7.woff2",
+  variable: "--font-galmuri-7",
+  display: "swap",
 });
 
-const plusJakarta = Plus_Jakarta_Sans({
-  subsets: ["latin", "vietnamese"],
-  variable: "--font-readable",
-  weight: ["400", "500"],
+const galmuri9 = localFont({
+  src: "./fonts/Galmuri9.woff2",
+  variable: "--font-galmuri-9",
+  display: "swap",
+});
+
+const galmuri11 = localFont({
+  src: "./fonts/Galmuri11.woff2",
+  variable: "--font-galmuri-11",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -25,12 +31,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi">
-      <body
-        className={`${vt323.variable} ${plusJakarta.variable} font-sans text-lg antialiased`}
-      >
-        {children}
-      </body>
+    <html
+      lang="vi"
+      className={`${galmuri7.variable} ${galmuri9.variable} ${galmuri11.variable}`}
+    >
+      <body className="font-galmuri-9 text-galmuri-body antialiased">{children}</body>
     </html>
   );
 }

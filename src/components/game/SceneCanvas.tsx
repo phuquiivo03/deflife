@@ -272,7 +272,7 @@ export function SceneCanvas({ areaRef, debug = false }: Props) {
             type="button"
             variant="outline"
             size="icon"
-            className="absolute left-1 top-1/2 z-10 -translate-y-1/2 bg-white/90"
+            className="absolute left-1 top-1/2 z-10 -translate-y-1/2 bg-[var(--panel-bg)]/95"
             onClick={() => pan(-1)}
             aria-label="Kéo sang trái"
           >
@@ -282,7 +282,7 @@ export function SceneCanvas({ areaRef, debug = false }: Props) {
             type="button"
             variant="outline"
             size="icon"
-            className="absolute right-1 top-1/2 z-10 -translate-y-1/2 bg-white/90"
+            className="absolute right-1 top-1/2 z-10 -translate-y-1/2 bg-[var(--panel-bg)]/95"
             onClick={() => pan(1)}
             aria-label="Kéo sang phải"
           >

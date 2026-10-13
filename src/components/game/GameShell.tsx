@@ -10,35 +10,29 @@ import { SceneCanvas } from "./SceneCanvas";
 import { CustomizePanel } from "./CustomizePanel";
 import { NotificationsPanel } from "./NotificationsPanel";
 import { PlayerInfoPanel } from "./PlayerInfoPanel";
-import { DecorativeShapes } from "@/components/design/DecorativeShapes";
+import { PlayerHudCard } from "./PlayerHudCard";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { IconBadge } from "@/components/ui/icon-badge";
 import { t } from "@/lib/locale";
 import { STAGE_LABELS } from "@/lib/stage-labels";
 
 const stageIcons: Record<StageId, React.ReactNode> = {
-  student: <Backpack className="h-4 w-4" strokeWidth={2.5} />,
-  junior: <Monitor className="h-4 w-4" strokeWidth={2.5} />,
-  senior: <Coffee className="h-4 w-4" strokeWidth={2.5} />,
+  student: <Backpack className="h-4 w-4" strokeWidth={2} />,
+  junior: <Monitor className="h-4 w-4" strokeWidth={2} />,
+  senior: <Coffee className="h-4 w-4" strokeWidth={2} />,
 };
 
-const stageIconTone: Record<StageId, "tertiary" | "accent" | "secondary"> = {
-  student: "tertiary",
-  junior: "accent",
-  senior: "secondary",
-};
-
-const DESKTOP_GAME_W = 768;
+/** Room viewport stays intentionally small (owner choice); do not upscale to fill center column. */
+const ROOM_VIEWPORT_W = 480;
 
 type SidebarTab = "player" | "edit-room";
 
 export function GameShell() {
   const areaRef = useRef<HTMLDivElement>(null);
   const [isDesktop, setIsDesktop] = useState(false);
-  const [sidebarTab, setSidebarTab] = useState<SidebarTab>("edit-room");
+  const [sidebarTab, setSidebarTab] = useState<SidebarTab>("player");
   const searchParams = useSearchParams();
   const router = useRouter();
   const debug = searchParams.get("debug") === "1";
@@ -115,20 +109,24 @@ export function GameShell() {
 
   if (!hydrated) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-dot-grid font-heading text-lg font-extrabold text-foreground">
+      <div className="flex min-h-screen items-center justify-center bg-devlife bg-devlife-grid font-galmuri-11 text-galmuri-title text-white">
         Đang tải phòng của bạn…
       </div>
     );
   }
 
-  const gameColumnStyle = isDesktop
-    ? { width: DESKTOP_GAME_W, maxWidth: DESKTOP_GAME_W }
-    : undefined;
+  const roomAreaStyle = isDesktop
+    ? {
+        width: ROOM_VIEWPORT_W,
+        maxWidth: "100%",
+        minHeight: Math.round((ROOM_VIEWPORT_W * 240) / 427),
+      }
+    : { width: "100%", maxWidth: ROOM_VIEWPORT_W, minHeight: 200, aspectRatio: "427 / 240" };
 
   return (
-    <div className="flex min-h-screen flex-col bg-dot-grid">
-      <header className="relative z-10 flex min-h-14 shrink-0 items-center gap-3 border-b-2 border-foreground bg-card px-3 shadow-pop md:px-4">
-        <span className="font-heading text-xl font-extrabold tracking-tight text-foreground">
+    <div className="flex min-h-screen flex-col bg-devlife bg-devlife-grid">
+      <header className="relative z-10 flex min-h-14 shrink-0 items-center gap-3 border-b border-white/15 bg-[var(--panel-bg)]/90 px-3 backdrop-blur-sm md:px-4">
+        <span className="font-galmuri-11 text-galmuri-title-lg text-[var(--foreground)]">
           devlife
         </span>
         <Tabs
@@ -136,12 +134,14 @@ export function GameShell() {
           onValueChange={(v) => setStage(v as StageId)}
           className="min-w-0 flex-1"
         >
-          <TabsList className="h-12 w-full max-w-xl md:h-10">
+          <TabsList className="tabs-lavender h-11 w-full max-w-xl border-0 bg-transparent p-1 md:h-10">
             {STAGES.map((s) => (
-              <TabsTrigger key={s} value={s} className="gap-1.5">
-                <IconBadge tone={stageIconTone[s]} className="h-7 w-7">
-                  {stageIcons[s]}
-                </IconBadge>
+              <TabsTrigger
+                key={s}
+                value={s}
+                className="gap-1.5 border-0 font-galmuri-11 text-galmuri-title shadow-none data-[state=active]:border-0 data-[state=active]:shadow-[var(--shadow-panel)]"
+              >
+                {stageIcons[s]}
                 <span className="hidden sm:inline">{STAGE_LABELS[s]}</span>
                 <span className="sm:hidden">{STAGE_LABELS[s][0]}</span>
               </TabsTrigger>
@@ -149,8 +149,8 @@ export function GameShell() {
           </TabsList>
         </Tabs>
         <div className="flex shrink-0 items-center gap-2">
-          <label className="hidden min-h-12 items-center gap-2 sm:flex">
-            <Label>Nhân vật</Label>
+          <label className="hidden min-h-10 items-center gap-2 sm:flex">
+            <Label className="font-galmuri-9 text-galmuri-body">Nhân vật</Label>
             <Switch
               checked={showCharacter}
               onCheckedChange={setShowCharacter}
@@ -158,7 +158,7 @@ export function GameShell() {
           </label>
           <Button
             type="button"
-            variant="secondary"
+            variant="outline"
             size="sm"
             showArrow={false}
             onClick={resetStage}
@@ -168,65 +168,73 @@ export function GameShell() {
         </div>
       </header>
 
-      <div className="relative flex min-h-0 flex-1 flex-col lg:flex-row">
-        <DecorativeShapes />
-
-        <aside
-          className="relative z-10 order-2 flex min-h-0 flex-col border-t-2 border-foreground bg-card/95 p-4 backdrop-blur-sm lg:order-1 lg:flex-1 lg:border-r lg:border-t-0"
-        >
+      <div className="relative flex min-h-0 flex-1 flex-col lg:grid lg:grid-cols-[minmax(0,22fr)_minmax(0,56fr)_minmax(0,22fr)]">
+        <aside className="order-2 flex min-h-0 flex-col p-3 lg:order-1 lg:p-4">
           <NotificationsPanel />
         </aside>
 
-        <main
-          className="relative z-20 order-1 flex shrink-0 flex-col items-center justify-center bg-[var(--game-letterbox)] p-2 lg:order-2"
-          style={gameColumnStyle}
-        >
-          <div
-            ref={areaRef}
-            className="flex w-full items-center justify-center"
-            style={
-              isDesktop
-                ? {
-                    width: DESKTOP_GAME_W,
-                    minHeight: Math.round((DESKTOP_GAME_W * 240) / 427),
-                  }
-                : { minHeight: 200, aspectRatio: "427 / 240" }
-            }
-          >
-            <SceneCanvas areaRef={areaRef} debug={debug} />
+        <main className="order-1 flex min-h-0 flex-col items-center justify-center px-2 py-4 lg:order-2">
+          <div className="room-stage-glow flex w-full flex-col items-center">
+            <div
+              className="rounded-xl border-2 p-2"
+              style={{
+                borderColor: "var(--room-frame)",
+                boxShadow: `0 0 32px var(--room-frame-glow)`,
+                background: "linear-gradient(180deg, #3d3668 0%, #2a2458 100%)",
+              }}
+            >
+              <div
+                ref={areaRef}
+                className="flex w-full items-center justify-center overflow-hidden rounded-lg"
+                style={roomAreaStyle}
+              >
+                <SceneCanvas areaRef={areaRef} debug={debug} />
+              </div>
+            </div>
+            <p
+              className="mt-3 rounded-full border border-[var(--panel-border)] bg-[var(--panel-bg)] px-4 py-1 font-galmuri-11 text-galmuri-title text-[var(--foreground)] shadow-[var(--shadow-panel)]"
+            >
+              {t(room.title)}
+              {debug ? " · debug (D)" : ""}
+            </p>
+            <div className="mt-3 w-full flex justify-center px-2">
+              <PlayerHudCard />
+            </div>
           </div>
-          <p className="mt-2 w-full truncate px-2 text-center text-xs font-medium text-muted-foreground">
-            {t(room.title)}
-            {debug ? " · debug bật (D)" : ""}
-          </p>
         </main>
 
-        <aside
-          className="relative z-10 order-3 flex min-h-0 w-full flex-col border-t-2 border-foreground bg-card/95 lg:max-w-[400px] lg:flex-1 lg:border-l lg:border-t-0"
-        >
-          <div className="flex min-h-0 flex-1 flex-col p-4 pt-6 lg:max-h-[calc(100vh-3.5rem)]">
-            <Tabs
-              value={sidebarTab}
-              onValueChange={(v) => {
-                setSidebarTab(v as SidebarTab);
-                if (v === "edit-room") setCustomizeOpen(true);
-              }}
-              className="flex min-h-0 flex-1 flex-col gap-3"
-            >
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="player">Thông tin nhân vật</TabsTrigger>
-                <TabsTrigger value="edit-room">Sửa phòng</TabsTrigger>
-              </TabsList>
-              <TabsContent value="player" className="mt-0 min-h-0 flex-1">
-                <PlayerInfoPanel />
-              </TabsContent>
-              <TabsContent value="edit-room" className="mt-0 min-h-0 flex-1">
-                <div className="flex max-h-[min(50vh,520px)] min-h-[240px] flex-col lg:max-h-none lg:min-h-0 lg:flex-1">
-                  <CustomizePanel />
-                </div>
-              </TabsContent>
-            </Tabs>
-          </div>
+        <aside className="order-3 flex min-h-0 flex-col p-3 lg:order-3 lg:p-4">
+          <Tabs
+            value={sidebarTab}
+            onValueChange={(v) => {
+              setSidebarTab(v as SidebarTab);
+              if (v === "edit-room") setCustomizeOpen(true);
+            }}
+            className="flex min-h-0 flex-1 flex-col gap-3"
+          >
+            <TabsList className="tabs-lavender grid h-11 w-full grid-cols-2">
+              <TabsTrigger
+                value="player"
+                className="border-0 font-galmuri-11 text-galmuri-title data-[state=active]:border-0"
+              >
+                Nhân vật
+              </TabsTrigger>
+              <TabsTrigger
+                value="edit-room"
+                className="border-0 font-galmuri-11 text-galmuri-title data-[state=active]:border-0"
+              >
+                Sửa phòng
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="player" className="mt-0 min-h-0 flex-1 overflow-hidden">
+              <PlayerInfoPanel />
+            </TabsContent>
+            <TabsContent value="edit-room" className="mt-0 min-h-0 flex-1 overflow-hidden">
+              <div className="flex max-h-[min(50vh,520px)] min-h-[240px] flex-col lg:max-h-[calc(100vh-8rem)] lg:min-h-0">
+                <CustomizePanel />
+              </div>
+            </TabsContent>
+          </Tabs>
         </aside>
       </div>
     </div>

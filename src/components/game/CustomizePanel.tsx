@@ -1,15 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Palette } from "lucide-react";
 import { getCatalog, getRoom } from "@/game/content";
 import { loadAtlas, type LoadedAtlas } from "@/game/render/atlas";
 import { useGameStore } from "@/game/state/store";
 import { ItemThumb } from "./ItemThumb";
 import { Switch } from "@/components/ui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { StickerCardHeader } from "@/components/ui/card";
-import { IconBadge } from "@/components/ui/icon-badge";
+import { PanelCard } from "@/components/ui/panel-card";
 import { t } from "@/lib/locale";
 
 export function CustomizePanel() {
@@ -30,17 +28,12 @@ export function CustomizePanel() {
   const slots = room.slots.filter((s) => s.label);
 
   return (
-    <div className="flex h-full flex-col gap-3">
-      <StickerCardHeader
-        title="Tùy chỉnh"
-        icon={
-          <IconBadge tone="tertiary" floating className="icon-wiggle-on-hover">
-            <Palette className="h-4 w-4" strokeWidth={2.5} />
-          </IconBadge>
-        }
-      />
-      <ScrollArea className="flex-1 pr-2">
-        <div className="space-y-4">
+    <PanelCard className="flex h-full min-h-0 flex-col gap-2 p-3">
+      <h2 className="font-galmuri-11 text-galmuri-title text-[var(--foreground)]">
+        Tùy chỉnh
+      </h2>
+      <ScrollArea className="min-h-0 flex-1 pr-2">
+        <div className="space-y-3">
           {slots.map((slot) => {
             const current = loadout[slot.id] ?? slot.default;
             const variants = items.filter((i) =>
@@ -54,17 +47,17 @@ export function CustomizePanel() {
                 id={`slot-${slot.id}`}
                 className={
                   selectedSlot === slot.id
-                    ? "rounded-xl border-2 border-accent bg-muted/80 p-3 shadow-[4px_4px_0_0_#8b5cf6]"
-                    : "rounded-xl border-2 border-transparent p-3"
+                    ? "rounded-[var(--radius-panel)] border border-[var(--accent-violet)] bg-white/70 p-2 shadow-[var(--shadow-panel)]"
+                    : "rounded-[var(--radius-panel)] border border-transparent p-2"
                 }
               >
                 <div className="mb-2 flex items-center justify-between gap-2">
                   <button
                     type="button"
-                    className="min-h-12 text-left md:min-h-0"
+                    className="min-h-10 text-left md:min-h-0"
                     onClick={() => selectSlot(slot.id)}
                   >
-                    <span className="text-xs font-bold uppercase tracking-wide text-foreground">
+                    <span className="font-galmuri-11 text-galmuri-title text-[var(--foreground)]">
                       {slotLabel}
                     </span>
                   </button>
@@ -104,6 +97,6 @@ export function CustomizePanel() {
           })}
         </div>
       </ScrollArea>
-    </div>
+    </PanelCard>
   );
 }

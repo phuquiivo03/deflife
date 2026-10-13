@@ -5,8 +5,9 @@ alwaysApply: true
 
 For any UI work in this repository (components, layouts, styling, new pages, shadcn usage):
 
-1. Follow **[docs/design/DESIGN_SYSTEM.md](docs/design/DESIGN_SYSTEM.md)** — it is the **PRIMARY** design system.
+1. Follow **[docs/design/DESIGN_SYSTEM.md](docs/design/DESIGN_SYSTEM.md)** — it is the **PRIMARY** design system (Galmuri, gradient/grid background, lavender cards, 22/56/22 layout, small centered room).
 2. Do **not** restyle the pixel-art **canvas** room renderer (crisp pixels, integer scale, no rounding/shadows on canvas pixels).
 3. If the owner explicitly names another style for a feature, that scoped doc wins for that feature only (e.g. **[docs/design/TERMINAL.md](docs/design/TERMINAL.md)** for the in-game CRT terminal).
-4. Use theme tokens in `src/app/globals.css` (colors, radii, pop shadows) rather than ad-hoc one-off colors for chrome.
-5. Respect `prefers-reduced-motion`, mobile tap targets (48px), and reduced shadows on small screens per the design doc.
+4. Use theme tokens in `src/app/globals.css` (`--panel-bg`, `--accent-coral`, Galmuri size vars, etc.) rather than ad-hoc colors for chrome.
+5. Typography: Galmuri7/9/11 at integer multiples; no Galmuri11-Bold for Vietnamese UI.
+6. Respect `prefers-reduced-motion` and mobile stacking order (room → HUD → panels).

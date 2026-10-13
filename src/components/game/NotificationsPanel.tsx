@@ -2,29 +2,54 @@
 
 import { Bell } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { StickerCard, StickerCardHeader } from "@/components/ui/card";
-import { IconBadge } from "@/components/ui/icon-badge";
+import { PanelCard, PanelCardTitle } from "@/components/ui/panel-card";
+import { PixelIcon } from "./PixelIcon";
+
+const NOTIFICATIONS = [
+  {
+    icon: "star",
+    title: "Nhiệm vụ hoàn thành",
+    body: "Bạn đã nộp bài lab Frontend đúng hạn.",
+  },
+  {
+    icon: "house",
+    title: "Vật phẩm mới",
+    body: "Mua được bàn gấp mới cho phòng sinh viên.",
+  },
+  {
+    icon: "star-up",
+    title: "Kỹ năng tăng",
+    body: "Frontend +2 sau buổi pair programming.",
+  },
+] as const;
 
 export function NotificationsPanel() {
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3">
-      <StickerCardHeader
-        title="Thông báo"
-        icon={
-          <IconBadge tone="secondary" floating className="icon-wiggle-on-hover">
-            <Bell className="h-4 w-4" strokeWidth={2.5} />
-          </IconBadge>
-        }
-      />
-      <ScrollArea className="flex-1">
-        <StickerCard className="flex min-h-[200px] flex-col items-center justify-center border-dashed px-4 py-10 text-center">
-          <p className="text-sm font-bold text-foreground">Chưa có gì mới</p>
-          <p className="mt-2 max-w-[240px] font-readable text-sm text-muted-foreground">
-            Nhiệm vụ, hóa đơn và sự kiện trong game sẽ hiện ở đây khi sim phát
-            triển thêm.
-          </p>
-        </StickerCard>
+    <PanelCard className="flex h-full min-h-0 flex-col gap-3 p-4">
+      <PanelCardTitle
+        icon={<Bell className="h-5 w-5 text-[var(--accent-violet)]" strokeWidth={2} />}
+      >
+        Thông báo
+      </PanelCardTitle>
+      <ScrollArea className="min-h-0 flex-1">
+        <ul className="space-y-2 pr-2">
+          {NOTIFICATIONS.map((n) => (
+            <li key={n.title}>
+              <PanelCard className="flex gap-2.5 p-3">
+                <PixelIcon name={n.icon} size={24} className="mt-0.5" />
+                <div className="min-w-0">
+                  <p className="font-galmuri-11 text-galmuri-title text-[var(--foreground)]">
+                    {n.title}
+                  </p>
+                  <p className="mt-1 font-galmuri-9 text-galmuri-body text-[var(--muted-foreground)]">
+                    {n.body}
+                  </p>
+                </div>
+              </PanelCard>
+            </li>
+          ))}
+        </ul>
       </ScrollArea>
-    </div>
+    </PanelCard>
   );
 }
