@@ -35,3 +35,15 @@ export function TabsTrigger({
     />
   );
 }
+
+export function TabsContent({
+  className,
+  ...props
+}: React.ComponentProps<typeof TabsPrimitive.Content>) {
+  return (
+    <TabsPrimitive.Content
+      className={cn("focus-visible:outline-none", className)}
+      {...props}
+    />
+  );
+}
