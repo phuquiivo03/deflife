@@ -81,13 +81,36 @@ User-facing copy: **Vietnamese**; tech terms stay English (Frontend, Backend, Ju
 
 Room canvas, UI icons, avatars: `image-rendering: pixelated` (`.pixelated`). Do not blur or round canvas pixels.
 
-Icons: `public/ui/icons/*.png` (chroma-keyed from owner sheet). Avatars: `public/ui/avatars/`.
+### Icons (`public/ui/icons/`)
+
+Art-agent PNGs with clean alpha (no chroma-key). Naming: `icon_<name>.png` and `icon_<name>_x4.png`.
+
+| Asset | Native size | ×4 size |
+|-------|-------------|---------|
+| Icons | **44×44** | **176×176** |
+
+**IDs (23):** `health`, `mood`, `energy`, `burnout`, `clock`, `level`, `job`, `reputation`, `stars`, `relationship`, `frontend`, `backend`, `devops`, `algorithms`, `english`, `communication`, `balance`, `salary`, `rent`, `food`, `savings`, `debt`, `skill_up`.
+
+Use `PixelIcon` + `resolveIconAsset()` in `src/lib/pixel-assets.ts`: pick native or `_x4` so CSS display size is an **integer downscale/upscale** only (e.g. 22px display → 44px native @ 2×, 88px display → 176px `_x4` @ 2×).
+
+### Avatars (`public/ui/avatars/`)
+
+Framed portraits for in-game chrome (use **framed**, not `_bust`, unless a scene explicitly needs bust crop).
+
+| Asset | Native | ×4 |
+|-------|--------|-----|
+| Framed avatar | **48×48** | **192×192** |
+
+**Roles:** `player`, `boss`, `tech_lead`, `coworker_male`, `designer`, `partner`, `hr`.  
+Also shipped: `avatar_<role>_bust.png` (+ `_x4`) for future dialogue UI.
+
+Use `PixelAvatar` + `resolveAvatarAsset()` with the same integer-scale rule.
 
 ---
 
 ## HUD & stat bars
 
-- HUD card under room: avatar, heart/mood/lightning bars, coins + `formatVnd`, game day.
+- HUD card under room: framed `avatar_player`, `health` / `mood` / `energy` bars, `savings` + `formatVnd`, `clock` + game day.
 - Bars: 1px border, fill coral / mint / sky per stat.
 - Stub data: `src/game/state/playerStats.ts` until sim loop exists.
 

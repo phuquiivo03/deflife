@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { STUB_PLAYER } from "@/game/state/playerStats";
 import { PixelIcon } from "./PixelIcon";
+import { PixelAvatar } from "./PixelAvatar";
 import { PanelCard } from "@/components/ui/panel-card";
 import { StatBar } from "./StatBar";
 
@@ -13,15 +13,9 @@ export function PlayerInfoPanel() {
     <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
       <PanelCard className="flex flex-col items-center p-4">
         <div
-          className="relative mb-3 h-28 w-28 overflow-hidden rounded-xl border-2 border-[#2d2858] bg-[#b8d9f0] shadow-[0_0_24px_rgba(90,99,196,0.35)]"
+          className="mb-3 flex items-center justify-center overflow-hidden rounded-xl border-2 border-[#2d2858] bg-[#b8d9f0] shadow-[0_0_24px_rgba(90,99,196,0.35)]"
         >
-          <Image
-            src="/ui/avatars/player-quy.png"
-            alt={p.name}
-            width={112}
-            height={112}
-            className="pixelated h-full w-full object-cover"
-          />
+          <PixelAvatar role="player" size={96} alt={p.name} />
         </div>
         <p className="font-galmuri-11 text-galmuri-title-lg text-[var(--foreground)]">
           {p.name}
@@ -30,7 +24,7 @@ export function PlayerInfoPanel() {
           {p.title}
         </p>
         <div className="mt-3 flex w-full items-center gap-2">
-          <PixelIcon name="star" size={20} />
+          <PixelIcon name="level" size={22} />
           <span className="font-galmuri-11 text-galmuri-title text-[var(--foreground)]">
             Lv {p.level}
           </span>
