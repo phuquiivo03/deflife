@@ -51,7 +51,7 @@ Approximate **22% | 56% | 22%** three-column grid (`lg:grid-cols-[22fr_56fr_22fr
 | mint | `#5CCB9A` | Mood, Backend, EXP |
 | sky | `#4A90E2` | Energy, Thuật toán |
 | tab lavender | `#E8E2F4` | Inactive tabs |
-| room frame | `#2D2858` | Room border + glow |
+| stage plate | `#E9E4F5` / `#3B3466` | Chamfered room label text/bg |
 
 Shadow: `0 8px 24px rgba(30, 20, 80, 0.25)` (`shadow-panel` / `--shadow-panel`).
 
@@ -119,6 +119,23 @@ Use `PixelAvatar` + `resolveAvatarAsset()` with the same integer-scale rule.
 ## Room viewport
 
 `ROOM_VIEWPORT_W` in `GameShell` (~480px) caps CSS size; renderer still uses integer device-pixel scale internally. **Do not increase** to fill the center column without owner approval.
+
+### Chamfered game frame
+
+Octagonal **clip-path** frame around the room (`RoomChamferFrame`), reference `uploads/index.html`. Nested layers (outer → inner), corners cut by `--c` per layer; scale corner radius and padding with `roomWidth / 427`:
+
+| Layer | Corner `c` | Pad | Fill |
+|-------|------------|-----|------|
+| f1 | 16px | 3px | `#1C1745` outer line |
+| f2 | 14px | 3px | gradient `#A99CF0` → `#7E70D0` bevel |
+| f3 | 12px | 7px | gradient 160deg `#4A3F8C`, `#2D2763` 60%, `#3A2F78` body |
+| f4 | 8px | 2px | `#15112F` inner line |
+| f5 | 6px | — | canvas + **inset** shadow `0 4px 10px rgba(0,0,0,.5)` (scaled) |
+
+**Glow:** `.room-frame-glow` wrapper uses `filter: drop-shadow(...)` (not `box-shadow` — clip-path clips box-shadow).  
+**Label plate:** chamfer `c6`, bg `#E9E4F5`, text `#3B3466`, stage title from room content.
+
+Canvas sizing `ref` stays on the inner room area; pointer hit-testing and `?debug=1` unchanged.
 
 ---
 

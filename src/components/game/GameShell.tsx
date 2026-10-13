@@ -11,6 +11,7 @@ import { CustomizePanel } from "./CustomizePanel";
 import { NotificationsPanel } from "./NotificationsPanel";
 import { PlayerInfoPanel } from "./PlayerInfoPanel";
 import { PlayerHudCard } from "./PlayerHudCard";
+import { RoomChamferFrame } from "./RoomChamferFrame";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
@@ -175,28 +176,18 @@ export function GameShell() {
 
         <main className="order-1 flex min-h-0 flex-col items-center justify-center px-2 py-4 lg:order-2">
           <div className="room-stage-glow flex w-full flex-col items-center">
-            <div
-              className="rounded-xl border-2 p-2"
-              style={{
-                borderColor: "var(--room-frame)",
-                boxShadow: `0 0 32px var(--room-frame-glow)`,
-                background: "linear-gradient(180deg, #3d3668 0%, #2a2458 100%)",
-              }}
+            <RoomChamferFrame
+              areaRef={areaRef}
+              roomAreaStyle={roomAreaStyle}
+              label={
+                <>
+                  {t(room.title)}
+                  {debug ? " · debug (D)" : ""}
+                </>
+              }
             >
-              <div
-                ref={areaRef}
-                className="flex w-full items-center justify-center overflow-hidden rounded-lg"
-                style={roomAreaStyle}
-              >
-                <SceneCanvas areaRef={areaRef} debug={debug} />
-              </div>
-            </div>
-            <p
-              className="mt-3 rounded-full border border-[var(--panel-border)] bg-[var(--panel-bg)] px-4 py-1 font-galmuri-11 text-galmuri-title text-[var(--foreground)] shadow-[var(--shadow-panel)]"
-            >
-              {t(room.title)}
-              {debug ? " · debug (D)" : ""}
-            </p>
+              <SceneCanvas areaRef={areaRef} debug={debug} />
+            </RoomChamferFrame>
             <div className="mt-3 w-full flex justify-center px-2">
               <PlayerHudCard />
             </div>
