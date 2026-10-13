@@ -1,6 +1,9 @@
 {
   "id": "junior",
-  "title": "Junior apartment",
+  "title": {
+    "en": "Junior apartment",
+    "vi": "Căn hộ Junior"
+  },
   "background": "rooms/room_junior_empty",
   "size": [
     427,

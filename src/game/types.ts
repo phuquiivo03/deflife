@@ -77,7 +77,7 @@ export type Slot = {
 
 export type Room = {
   id: StageId;
-  title: string;
+  title: Localized;
   background: string;
   size: Vec;
   bounds: {

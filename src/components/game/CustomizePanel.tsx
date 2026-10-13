@@ -1,12 +1,16 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { Palette } from "lucide-react";
 import { getCatalog, getRoom } from "@/game/content";
 import { loadAtlas, type LoadedAtlas } from "@/game/render/atlas";
 import { useGameStore } from "@/game/state/store";
 import { ItemThumb } from "./ItemThumb";
 import { Switch } from "@/components/ui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { StickerCardHeader } from "@/components/ui/card";
+import { IconBadge } from "@/components/ui/icon-badge";
+import { t } from "@/lib/locale";
 
 export function CustomizePanel() {
   const stage = useGameStore((s) => s.stage);
@@ -27,7 +31,14 @@ export function CustomizePanel() {
 
   return (
     <div className="flex h-full flex-col gap-3">
-      <h2 className="text-lg font-semibold text-zinc-900">Customize</h2>
+      <StickerCardHeader
+        title="Tùy chỉnh"
+        icon={
+          <IconBadge tone="tertiary" floating className="icon-wiggle-on-hover">
+            <Palette className="h-4 w-4" strokeWidth={2.5} />
+          </IconBadge>
+        }
+      />
       <ScrollArea className="flex-1 pr-2">
         <div className="space-y-4">
           {slots.map((slot) => {
@@ -36,25 +47,25 @@ export function CustomizePanel() {
               slot.accepts.includes(i.category),
             );
             const enabled = current !== null;
+            const slotLabel = t(slot.label);
             return (
               <div
                 key={slot.id}
                 id={`slot-${slot.id}`}
                 className={
                   selectedSlot === slot.id
-                    ? "rounded-lg border border-amber-300 bg-amber-50/50 p-2"
-                    : "rounded-lg border border-transparent p-2"
+                    ? "rounded-xl border-2 border-accent bg-muted/80 p-3 shadow-[4px_4px_0_0_#8b5cf6]"
+                    : "rounded-xl border-2 border-transparent p-3"
                 }
               >
                 <div className="mb-2 flex items-center justify-between gap-2">
                   <button
                     type="button"
-                    className="text-left text-sm font-medium"
+                    className="min-h-12 text-left md:min-h-0"
                     onClick={() => selectSlot(slot.id)}
                   >
-                    {slot.label?.en}
-                    <span className="block text-xs font-normal text-zinc-500">
-                      {slot.label?.vi}
+                    <span className="text-xs font-bold uppercase tracking-wide text-foreground">
+                      {slotLabel}
                     </span>
                   </button>
                   {!slot.required && (
@@ -63,7 +74,7 @@ export function CustomizePanel() {
                       onCheckedChange={(on) =>
                         setSlotItem(slot.id, on ? slot.default : null)
                       }
-                      aria-label={`Toggle ${slot.label?.en}`}
+                      aria-label={`Bật/tắt ${slotLabel}`}
                     />
                   )}
                 </div>
@@ -71,7 +82,7 @@ export function CustomizePanel() {
                   {!slot.required && (
                     <ItemThumb
                       atlas={atlas}
-                      label="None"
+                      label="Không"
                       selected={!enabled}
                       onClick={() => setSlotItem(slot.id, null)}
                     />
@@ -81,7 +92,7 @@ export function CustomizePanel() {
                       key={v.id}
                       atlas={atlas}
                       sprite={v.sprite}
-                      label={v.name.en}
+                      label={t(v.name)}
                       badge={v.stage[0]?.toUpperCase()}
                       selected={enabled && current === v.id}
                       onClick={() => setSlotItem(slot.id, v.id)}

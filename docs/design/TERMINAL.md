@@ -10,7 +10,7 @@
 
 devlife will add a **retro CRT terminal** as the primary “computer screen” metaphor: a phosphor-green monospace shell that presents player identity, tasks, skills, and life events as if they were command output. Visually it inherits a portfolio-site reference (see [Appendix A](#appendix-a-original-visual-reference-prompt)) but is **scoped to a terminal surface** inside the existing `GameShell` layout—not a full-page marketing site.
 
-The terminal is a **distinct design system** from the cozy room chrome (cream `#f4f1ea`, white side panels, Pixelify Sans wordmark). Only panels that represent “what’s on the monitor” use the CRT tokens below.
+The terminal is a **scoped exception** to the primary app chrome in [`DESIGN_SYSTEM.md`](./DESIGN_SYSTEM.md) (Playful Geometric: cream `#FFFDF5`, VT323 UI type, sticker cards, pop shadows). Only panels that represent “what’s on the monitor” use the CRT tokens below—not the global header, side panels, or stage tabs.
 
 ---
 
@@ -27,7 +27,7 @@ The terminal is a **distinct design system** from the cozy room chrome (cream `#
 
 ### 2.1 Non-goals
 
-- **Not** replacing the global app shell typography (Inter / Pixelify) outside the terminal.
+- **Not** replacing the global app shell (see `DESIGN_SYSTEM.md`) outside the terminal surface.
 - **Not** defining final game mechanics, economy formulas, or notification rules—only UI mapping and placeholders.
 - **Not** a real shell (no arbitrary command execution, no Node in the browser).
 - **Not** stock photos, glossy marketing layouts, or multi-chrome rainbow palettes.

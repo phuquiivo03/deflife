@@ -1,6 +1,9 @@
 {
   "id": "student",
-  "title": "Student room",
+  "title": {
+    "en": "Student room",
+    "vi": "Phòng sinh viên"
+  },
   "background": "rooms/room_student_empty",
   "size": [
     427,

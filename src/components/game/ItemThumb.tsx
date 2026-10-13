@@ -30,7 +30,8 @@ export function ItemThumb({
     if (!ctx) return;
     ctx.clearRect(0, 0, 48, 48);
     if (!atlas || !sprite) {
-      ctx.strokeStyle = "#ccc";
+      ctx.strokeStyle = "#cbd5e1";
+      ctx.lineWidth = 2;
       ctx.strokeRect(8, 8, 32, 32);
       return;
     }
@@ -63,13 +64,15 @@ export function ItemThumb({
       onClick={onClick}
       title={label}
       className={cn(
-        "relative flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-md border bg-zinc-50 p-1",
-        selected ? "border-zinc-900 ring-2 ring-zinc-400" : "border-zinc-200",
+        "relative flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-lg border-2 bg-card p-1 transition-bouncy min-h-12 min-w-12",
+        selected
+          ? "border-foreground shadow-[4px_4px_0_0_#8b5cf6] ring-2 ring-accent"
+          : "border-border hover:border-foreground",
       )}
     >
       <canvas ref={ref} width={48} height={48} className="pixelated" />
       {badge && (
-        <span className="absolute -right-1 -top-1 rounded bg-zinc-800 px-1 text-[9px] text-white">
+        <span className="absolute -right-1 -top-1 rounded-full border border-foreground bg-accent px-1.5 text-[9px] font-bold text-accent-foreground">
           {badge}
         </span>
       )}
