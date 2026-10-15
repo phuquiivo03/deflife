@@ -34,6 +34,8 @@ export type StudyActivity = {
   hours: number;
   energy: number;
   skill_id: SkillId;
+  /** When false, the player can finish this course only once. */
+  repeatable: boolean;
 };
 
 export type StudyActivityXp = {
@@ -115,6 +117,14 @@ export type PlayerSkill = {
   xp: number;
 };
 
+/** One finish per course. Local rows omit player_id. */
+export type PlayerStudyCompletion = {
+  activity_id: string;
+  skill_id: SkillId;
+  xp_gained: number;
+  completed_day: number;
+};
+
 export type PlayerJob = {
   id: string;
   template_id: string;
@@ -147,6 +157,7 @@ export type PlayerEvent = {
 export type CareerState = {
   players: PlayerRow;
   player_skills: PlayerSkill[];
+  player_study_completions: PlayerStudyCompletion[];
   player_jobs: PlayerJob[];
   player_unlocks: PlayerUnlock[];
   player_events: PlayerEvent[];

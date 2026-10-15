@@ -32,7 +32,9 @@ The bar on the skill screen is progress to the **next level**, not the bracket p
 
 `config/study_activities.json` and `config/study_activity_xp.json`. Buying a course spends money and energy, adds XP immediately, then fast-forwards the clock by exactly `hours * 60` through `advanceMinutes`. The returned time events are emitted on `timeBus`, so a course that crosses midnight still starts the next day.
 
-The button stays clickable when the course is blocked so it can shake. The reason is `Không đủ tiền`, `Không đủ năng lượng`, or both. The native `disabled` attribute is not used, because it would swallow the click.
+Each course has `repeatable` (default `false`). A non-repeatable course can be finished once. The finish is a `player_study_completions` row: activity, skill, XP actually granted, and the day the clock lands on after the fast-forward. Saves from before that table have no history, so nothing is completed. The Học panel lists unfinished courses under **Khóa học** and finished ones under **Đã học**. A repeatable course stays on Khóa học and its completion row is replaced.
+
+The button stays clickable when the course is blocked so it can shake. The reason is `Không đủ tiền`, `Không đủ năng lượng`, or both. Buying a finished non-repeatable course returns `Đã học khóa này`. The native `disabled` attribute is not used, because it would swallow the click.
 
 ## Energy
 

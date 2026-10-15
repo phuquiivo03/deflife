@@ -21,7 +21,9 @@ CREATE TABLE study_activities (
   price integer NOT NULL CHECK (price >= 0),
   hours integer NOT NULL CHECK (hours > 0),
   energy integer NOT NULL CHECK (energy >= 0),
-  skill_id text NOT NULL REFERENCES skills (id)
+  skill_id text NOT NULL REFERENCES skills (id),
+  -- false: the player can complete this course only once.
+  repeatable boolean NOT NULL DEFAULT false
 );
 
 CREATE TABLE study_activity_xp (
@@ -91,6 +93,16 @@ CREATE TABLE player_skills (
   level integer NOT NULL CHECK (level BETWEEN 1 AND 10),
   xp integer NOT NULL CHECK (xp >= 0),
   PRIMARY KEY (player_id, skill_id)
+);
+
+-- Local saves omit player_id. No row means the course has not been completed.
+CREATE TABLE player_study_completions (
+  player_id text NOT NULL REFERENCES players (id),
+  activity_id text NOT NULL REFERENCES study_activities (id),
+  skill_id text NOT NULL REFERENCES skills (id),
+  xp_gained integer NOT NULL CHECK (xp_gained >= 0),
+  completed_day integer NOT NULL CHECK (completed_day >= 1),
+  PRIMARY KEY (player_id, activity_id)
 );
 
 CREATE TABLE player_jobs (

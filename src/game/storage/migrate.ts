@@ -10,6 +10,7 @@ import {
   type PlayerEvent,
   type PlayerJob,
   type PlayerSkill,
+  type PlayerStudyCompletion,
   type PlayerUnlock,
   type SkillId,
 } from "../career/types";
@@ -97,6 +98,24 @@ function normalizeJobs(value: unknown): PlayerJob[] {
   return jobs;
 }
 
+function normalizeCompletions(value: unknown): PlayerStudyCompletion[] {
+  if (!Array.isArray(value)) return [];
+  const byId = new Map<string, PlayerStudyCompletion>();
+  for (const row of value) {
+    if (!isRecord(row) || typeof row.activity_id !== "string" || row.activity_id.length === 0) {
+      continue;
+    }
+    if (!isSkillId(row.skill_id)) continue;
+    byId.set(row.activity_id, {
+      activity_id: row.activity_id,
+      skill_id: row.skill_id,
+      xp_gained: num(row.xp_gained),
+      completed_day: Math.max(1, num(row.completed_day, 1)),
+    });
+  }
+  return [...byId.values()];
+}
+
 function normalizeUnlocks(value: unknown): PlayerUnlock[] {
   if (!Array.isArray(value)) return [];
   const unlocks: PlayerUnlock[] = [];
@@ -165,6 +184,7 @@ export function careerFromUnknown(
       freelance_completed: num(players.freelance_completed),
     },
     player_skills: normalizeSkills(value.player_skills),
+    player_study_completions: normalizeCompletions(value.player_study_completions),
     player_jobs: normalizeJobs(value.player_jobs),
     player_unlocks: normalizeUnlocks(value.player_unlocks),
     player_events: normalizeEvents(value.player_events),
@@ -172,8 +192,9 @@ export function careerFromUnknown(
 }
 
 /**
- * Persist version 3. Versions before 3 keep the room and the clock, and gain
- * a fresh career document. Version 3 keeps the career tables.
+ * Persist version 4. Versions before 3 keep the room and the clock, and gain
+ * a fresh career document. Version 3 keeps the career tables. Versions before
+ * 4 have no course history, so every course is still uncompleted.
  */
 export function migrateSave(persisted: unknown, version: number): PersistedSave {
   const prev = isRecord(persisted) ? persisted : {};
@@ -190,10 +211,13 @@ export function migrateSave(persisted: unknown, version: number): PersistedSave 
   const showCharacter = typeof prev.showCharacter === "boolean" ? prev.showCharacter : true;
   const totalMinutes = totalMinutesFromPersisted(prev.totalMinutes, version);
   const snap = snapshot(totalMinutes);
-  const career =
+  let career =
     version >= 3
       ? careerFromUnknown(prev.career, snap.day, snap.minuteOfDay, stage)
       : defaultCareer(snap.day, snap.minuteOfDay, stage, SIM_CATALOG);
+  if (version < 4) {
+    career = { ...career, player_study_completions: [] };
+  }
 
   return {
     stage,
