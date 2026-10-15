@@ -68,7 +68,7 @@
         6
       ],
       "floorSit": {
-        "pose": "sit_back",
+        "pose": "sit_floor",
         "offset": [
           0,
           6
@@ -676,6 +676,10 @@
     },
     "sit_side": {
       "sprite": "character/derived/char_sit_side",
+      "hipFromBottom": 9
+    },
+    "sit_floor": {
+      "sprite": "character/derived/char_sit_floor",
       "hipFromBottom": 9
     }
   }
