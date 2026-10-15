@@ -225,7 +225,7 @@ export function GameShell({ iconFiles = [] }: { iconFiles?: readonly string[] })
               </TabsTrigger>
             </TabsList>
             <TabsContent value="player" className="mt-0 min-h-0 flex-1 overflow-hidden">
-              <PlayerInfoPanel />
+              <PlayerInfoPanel iconFiles={iconFiles} />
             </TabsContent>
             <TabsContent value="edit-room" className="mt-0 min-h-0 flex-1 overflow-hidden">
               <div className="flex max-h-[min(50vh,520px)] min-h-[240px] flex-col lg:max-h-[calc(100vh-8rem)] lg:min-h-0">

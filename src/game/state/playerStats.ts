@@ -1,8 +1,4 @@
-import type { IconName } from "@/lib/pixel-assets";
-
-/** Stub player stats for UI chrome until the sim loop exists. */
-export type SkillId = "frontend" | "backend" | "algorithms";
-
+/** Identity, health, and mood stay stubbed until that sim loop exists. Skills, energy, and money live on the career store. */
 export type PlayerStats = {
   name: string;
   title: string;
@@ -11,18 +7,6 @@ export type PlayerStats = {
   expMax: number;
   health: number;
   mood: number;
-  energy: number;
-  money: number;
-  day: number;
-  skills: Record<
-    SkillId,
-    {
-      label: string;
-      value: number;
-      icon: IconName;
-      bar: "coral" | "mint" | "sky";
-    }
-  >;
 };
 
 export const STUB_PLAYER: PlayerStats = {
@@ -33,27 +17,4 @@ export const STUB_PLAYER: PlayerStats = {
   expMax: 100,
   health: 78,
   mood: 85,
-  energy: 64,
-  money: 2_450_000,
-  day: 12,
-  skills: {
-    frontend: {
-      label: "Frontend",
-      value: 72,
-      icon: "frontend",
-      bar: "coral",
-    },
-    backend: {
-      label: "Backend",
-      value: 58,
-      icon: "backend",
-      bar: "mint",
-    },
-    algorithms: {
-      label: "Thuật toán",
-      value: 45,
-      icon: "algorithms",
-      bar: "sky",
-    },
-  },
 };

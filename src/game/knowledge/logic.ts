@@ -3,6 +3,7 @@ import type {
   GameConfig,
   PlayerSkill,
   RankBracket,
+  SimCatalog,
   SkillId,
   SkillLevelXp,
   StudyActivity,
@@ -142,6 +143,62 @@ export function formatRankLabel(
   percent: number,
 ): string {
   return `${skillName}: ${rankLabel} ${percent}%`;
+}
+
+/** `12/40 XP`, or `tối đa` once the level cap has no next step. */
+export function formatSkillXpLine(xp: number, xpToNext: number): string {
+  if (xpToNext <= 0) return "tối đa";
+  return `${xp}/${xpToNext} XP`;
+}
+
+export type SkillProgress = {
+  id: SkillId;
+  name: string;
+  icon: string;
+  level: number;
+  xp: number;
+  xpToNext: number;
+  levelPercent: number;
+  rankId: string;
+  rankLabel: string;
+  rankPercent: number;
+  /** Same headline the skill popup renders. */
+  summary: string;
+  xpLine: string;
+};
+
+/**
+ * One row per catalog skill, in catalog order. Missing saves fall back to
+ * level 1 with 0 XP so every surface shows the same five skills.
+ */
+export function skillProgressList(
+  playerSkills: readonly PlayerSkill[],
+  catalog: Pick<SimCatalog, "skills" | "skillLevelXp" | "config">,
+): SkillProgress[] {
+  return catalog.skills.map((def) => {
+    const row = playerSkills.find((skill) => skill.skill_id === def.id) ?? {
+      skill_id: def.id,
+      level: 1,
+      xp: 0,
+    };
+    const bracket = rankBracketForLevel(row.level, catalog.config.rank_brackets);
+    const xpToNext = xpToNextLevel(row.level, catalog.skillLevelXp);
+    const rankPercent = rankProgressPercent(row.level, row.xp, xpToNext, bracket);
+    return {
+      id: def.id,
+      name: def.name,
+      icon: def.icon,
+      level: row.level,
+      xp: row.xp,
+      xpToNext,
+      levelPercent: levelProgressPercent(row.level, row.xp, catalog.skillLevelXp),
+      rankId: bracket.id,
+      rankLabel: bracket.label,
+      rankPercent,
+      summary: formatRankLabel(def.name, bracket.label, rankPercent),
+      xpLine: formatSkillXpLine(row.xp, xpToNext),
+    };
+  });
 }
 
 export function studyBlockReason(

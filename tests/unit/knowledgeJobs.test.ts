@@ -15,6 +15,7 @@ import {
   levelProgressPercent,
   rankBracketForLevel,
   rankProgressPercent,
+  skillProgressList,
   studyBlockReason,
   xpMultiplier,
 } from "../../src/game/knowledge/logic";
@@ -76,6 +77,68 @@ describe("rank brackets", () => {
     expect(rankProgressPercent(10, 0, 0, rankBracketForLevel(10, brackets))).toBe(100);
     expect(levelProgressPercent(10, 0, SIM_CATALOG.skillLevelXp)).toBe(100);
     expect(levelProgressPercent(1, 40, SIM_CATALOG.skillLevelXp)).toBe(40);
+  });
+});
+
+describe("skill progress rows", () => {
+  it("uses one view for every catalog skill, including a missing save row", () => {
+    const rows = skillProgressList(
+      [{ skill_id: "frontend", level: 4, xp: 60 }],
+      SIM_CATALOG,
+    );
+    expect(rows.map((row) => row.id)).toEqual([
+      "frontend",
+      "backend",
+      "database",
+      "devops",
+      "soft",
+    ]);
+    expect(rows[0]).toMatchObject({
+      name: "Frontend",
+      icon: "skill_frontend",
+      level: 4,
+      xp: 60,
+      xpToNext: 300,
+      levelPercent: 20,
+      rankId: "junior",
+      rankLabel: "Junior",
+      rankPercent: 60,
+      summary: "Frontend: Junior 60%",
+      xpLine: "60/300 XP",
+    });
+    expect(rows.find((row) => row.id === "backend")).toMatchObject({
+      level: 1,
+      xp: 0,
+      xpToNext: 100,
+      rankId: "intern",
+      xpLine: "0/100 XP",
+    });
+  });
+
+  it("follows XP granted on the career state, including the level cap", () => {
+    const start = defaultCareer(1, 480, "student", SIM_CATALOG);
+    const granted = grantRawXp(start, "frontend", 40, SIM_CATALOG);
+    const rows = skillProgressList(granted.state.player_skills, SIM_CATALOG);
+    expect(rows.find((row) => row.id === "frontend")).toMatchObject({
+      level: 1,
+      xp: 40,
+      xpToNext: 100,
+      levelPercent: 40,
+      xpLine: "40/100 XP",
+    });
+
+    const capped = skillProgressList(
+      [{ skill_id: "soft", level: 10, xp: 0 }],
+      SIM_CATALOG,
+    );
+    expect(capped.find((row) => row.id === "soft")).toMatchObject({
+      level: 10,
+      xpToNext: 0,
+      levelPercent: 100,
+      rankId: "senior",
+      rankPercent: 100,
+      xpLine: "tối đa",
+    });
   });
 });
 

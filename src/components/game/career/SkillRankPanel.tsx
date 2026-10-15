@@ -1,13 +1,7 @@
 "use client";
 
 import { SIM_CATALOG } from "@/game/career/content";
-import {
-  formatRankLabel,
-  levelProgressPercent,
-  rankBracketForLevel,
-  rankProgressPercent,
-  xpToNextLevel,
-} from "@/game/knowledge/logic";
+import { skillProgressList } from "@/game/knowledge/logic";
 import { useGameStore } from "@/game/state/store";
 import { PixelIcon } from "../PixelIcon";
 import { StatBar } from "../StatBar";
@@ -35,37 +29,29 @@ export function SkillRankPanel({ iconFiles }: { iconFiles: readonly string[] }) 
         </span>
       </div>
       <ul className="flex flex-col gap-2">
-        {SIM_CATALOG.skills.map((def) => {
-          const row = skills.find((skill) => skill.skill_id === def.id) ?? {
-            skill_id: def.id,
-            level: 1,
-            xp: 0,
-          };
-          const bracket = rankBracketForLevel(row.level, SIM_CATALOG.config.rank_brackets);
-          const need = xpToNextLevel(row.level, SIM_CATALOG.skillLevelXp);
-          const rankPercent = rankProgressPercent(row.level, row.xp, need, bracket);
-          const levelPercent = levelProgressPercent(row.level, row.xp, SIM_CATALOG.skillLevelXp);
-          return (
-            <li
-              key={def.id}
-              data-testid={`skill-row-${def.id}`}
-              className="flex items-center gap-3 rounded-[var(--radius-panel)] border border-[var(--panel-border)] bg-white/50 p-2"
-            >
-              <PixelIcon name={def.icon} size={44} alt="" files={iconFiles} />
-              <div className="min-w-0 flex-1">
-                <p className="font-galmuri-9 text-galmuri-body text-[var(--foreground)]">
-                  {formatRankLabel(def.name, bracket.label, rankPercent)}
-                </p>
-                <p className="font-galmuri-7 text-galmuri-small text-[var(--muted-foreground)]">
-                  Cấp {row.level}
-                  {need > 0 ? ` · ${row.xp}/${need} XP` : " · tối đa"}
-                </p>
-                <StatBar value={levelPercent} tone="mint" stepped className="mt-1" />
-              </div>
-              <RankBadge rankId={bracket.id} />
-            </li>
-          );
-        })}
+        {skillProgressList(skills, SIM_CATALOG).map((skill) => (
+          <li
+            key={skill.id}
+            data-testid={`skill-row-${skill.id}`}
+            data-level={skill.level}
+            data-xp={skill.xp}
+            data-need={skill.xpToNext}
+            data-rank={skill.rankId}
+            className="flex items-center gap-3 rounded-[var(--radius-panel)] border border-[var(--panel-border)] bg-white/50 p-2"
+          >
+            <PixelIcon name={skill.icon} size={44} alt="" files={iconFiles} />
+            <div className="min-w-0 flex-1">
+              <p className="font-galmuri-9 text-galmuri-body text-[var(--foreground)]">
+                {skill.summary}
+              </p>
+              <p className="font-galmuri-7 text-galmuri-small text-[var(--muted-foreground)]">
+                Cấp {skill.level} · {skill.xpLine}
+              </p>
+              <StatBar value={skill.levelPercent} tone="mint" stepped className="mt-1" />
+            </div>
+            <RankBadge rankId={skill.rankId} />
+          </li>
+        ))}
       </ul>
     </div>
   );

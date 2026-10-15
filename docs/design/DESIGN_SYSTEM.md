@@ -114,7 +114,7 @@ Use `PixelAvatar` + `resolveAvatarAsset()` with the same integer-scale rule.
 
 - HUD card under room: framed `avatar_player`, `health` / `mood` / `energy` bars, `savings` + `formatVnd`, `clock` + game day.
 - Bars: 1px border, fill coral / mint / sky per stat.
-- Stub data: `src/game/state/playerStats.ts` until sim loop exists.
+- Name, title, overall level, health, and mood stay stubbed in `src/game/state/playerStats.ts`. Skill rows, energy, and money read the career store.
 
 ---
 
