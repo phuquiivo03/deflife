@@ -52,19 +52,18 @@ export function RoomChamferFrame({
   label,
   children,
 }: Props) {
-  const measureRef = useRef<HTMLDivElement>(null);
+  const frameRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
 
   const setRefs = useCallback(
     (node: HTMLDivElement | null) => {
-      measureRef.current = node;
       areaRef.current = node;
     },
     [areaRef],
   );
 
   useEffect(() => {
-    const el = measureRef.current;
+    const el = frameRef.current;
     if (!el) return;
     const update = () => setScale(chamferScale(el.clientWidth));
     const ro = new ResizeObserver(update);
@@ -78,22 +77,21 @@ export function RoomChamferFrame({
 
   return (
     <div className="flex w-full flex-col items-center">
-      <div className="room-frame-glow w-max max-w-full">
-        <ChamferLayer layer="f1" scale={scale} className="chamfer-frame-f1">
-          <ChamferLayer layer="f2" scale={scale} className="chamfer-frame-f2">
-            <ChamferLayer layer="f3" scale={scale} className="chamfer-frame-f3">
-              <ChamferLayer layer="f4" scale={scale} className="chamfer-frame-f4">
+      <div
+        ref={setRefs}
+        className="room-canvas-slot flex items-center justify-center"
+        style={roomAreaStyle}
+      >
+        <div className="room-frame-glow w-max max-w-full">
+          <ChamferLayer layer="f1" scale={scale} className="chamfer-frame-f1">
+            <ChamferLayer layer="f2" scale={scale} className="chamfer-frame-f2">
+              <ChamferLayer layer="f3" scale={scale} className="chamfer-frame-f3">
                 <div
-                  className="chamfer-frame-f5 relative"
+                  ref={frameRef}
+                  className="chamfer-frame-f5 relative w-max bg-transparent"
                   style={chamferClipStyle(f5.corner)}
                 >
-                  <div
-                    ref={setRefs}
-                    className="flex w-full items-center justify-center overflow-hidden"
-                    style={roomAreaStyle}
-                  >
-                    {children}
-                  </div>
+                  {children}
                   <div
                     className="pointer-events-none absolute inset-0"
                     style={{
@@ -105,7 +103,7 @@ export function RoomChamferFrame({
               </ChamferLayer>
             </ChamferLayer>
           </ChamferLayer>
-        </ChamferLayer>
+        </div>
       </div>
 
       <div className="room-frame-glow mt-2.5 w-max max-w-full">

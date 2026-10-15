@@ -12,7 +12,6 @@ export const CHAMFER_LAYERS = {
   f1: { cornerPx: 16, paddingPx: 3 },
   f2: { cornerPx: 14, paddingPx: 3 },
   f3: { cornerPx: 12, paddingPx: 7 },
-  f4: { cornerPx: 8, paddingPx: 2 },
   f5: { cornerPx: 6, paddingPx: 0 },
   plate: { cornerPx: 6, paddingPx: 0 },
 } as const;
@@ -29,6 +28,31 @@ export function scaledChamfer(
     corner: layer.cornerPx * scale,
     padding: layer.paddingPx * scale,
   };
+}
+
+const FRAME_PAD_PER_SIDE =
+  CHAMFER_LAYERS.f1.paddingPx +
+  CHAMFER_LAYERS.f2.paddingPx +
+  CHAMFER_LAYERS.f3.paddingPx;
+
+/**
+ * CSS canvas size that keeps the purple frame inside the slot.
+ * When the integer-scaled canvas already fits, the size is unchanged.
+ */
+export function canvasCssWithinFrame(
+  cssW: number,
+  cssH: number,
+  slotW: number,
+  slotH: number,
+): { cssW: number; cssH: number } {
+  if (slotW <= 0 || slotH <= 0) return { cssW, cssH };
+  const scale = chamferScale(Math.min(cssW, slotW));
+  const inset = FRAME_PAD_PER_SIDE * scale;
+  const maxW = Math.max(1, slotW - inset * 2);
+  const maxH = Math.max(1, slotH - inset * 2);
+  if (cssW <= maxW && cssH <= maxH) return { cssW, cssH };
+  const fit = Math.min(maxW / cssW, maxH / cssH);
+  return { cssW: cssW * fit, cssH: cssH * fit };
 }
 
 export function chamferClipStyle(cornerPx: number): CSSProperties {
