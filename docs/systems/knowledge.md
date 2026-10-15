@@ -36,7 +36,9 @@ The button stays clickable when the course is blocked so it can shake. The reaso
 
 ## Energy
 
-Energy is not a stats-system stat yet. It lives on the player row (0–`energy_max`) in `src/game/vitals`. `dayStarted` and `sleep` both refill it to full. Sleep already emits `dayStarted` before `sleep`, so the second refill is a no-op. A course that crosses midnight is deducted first and then refilled by `dayStarted`. That matches “refill on `dayStarted`”.
+Energy is not a stats-system stat yet. It lives on the player row (0–`energy_max`) in `src/game/vitals`. Only the `sleep` event changes it back up. `dayStarted` refreshes the job board and leaves energy where it is, including when a course fast-forward crosses midnight.
+
+Sleep emits `dayStarted` and then `sleep`. The day handler runs first and does not refill. The sleep handler then sets energy to `energyOnSleep` from `game_config` (100, the same as full). The value is clamped to `energy_max`. A later stats system can replace `energyOnSleep` with a number computed from how long the player slept. The debug “Đầy năng lượng” control still sets energy to `energy_max`.
 
 Starting money, energy, and reputation are `starting_money`, `starting_energy`, and `starting_reputation` in `game_config` (1.500.000đ, 70, 0) so the first screen can show both an affordable course and a locked one.
 

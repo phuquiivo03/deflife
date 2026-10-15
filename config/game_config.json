@@ -6,6 +6,7 @@
   "job_xp_multiplier_at_cap": 1,
   "board_size": 4,
   "energy_max": 100,
+  "energyOnSleep": 100,
   "starting_money": 1500000,
   "starting_energy": 70,
   "starting_reputation": 0,

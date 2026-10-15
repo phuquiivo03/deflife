@@ -42,7 +42,11 @@ export function PlayerHudCard({ iconFiles = [] }: { iconFiles?: readonly string[
               <PixelIcon name="mood" size={22} />
               <StatBar value={p.mood} tone="mint" className="flex-1" />
             </div>
-            <div className="flex items-center gap-1.5">
+            <div
+              className="flex items-center gap-1.5"
+              data-testid="hud-energy"
+              data-value={energy}
+            >
               <PixelIcon name="energy" size={22} />
               <StatBar
                 value={energy}
