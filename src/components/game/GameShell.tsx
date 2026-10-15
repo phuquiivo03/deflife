@@ -15,6 +15,7 @@ import { RoomChamferFrame } from "./RoomChamferFrame";
 import { TimeDebugPanel } from "./TimeDebugPanel";
 import { CareerChrome } from "./career/CareerChrome";
 import { useGameClock } from "./useGameClock";
+import { useGameAudio } from "./useGameAudio";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
@@ -46,6 +47,7 @@ export function GameShell({ iconFiles = [] }: { iconFiles?: readonly string[] })
   const setStage = useGameStore((s) => s.setStage);
   const hydrated = useGameStore((s) => s._hasHydrated);
   useGameClock(hydrated);
+  useGameAudio();
   const showCharacter = useGameStore((s) => s.showCharacter);
   const setShowCharacter = useGameStore((s) => s.setShowCharacter);
   const resetStage = useGameStore((s) => s.resetStage);

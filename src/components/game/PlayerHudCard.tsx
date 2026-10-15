@@ -6,6 +6,7 @@ import { useGameStore, type CareerPanel } from "@/game/state/store";
 import { canSleepAt, phaseById, snapshot, type PhaseId } from "@/game/time";
 import { resolveShippedIcon } from "@/lib/pixel-assets";
 import { cn } from "@/lib/utils";
+import { AudioControls } from "./AudioControls";
 import { PixelIcon } from "./PixelIcon";
 import { formatVnd } from "@/lib/format-currency";
 import { PanelCard } from "@/components/ui/panel-card";
@@ -135,6 +136,7 @@ export function PlayerHudCard({ iconFiles = [] }: { iconFiles?: readonly string[
           ))}
         </div>
       </div>
+      <AudioControls iconFiles={iconFiles} />
     </PanelCard>
   );
 }

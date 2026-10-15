@@ -20,6 +20,7 @@ import {
 } from "../career/actions";
 import { SIM_CATALOG } from "../career/content";
 import type { CareerState } from "../career/types";
+import { playCueKey } from "../audio/client";
 import { gameBus } from "../events/bus";
 import type { GameEvent } from "../events/types";
 import { LocalStorageAdapter, toStateStorage } from "../storage/adapter";
@@ -244,7 +245,10 @@ export const useGameStore = create<GameState>()(
           current.stage,
         );
         const result = applyAccept(synced, jobId, SIM_CATALOG);
-        if (result.error) return;
+        if (result.error) {
+          playCueKey("jobFailed");
+          return;
+        }
         set({ career: result.state });
         emitGame(result.events);
       },
