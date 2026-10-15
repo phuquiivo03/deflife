@@ -78,6 +78,47 @@ export function resolveIconAsset(
   };
 }
 
+/**
+ * Same integer-scale choice as `resolveIconAsset`, but only among files that
+ * are actually in `public/ui/icons`. Returns null when neither
+ * `icon_<name>.png` nor `icon_<name>_x4.png` is present so callers can keep
+ * a placeholder until the art is dropped in.
+ */
+export function resolveShippedIcon(
+  name: string,
+  requestedSize: number,
+  files: readonly string[],
+): { src: string; displayPx: number } | null {
+  const shipped = new Set(files);
+  const nativeName = `icon_${name}.png`;
+  const x4Name = `icon_${name}_x4.png`;
+  const hasNative = shipped.has(nativeName);
+  const hasX4 = shipped.has(x4Name);
+  if (!hasNative && !hasX4) return null;
+
+  const want = Math.max(1, Math.round(requestedSize));
+
+  for (let delta = 0; delta <= 8; delta++) {
+    for (const candidate of delta === 0 ? [want] : [want - delta, want + delta]) {
+      if (candidate < 1) continue;
+      if (hasX4 && ICON_X4_PX % candidate === 0) {
+        return { src: `/ui/icons/${x4Name}`, displayPx: candidate };
+      }
+      if (hasNative && ICON_NATIVE_PX % candidate === 0) {
+        return { src: `/ui/icons/${nativeName}`, displayPx: candidate };
+      }
+      if (hasNative && candidate % ICON_NATIVE_PX === 0) {
+        return { src: `/ui/icons/${nativeName}`, displayPx: candidate };
+      }
+    }
+  }
+
+  if (hasNative) {
+    return { src: `/ui/icons/${nativeName}`, displayPx: ICON_NATIVE_PX };
+  }
+  return { src: `/ui/icons/${x4Name}`, displayPx: ICON_X4_PX };
+}
+
 export function resolveAvatarAsset(
   role: FramedAvatarRole,
   requestedSize: number,

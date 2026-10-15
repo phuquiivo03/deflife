@@ -5,6 +5,17 @@ import { persist } from "zustand/middleware";
 import type { Loadout, StageId } from "../types";
 import { PERSIST_KEY, PERSIST_VERSION } from "../config";
 import { getCatalog, getRoom } from "../content";
+import {
+  DEFAULT_START_MINUTES,
+  canSleepAt,
+  minutesForPhaseStart,
+  seekMinutes,
+  sleepToNextMorning,
+  timeBus,
+  totalMinutesFromPersisted,
+  type PhaseId,
+  type SpeedPreset,
+} from "../time";
 
 type GameState = {
   stage: StageId;
@@ -25,6 +36,17 @@ type GameState = {
   setShowCharacter: (v: boolean) => void;
   setCameraX: (stage: StageId, x: number | null) => void;
   setCustomizeOpen: (v: boolean) => void;
+  /** In-game minutes since day 1, 00:00. Persisted. */
+  totalMinutes: number;
+  /** Dev speed. Not persisted. */
+  clockSpeed: SpeedPreset;
+  /** Dev pause. Not persisted. */
+  clockPaused: boolean;
+  setTotalMinutes: (minutes: number) => void;
+  setClockSpeed: (speed: SpeedPreset) => void;
+  setClockPaused: (paused: boolean) => void;
+  sleep: () => void;
+  jumpToPhase: (phaseId: PhaseId) => void;
 };
 
 const emptyLoadouts = (): Record<StageId, Loadout> => ({
@@ -82,6 +104,32 @@ export const useGameStore = create<GameState>()(
       setCameraX: (stage, x) =>
         set((st) => ({ cameraX: { ...st.cameraX, [stage]: x } })),
       setCustomizeOpen: (v) => set({ customizeOpen: v }),
+      totalMinutes: DEFAULT_START_MINUTES,
+      clockSpeed: 1,
+      clockPaused: false,
+      setTotalMinutes: (minutes) =>
+        set({
+          totalMinutes:
+            typeof minutes === "number" && Number.isFinite(minutes)
+              ? Math.max(0, minutes)
+              : DEFAULT_START_MINUTES,
+        }),
+      setClockSpeed: (speed) => set({ clockSpeed: speed }),
+      setClockPaused: (paused) => set({ clockPaused: paused }),
+      sleep: () => {
+        const current = get().totalMinutes;
+        if (!canSleepAt(current)) return;
+        const result = sleepToNextMorning(current);
+        set({ totalMinutes: result.totalMinutes });
+        for (const event of result.events) timeBus.emit(event);
+      },
+      jumpToPhase: (phaseId) => {
+        const current = get().totalMinutes;
+        const target = minutesForPhaseStart(current, phaseId);
+        const result = seekMinutes(current, target);
+        set({ totalMinutes: result.totalMinutes });
+        for (const event of result.events) timeBus.emit(event);
+      },
     }),
     {
       name: PERSIST_KEY,
@@ -90,7 +138,22 @@ export const useGameStore = create<GameState>()(
         stage: s.stage,
         loadouts: s.loadouts,
         showCharacter: s.showCharacter,
+        totalMinutes: s.totalMinutes,
       }),
+      migrate: (persisted, version) => {
+        const prev = (persisted ?? {}) as {
+          stage?: StageId;
+          loadouts?: Record<StageId, Loadout>;
+          showCharacter?: boolean;
+          totalMinutes?: unknown;
+        };
+        return {
+          stage: prev.stage ?? "student",
+          loadouts: prev.loadouts ?? emptyLoadouts(),
+          showCharacter: prev.showCharacter ?? true,
+          totalMinutes: totalMinutesFromPersisted(prev.totalMinutes, version),
+        };
+      },
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },
