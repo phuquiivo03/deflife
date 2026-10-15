@@ -7,7 +7,7 @@ import {
   type TimeAudioPlan,
 } from "./cues";
 import { bgmUrl, clamp01, mixGain, parseManifest, type AudioCue } from "./manifest";
-import type { AudioLevels } from "./settings";
+import { DEFAULT_AUDIO_LEVELS, type AudioLevels } from "./settings";
 import {
   bgmLeadSeconds,
   parseSpriteMap,
@@ -171,7 +171,7 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
   let byId = new Map<string, AudioCue>();
   let sprite: SpriteMap | null = null;
   let sfxBuffer: AudioBufferLike | null = null;
-  let settings: AudioLevels = { music: 0.5, sfx: 0.8, muted: false };
+  let settings: AudioLevels = { ...DEFAULT_AUDIO_LEVELS };
   let unlocked = false;
   let phase: PhaseId | null = null;
   let bed: LiveBed | null = null;

@@ -28,8 +28,11 @@ import {
   type SpriteMap,
 } from "../../src/game/audio/sprite";
 import {
+  AUDIO_SETTINGS_VERSION,
   AUDIO_STORAGE_KEY,
   DEFAULT_AUDIO_LEVELS,
+  LEGACY_AUDIO_STORAGE_KEY,
+  loadAudioSettings,
   parseAudioSettings,
   serializeAudioSettings,
 } from "../../src/game/audio/settings";
@@ -255,6 +258,22 @@ function phaseChange(phase: PhaseId, previous: PhaseId): TimeEvent {
   return { type: "phaseChanged", phase, previous, day: 1, totalMinutes: 0 };
 }
 
+function memoryStorage(initial: Record<string, string> = {}) {
+  const data: Record<string, string> = { ...initial };
+  return {
+    data,
+    getItem(key: string) {
+      return Object.prototype.hasOwnProperty.call(data, key) ? data[key]! : null;
+    },
+    setItem(key: string, value: string) {
+      data[key] = value;
+    },
+    removeItem(key: string) {
+      delete data[key];
+    },
+  };
+}
+
 describe("audio manifest", () => {
   it("parses an array or a cues object and drops bad rows", () => {
     expect(parseManifest([{ id: "ui_click", file: "ui_click", type: "sfx", loop: false, volume: 2 }])).toEqual([
@@ -295,21 +314,54 @@ describe("audio manifest", () => {
     expect(parseSpriteMap(null)).toBeNull();
   });
 
-  it("clamps bus gain and ignores a bad saved payload", () => {
+  it("defaults to sound on and unmutes a v1 save once", () => {
     expect(busGain(0.5, 0.5, false)).toBe(0.25);
     expect(busGain(1, 1, true)).toBe(0);
-    expect(DEFAULT_AUDIO_LEVELS.music).toBe(0.5);
-    expect(DEFAULT_AUDIO_LEVELS.sfx).toBe(0.8);
+    expect(DEFAULT_AUDIO_LEVELS.muted).toBe(false);
+    expect(DEFAULT_AUDIO_LEVELS.music).toBeGreaterThan(0);
+    expect(DEFAULT_AUDIO_LEVELS.sfx).toBeGreaterThan(0);
+    expect(DEFAULT_AUDIO_LEVELS).toEqual({ music: 0.5, sfx: 0.8, muted: false });
     expect(parseAudioSettings("nope", DEFAULT_AUDIO_LEVELS)).toEqual(DEFAULT_AUDIO_LEVELS);
-    expect(parseAudioSettings(JSON.stringify({ v: 2, music: 0 }), DEFAULT_AUDIO_LEVELS)).toEqual(
+    expect(parseAudioSettings(JSON.stringify({ v: 99, music: 0 }), DEFAULT_AUDIO_LEVELS)).toEqual(
       DEFAULT_AUDIO_LEVELS,
     );
+
+    const legacyMuted = parseAudioSettings(
+      JSON.stringify({ v: 1, music: 0.5, sfx: 0.8, muted: true }),
+      DEFAULT_AUDIO_LEVELS,
+    );
+    expect(legacyMuted).toEqual({ music: 0.5, sfx: 0.8, muted: false });
+    expect(
+      parseAudioSettings(JSON.stringify({ v: 1, music: 0, sfx: 0, muted: true }), DEFAULT_AUDIO_LEVELS),
+    ).toEqual(DEFAULT_AUDIO_LEVELS);
+    expect(
+      parseAudioSettings(JSON.stringify({ v: 1, music: 0.3, sfx: 0, muted: true }), DEFAULT_AUDIO_LEVELS),
+    ).toEqual({ music: 0.3, sfx: 0.8, muted: false });
+
+    const kept = parseAudioSettings(
+      JSON.stringify({ v: AUDIO_SETTINGS_VERSION, music: 0, sfx: 0.4, muted: true }),
+      DEFAULT_AUDIO_LEVELS,
+    );
+    expect(kept).toEqual({ music: 0, sfx: 0.4, muted: true });
+
     const stored = parseAudioSettings(
       serializeAudioSettings({ music: 0.3, sfx: 1.4, muted: true }),
       DEFAULT_AUDIO_LEVELS,
     );
     expect(stored).toEqual({ music: 0.3, sfx: 1, muted: true });
-    expect(AUDIO_STORAGE_KEY).toBe("devlife:audio:v1");
+    expect(JSON.parse(serializeAudioSettings(stored)).v).toBe(2);
+    expect(AUDIO_STORAGE_KEY).toBe("devlife:audio:v2");
+    expect(LEGACY_AUDIO_STORAGE_KEY).toBe("devlife:audio:v1");
+
+    const storage = memoryStorage({
+      [LEGACY_AUDIO_STORAGE_KEY]: JSON.stringify({ v: 1, music: 0.5, sfx: 0.8, muted: true }),
+    });
+    expect(loadAudioSettings(storage)).toEqual({ music: 0.5, sfx: 0.8, muted: false });
+    expect(storage.data[LEGACY_AUDIO_STORAGE_KEY]).toBeUndefined();
+    expect(JSON.parse(storage.data[AUDIO_STORAGE_KEY]!).muted).toBe(false);
+    storage.data[AUDIO_STORAGE_KEY] = serializeAudioSettings({ music: 0.2, sfx: 0.4, muted: true });
+    expect(loadAudioSettings(storage)).toEqual({ music: 0.2, sfx: 0.4, muted: true });
+    expect(loadAudioSettings(memoryStorage())).toEqual(DEFAULT_AUDIO_LEVELS);
   });
 });
 
