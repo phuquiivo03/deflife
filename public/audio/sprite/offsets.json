@@ -1,0 +1,261 @@
+{
+  "sampleRate": 32000,
+  "channels": 1,
+  "gapSeconds": 0.08,
+  "ogg": {
+    "file": "sprite/sfx.ogg",
+    "delaySamples": 0,
+    "cues": {
+      "sfx_ui_click": {
+        "offset": 0,
+        "duration": 0.042063
+      },
+      "sfx_ui_hover": {
+        "offset": 0.122063,
+        "duration": 0.037125
+      },
+      "sfx_ui_panel_open": {
+        "offset": 0.239188,
+        "duration": 0.176938
+      },
+      "sfx_ui_panel_close": {
+        "offset": 0.496125,
+        "duration": 0.176938
+      },
+      "sfx_ui_tab_switch": {
+        "offset": 0.753063,
+        "duration": 0.097031
+      },
+      "sfx_ui_locked_denied": {
+        "offset": 0.930094,
+        "duration": 0.276813
+      },
+      "sfx_ui_toast": {
+        "offset": 1.286906,
+        "duration": 0.395313
+      },
+      "sfx_ui_error_invalid": {
+        "offset": 1.762219,
+        "duration": 0.239969
+      },
+      "sfx_ui_purchase_confirm": {
+        "offset": 2.082187,
+        "duration": 0.395781
+      },
+      "sfx_ui_notification_badge": {
+        "offset": 2.557969,
+        "duration": 0.2065
+      },
+      "sfx_ui_save_game": {
+        "offset": 2.844469,
+        "duration": 0.554531
+      },
+      "sfx_money_gain": {
+        "offset": 3.479,
+        "duration": 0.326469
+      },
+      "sfx_money_spend": {
+        "offset": 3.885469,
+        "duration": 0.306281
+      },
+      "sfx_xp_gain": {
+        "offset": 4.27175,
+        "duration": 0.181406
+      },
+      "sfx_skill_levelup": {
+        "offset": 4.533156,
+        "duration": 0.917125
+      },
+      "sfx_tier_up": {
+        "offset": 5.530281,
+        "duration": 0.831594
+      },
+      "sfx_freelance_milestone": {
+        "offset": 6.441875,
+        "duration": 0.917125
+      },
+      "sfx_job_accepted": {
+        "offset": 7.439,
+        "duration": 0.246781
+      },
+      "sfx_job_complete": {
+        "offset": 7.765781,
+        "duration": 0.8125
+      },
+      "sfx_job_failed": {
+        "offset": 8.658281,
+        "duration": 0.917125
+      },
+      "sfx_phase_morning": {
+        "offset": 9.655406,
+        "duration": 0.774875
+      },
+      "sfx_phase_noon": {
+        "offset": 10.510281,
+        "duration": 0.782313
+      },
+      "sfx_phase_evening": {
+        "offset": 11.372594,
+        "duration": 0.833906
+      },
+      "sfx_phase_night": {
+        "offset": 12.2865,
+        "duration": 0.941875
+      },
+      "sfx_sleep": {
+        "offset": 13.308375,
+        "duration": 0.867375
+      },
+      "sfx_time_skip": {
+        "offset": 14.25575,
+        "duration": 0.941875
+      },
+      "sfx_energy_low": {
+        "offset": 15.277625,
+        "duration": 0.846438
+      },
+      "sfx_energy_restored": {
+        "offset": 16.204063,
+        "duration": 0.674344
+      },
+      "sfx_day_summary": {
+        "offset": 16.958406,
+        "duration": 0.941875
+      }
+    }
+  },
+  "mp3": {
+    "file": "sprite/sfx.mp3",
+    "delaySamples": 1105,
+    "cues": {
+      "sfx_ui_click": {
+        "offset": 0.034531,
+        "duration": 0.042063
+      },
+      "sfx_ui_hover": {
+        "offset": 0.156594,
+        "duration": 0.037125
+      },
+      "sfx_ui_panel_open": {
+        "offset": 0.273719,
+        "duration": 0.176938
+      },
+      "sfx_ui_panel_close": {
+        "offset": 0.530656,
+        "duration": 0.176938
+      },
+      "sfx_ui_tab_switch": {
+        "offset": 0.787594,
+        "duration": 0.097031
+      },
+      "sfx_ui_locked_denied": {
+        "offset": 0.964625,
+        "duration": 0.276813
+      },
+      "sfx_ui_toast": {
+        "offset": 1.321438,
+        "duration": 0.395313
+      },
+      "sfx_ui_error_invalid": {
+        "offset": 1.79675,
+        "duration": 0.239969
+      },
+      "sfx_ui_purchase_confirm": {
+        "offset": 2.116719,
+        "duration": 0.395781
+      },
+      "sfx_ui_notification_badge": {
+        "offset": 2.5925,
+        "duration": 0.2065
+      },
+      "sfx_ui_save_game": {
+        "offset": 2.879,
+        "duration": 0.554531
+      },
+      "sfx_money_gain": {
+        "offset": 3.513531,
+        "duration": 0.326469
+      },
+      "sfx_money_spend": {
+        "offset": 3.92,
+        "duration": 0.306281
+      },
+      "sfx_xp_gain": {
+        "offset": 4.306281,
+        "duration": 0.181406
+      },
+      "sfx_skill_levelup": {
+        "offset": 4.567688,
+        "duration": 0.917125
+      },
+      "sfx_tier_up": {
+        "offset": 5.564813,
+        "duration": 0.831594
+      },
+      "sfx_freelance_milestone": {
+        "offset": 6.476406,
+        "duration": 0.917125
+      },
+      "sfx_job_accepted": {
+        "offset": 7.473531,
+        "duration": 0.246781
+      },
+      "sfx_job_complete": {
+        "offset": 7.800313,
+        "duration": 0.8125
+      },
+      "sfx_job_failed": {
+        "offset": 8.692813,
+        "duration": 0.917125
+      },
+      "sfx_phase_morning": {
+        "offset": 9.689938,
+        "duration": 0.774875
+      },
+      "sfx_phase_noon": {
+        "offset": 10.544813,
+        "duration": 0.782313
+      },
+      "sfx_phase_evening": {
+        "offset": 11.407125,
+        "duration": 0.833906
+      },
+      "sfx_phase_night": {
+        "offset": 12.321031,
+        "duration": 0.941875
+      },
+      "sfx_sleep": {
+        "offset": 13.342906,
+        "duration": 0.867375
+      },
+      "sfx_time_skip": {
+        "offset": 14.290281,
+        "duration": 0.941875
+      },
+      "sfx_energy_low": {
+        "offset": 15.312156,
+        "duration": 0.846438
+      },
+      "sfx_energy_restored": {
+        "offset": 16.238594,
+        "duration": 0.674344
+      },
+      "sfx_day_summary": {
+        "offset": 16.992938,
+        "duration": 0.941875
+      }
+    }
+  },
+  "bgm": {
+    "bgm_student_day": {
+      "mp3LeadSeconds": 0.025057,
+      "mp3SkipSamples": 1105,
+      "oggLeadSeconds": 0
+    },
+    "bgm_student_night": {
+      "mp3LeadSeconds": 0.025057,
+      "mp3SkipSamples": 1105,
+      "oggLeadSeconds": 0
+    }
+  }
+}
