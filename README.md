@@ -1,6 +1,10 @@
 # devlife
 
-A cozy 2D pixel-art developer life-sim for the web: decorate your room as you grow from **student → junior → senior** developer.
+[![devlife](docs/banner_1280x640.png)](https://deflife.vercel.app)
+
+Cuộc sống từ sinh viên IT đến khi trở thành super senior siêu cấp vip pro plus promax ultra fullhd limited
+
+A cozy 2D pixel-art developer life-sim for the web: decorate your room as you grow from **student → junior → senior** developer. Play at [deflife.vercel.app](https://deflife.vercel.app).
 
 ## Run locally
 

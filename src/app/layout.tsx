@@ -20,9 +20,42 @@ const galmuri11 = localFont({
   display: "swap",
 });
 
+const description =
+  "Cuộc sống từ sinh viên IT đến khi trở thành super senior siêu cấp vip pro plus promax ultra fullhd limited";
+
+const ogImage = "/branding/og_1200x630.png";
+
 export const metadata: Metadata = {
+  metadataBase: new URL("https://deflife.vercel.app"),
   title: "devlife",
-  description: "Mô phỏng cuộc sống lập trình viên — xây phòng pixel-art ấm cúng",
+  description,
+  applicationName: "devlife",
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "16x16 32x32" },
+      { url: "/branding/logo_16.png", sizes: "16x16", type: "image/png" },
+      { url: "/branding/logo_32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [
+      { url: "/branding/apple-touch-icon_180.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
+  openGraph: {
+    title: "devlife",
+    description,
+    url: "/",
+    siteName: "devlife",
+    locale: "vi_VN",
+    type: "website",
+    images: [{ url: ogImage, width: 1200, height: 630, alt: "devlife" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "devlife",
+    description,
+    images: [ogImage],
+  },
 };
 
 export default function RootLayout({
