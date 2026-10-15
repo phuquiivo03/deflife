@@ -1,0 +1,7 @@
+[
+  { "id": "frontend", "name": "Frontend", "icon": "skill_frontend" },
+  { "id": "backend", "name": "Backend", "icon": "skill_backend" },
+  { "id": "database", "name": "Database", "icon": "skill_database" },
+  { "id": "devops", "name": "DevOps", "icon": "skill_devops" },
+  { "id": "soft", "name": "Soft skill", "icon": "skill_soft" }
+]

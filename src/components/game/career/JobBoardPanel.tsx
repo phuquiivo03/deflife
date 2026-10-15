@@ -1,0 +1,107 @@
+"use client";
+
+import { SIM_CATALOG } from "@/game/career/content";
+import { jobEligibility, jobRequirementsFor, skillNameMap, visibleBoardJobs } from "@/game/jobs/logic";
+import { useGameStore } from "@/game/state/store";
+import { snapshot } from "@/game/time";
+import { formatVnd } from "@/lib/format-currency";
+import { Button } from "@/components/ui/button";
+import { PixelIcon } from "../PixelIcon";
+import { BlockedButton } from "./BlockedButton";
+
+const names = skillNameMap(SIM_CATALOG.skills);
+
+export function JobBoardPanel({ iconFiles }: { iconFiles: readonly string[] }) {
+  const jobs = useGameStore((s) => s.career.player_jobs);
+  const player = useGameStore((s) => s.career.players);
+  const skills = useGameStore((s) => s.career.player_skills);
+  const day = useGameStore((s) => snapshot(s.totalMinutes).day);
+  const acceptJob = useGameStore((s) => s.acceptJob);
+  const board = visibleBoardJobs(jobs, day);
+
+  if (board.length === 0) {
+    return (
+      <p className="font-galmuri-9 text-galmuri-body text-[var(--muted-foreground)]">
+        Bảng việc trống. Ngày mới sẽ có việc freelance.
+      </p>
+    );
+  }
+
+  return (
+    <ul className="flex flex-col gap-2">
+      {board.map((job, index) => {
+        const template = SIM_CATALOG.jobTemplates.find((row) => row.id === job.template_id);
+        if (!template) return null;
+        const reqs = jobRequirementsFor(template.id, SIM_CATALOG.jobTemplateRequirements);
+        const check = jobEligibility(player, skills, template, reqs, names);
+        const done = job.status === "completed";
+        const xp = SIM_CATALOG.jobTemplateXp
+          .filter((row) => row.template_id === template.id)
+          .reduce((sum, row) => sum + row.xp, 0);
+        return (
+          <li
+            key={job.id}
+            data-testid={`job-card-${job.template_id}`}
+            data-state={done ? "done" : check.ok ? "open" : "locked"}
+            className={
+              done
+                ? "card-done flex items-center gap-3 rounded-[var(--radius-panel)] border border-[var(--panel-border)] bg-white/40 p-2"
+                : "card-slide flex items-center gap-3 rounded-[var(--radius-panel)] border border-[var(--panel-border)] bg-white/50 p-2"
+            }
+            style={done ? undefined : { animationDelay: `${index * 90}ms` }}
+          >
+            <PixelIcon
+              name={done ? "task_done" : check.ok ? "job_freelance" : "task_locked"}
+              size={44}
+              alt=""
+              files={iconFiles}
+            />
+            <div className="min-w-0 flex-1">
+              <p className="font-galmuri-9 text-galmuri-body text-[var(--foreground)]">
+                {template.name}
+              </p>
+              <p className="font-galmuri-7 text-galmuri-small text-[var(--muted-foreground)]">
+                Bậc {template.tier} · {formatVnd(template.pay)} · {template.energy} năng lượng ·{" "}
+                {xp} XP · +{template.reputation_gain} uy tín
+              </p>
+              {done ? (
+                <p className="font-galmuri-7 text-galmuri-small text-[var(--accent-mint)]">Xong</p>
+              ) : null}
+              {!done && !check.ok ? (
+                <ul className="mt-1">
+                  {check.missing.map((line) => (
+                    <li
+                      key={line}
+                      className="font-galmuri-7 text-galmuri-small text-[var(--accent-coral)]"
+                    >
+                      {line}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+            {done ? (
+              <PixelIcon name="task_done" size={22} alt="Xong" files={iconFiles} />
+            ) : check.ok ? (
+              <Button
+                type="button"
+                size="sm"
+                showArrow={false}
+                data-testid={`job-accept-${job.template_id}`}
+                onClick={() => acceptJob(job.id)}
+              >
+                Nhận
+              </Button>
+            ) : (
+              <BlockedButton
+                label="Nhận"
+                reason={check.missing[0] ?? "Chưa đủ điều kiện"}
+                testId={`job-accept-${job.template_id}`}
+              />
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}

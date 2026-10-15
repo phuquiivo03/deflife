@@ -1,0 +1,74 @@
+[
+  {
+    "id": "html",
+    "name": "HTML cơ bản",
+    "icon": "learn_course",
+    "price": 200000,
+    "hours": 2,
+    "energy": 12,
+    "skill_id": "frontend"
+  },
+  {
+    "id": "css",
+    "name": "CSS layout",
+    "icon": "learn_course",
+    "price": 350000,
+    "hours": 3,
+    "energy": 16,
+    "skill_id": "frontend"
+  },
+  {
+    "id": "react",
+    "name": "React hooks",
+    "icon": "learn_project",
+    "price": 450000,
+    "hours": 4,
+    "energy": 85,
+    "skill_id": "frontend"
+  },
+  {
+    "id": "node",
+    "name": "Node API",
+    "icon": "learn_project",
+    "price": 500000,
+    "hours": 3,
+    "energy": 20,
+    "skill_id": "backend"
+  },
+  {
+    "id": "sql",
+    "name": "SQL cơ bản",
+    "icon": "learn_book",
+    "price": 300000,
+    "hours": 2,
+    "energy": 12,
+    "skill_id": "database"
+  },
+  {
+    "id": "docker",
+    "name": "Docker intro",
+    "icon": "learn_course",
+    "price": 700000,
+    "hours": 3,
+    "energy": 22,
+    "skill_id": "devops"
+  },
+  {
+    "id": "comms",
+    "name": "Giao tiếp nhóm",
+    "icon": "learn_book",
+    "price": 180000,
+    "hours": 2,
+    "energy": 8,
+    "skill_id": "soft"
+  },
+  {
+    "id": "sysdesign",
+    "name": "System design",
+    "icon": "learn_book",
+    "price": 2200000,
+    "hours": 6,
+    "energy": 30,
+    "skill_id": "backend"
+  }
+]

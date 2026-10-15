@@ -1,5 +1,6 @@
 "use client";
 
+import { SIM_CATALOG } from "@/game/career/content";
 import { STUB_PLAYER } from "@/game/state/playerStats";
 import { useGameStore } from "@/game/state/store";
 import { canSleepAt, phaseById, snapshot, type PhaseId } from "@/game/time";
@@ -13,11 +14,15 @@ import { StatBar } from "./StatBar";
 
 export function PlayerHudCard({ iconFiles = [] }: { iconFiles?: readonly string[] }) {
   const p = STUB_PLAYER;
+  const energy = useGameStore((s) => s.career.players.energy);
+  const money = useGameStore((s) => s.career.players.money);
   const day = useGameStore((s) => snapshot(s.totalMinutes).day);
   const clockLabel = useGameStore((s) => snapshot(s.totalMinutes).clockLabel);
   const phaseId = useGameStore((s) => snapshot(s.totalMinutes).phaseId);
+  const fastForward = useGameStore((s) => s.fastForward);
   const sleep = useGameStore((s) => s.sleep);
   const canSleep = useGameStore((s) => canSleepAt(s.totalMinutes));
+  const openCareerPanel = useGameStore((s) => s.openCareerPanel);
 
   return (
     <PanelCard className="w-full max-w-[520px] p-3">
@@ -39,20 +44,30 @@ export function PlayerHudCard({ iconFiles = [] }: { iconFiles?: readonly string[
             </div>
             <div className="flex items-center gap-1.5">
               <PixelIcon name="energy" size={22} />
-              <StatBar value={p.energy} tone="sky" className="flex-1" />
+              <StatBar
+                value={energy}
+                max={SIM_CATALOG.config.energy_max}
+                tone="sky"
+                className="flex-1"
+              />
             </div>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-2 font-galmuri-9 text-galmuri-body text-[var(--foreground)]">
             <span className="inline-flex items-center gap-1.5">
               <PixelIcon name="savings" size={22} />
-              {formatVnd(p.money)}
+              <span data-testid="hud-money">{formatVnd(money)}</span>
             </span>
             <span
-              className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 text-[var(--muted-foreground)]"
+              className={
+                fastForward
+                  ? "fast-forward-flash inline-flex flex-wrap items-center gap-x-2 gap-y-1 text-[var(--muted-foreground)]"
+                  : "inline-flex flex-wrap items-center gap-x-2 gap-y-1 text-[var(--muted-foreground)]"
+              }
               data-testid="game-clock"
               data-day={day}
               data-time={clockLabel}
               data-phase={phaseId}
+              data-fast-forward={fastForward ? "1" : "0"}
             >
               <PixelIcon name="clock" size={22} alt="" />
               <span>Ngày {day}</span>
@@ -60,7 +75,37 @@ export function PlayerHudCard({ iconFiles = [] }: { iconFiles?: readonly string[
               <PhaseMark phaseId={phaseId} iconFiles={iconFiles} />
             </span>
           </div>
-          <div className="flex justify-end">
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <Button
+              type="button"
+              size="sm"
+              showArrow={false}
+              variant="outline"
+              data-testid="open-study"
+              onClick={() => openCareerPanel("study")}
+            >
+              Học
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              showArrow={false}
+              variant="outline"
+              data-testid="open-jobs"
+              onClick={() => openCareerPanel("jobs")}
+            >
+              Việc làm
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              showArrow={false}
+              variant="outline"
+              data-testid="open-skills"
+              onClick={() => openCareerPanel("skills")}
+            >
+              Kỹ năng
+            </Button>
             <Button
               type="button"
               size="sm"

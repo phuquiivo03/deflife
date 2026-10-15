@@ -1,0 +1,18 @@
+{
+  "study_cap_level": 6,
+  "study_xp_multiplier_below": 1,
+  "study_xp_multiplier_at_cap": 0.1,
+  "job_xp_multiplier_below": 0.3,
+  "job_xp_multiplier_at_cap": 1,
+  "board_size": 4,
+  "energy_max": 100,
+  "starting_money": 1500000,
+  "starting_energy": 70,
+  "starting_reputation": 0,
+  "rank_brackets": [
+    { "id": "intern", "label": "Intern", "min_level": 1, "max_level": 2 },
+    { "id": "junior", "label": "Junior", "min_level": 3, "max_level": 4 },
+    { "id": "middle", "label": "Middle", "min_level": 5, "max_level": 7 },
+    { "id": "senior", "label": "Senior", "min_level": 8, "max_level": 10 }
+  ]
+}

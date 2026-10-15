@@ -13,6 +13,7 @@ import { PlayerInfoPanel } from "./PlayerInfoPanel";
 import { PlayerHudCard } from "./PlayerHudCard";
 import { RoomChamferFrame } from "./RoomChamferFrame";
 import { TimeDebugPanel } from "./TimeDebugPanel";
+import { CareerChrome } from "./career/CareerChrome";
 import { useGameClock } from "./useGameClock";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -195,6 +196,7 @@ export function GameShell({ iconFiles = [] }: { iconFiles?: readonly string[] })
             <div className="mt-3 flex w-full flex-col items-center gap-3 px-2">
               <PlayerHudCard iconFiles={iconFiles} />
               {showTimeDebug ? <TimeDebugPanel /> : null}
+              <CareerChrome iconFiles={iconFiles} showDebug={showTimeDebug} />
             </div>
           </div>
         </main>
