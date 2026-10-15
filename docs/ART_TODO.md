@@ -2,9 +2,7 @@
 
 ## Redraw at native scale (priority)
 
-1. **junior/wardrobe** — wrong viewing angle vs room reference.
-2. **junior/desk** — wrong angle; heavy ×1.73 resample.
-3. **junior/bed** — proportions off vs reference.
+Junior bed, desk, and wardrobe are redrawn (see `composite_junior_shadow.png`). Their shadows shipped with that drop.
 
 ## Resample quality
 

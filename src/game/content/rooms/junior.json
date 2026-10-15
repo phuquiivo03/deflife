@@ -62,7 +62,7 @@
       ],
       "default": "junior.bed",
       "anchor": [
-        42,
+        46,
         203
       ],
       "label": {
@@ -232,7 +232,7 @@
       ],
       "default": "junior.bookshelf",
       "anchor": [
-        369,
+        312,
         133
       ],
       "label": {
@@ -250,7 +250,7 @@
       "default": "junior.wardrobe",
       "anchor": [
         408,
-        199
+        134
       ],
       "label": {
         "en": "Wardrobe",

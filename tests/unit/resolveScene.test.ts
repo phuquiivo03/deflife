@@ -5,7 +5,7 @@ import { resolveScene } from "@/game/layout/resolveScene";
 const frames = (sprite: string) => {
   const sizes: Record<string, [number, number]> = {
     "furniture/junior/monitor": [61, 41],
-    "furniture/junior/desk": [140, 72],
+    "furniture/junior/desk": [140, 54],
     "furniture/senior/standing_desk": [161, 70],
     "furniture/senior/dual_monitor": [94, 36],
   };

@@ -85,8 +85,8 @@ The room art has an effective "art pixel" ≈ 1 native px (3 source px).
 | student/noodle_cup ×2 | 15×20 | (203,128), (189,126) | 0.73 | |
 | student/clothesline (wall) | 116×45 | (66,78) | 0.80 | |
 | student/mirror (wall) | 25×34 | (84,83) | 0.90 | |
-| junior/bed | 113×91 | (42,203); left edge at x=−14 | 1.35 | **proportions off – redraw later** |
-| junior/desk | 140×72 | (205,153) | 1.73 | **wrong angle – redraw later**; heavy resample |
+| junior/bed | 90×118 | (46,203); left edge at x=1 | native | redrawn (pillow + blanket); shadow kept |
+| junior/desk | 140×54 | (205,153) | native | redrawn front-on; sockets unchanged |
 | junior/office_chair | 49×68 | seat socket | 1.18 | |
 | junior/drawer_pedestal | 30×35 | desk.under | 0.65 | |
 | junior/monitor | 61×41 | desk.display | 0.79 | |
@@ -95,8 +95,8 @@ The room art has an effective "art pixel" ≈ 1 native px (3 source px).
 | junior/mouse | 10×10 | desk.mouse | **0.40** | heavy downsample |
 | junior/mug | 14×14 | desk.cup | **0.51** | heavy downsample |
 | junior/plant_small | 15×22 | desk.plant | **0.53** | heavy downsample |
-| junior/bookshelf | 63×74 | (369,133) | 1.25 | |
-| junior/wardrobe | 78×108 | (408,199); right edge at x=447 (overflows by 20) | 1.65 | **wrong angle – redraw later** |
+| junior/bookshelf | 63×74 | (312,133) | 1.25 | moved left to sit beside the wardrobe |
+| junior/wardrobe | 78×108 | (408,134); right edge at x=447 (overflows by 20) | native | redrawn; shadow kept |
 | junior/poster_1, poster_2 (wall) | 23×32, 17×22 | (43,60), (70,59) | 0.74, **0.58** | |
 | senior/standing_desk | 161×70 | (218,175) | 1.41 | |
 | senior/ergo_chair | 51×81 | seat socket | 1.28 | |
