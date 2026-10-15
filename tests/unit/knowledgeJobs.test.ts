@@ -13,6 +13,7 @@ import {
   formatRankLabel,
   grantedXp,
   levelProgressPercent,
+  overallRankBracket,
   rankBracketForLevel,
   rankProgressPercent,
   skillProgressList,
@@ -20,6 +21,7 @@ import {
   xpMultiplier,
 } from "../../src/game/knowledge/logic";
 import {
+  freelanceGoal,
   jobEligibility,
   selectBoardTemplates,
   skillNameMap,
@@ -77,6 +79,14 @@ describe("rank brackets", () => {
     expect(rankProgressPercent(10, 0, 0, rankBracketForLevel(10, brackets))).toBe(100);
     expect(levelProgressPercent(10, 0, SIM_CATALOG.skillLevelXp)).toBe(100);
     expect(levelProgressPercent(1, 40, SIM_CATALOG.skillLevelXp)).toBe(40);
+  });
+
+  it("uses the mean skill level as the overall rank", () => {
+    expect(overallRankBracket([1, 1, 1, 1, 1], brackets).id).toBe("intern");
+    expect(overallRankBracket([4, 1, 1, 1, 1], brackets).id).toBe("intern");
+    expect(overallRankBracket([4, 4, 4, 3, 4], brackets).id).toBe("junior");
+    expect(overallRankBracket([], brackets).id).toBe("intern");
+    expect(freelanceGoal(SIM_CATALOG.milestones)).toBe(100);
   });
 });
 

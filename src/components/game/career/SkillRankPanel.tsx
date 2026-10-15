@@ -2,15 +2,13 @@
 
 import { SIM_CATALOG } from "@/game/career/content";
 import { skillProgressList } from "@/game/knowledge/logic";
+import { freelanceGoal } from "@/game/jobs/logic";
 import { useGameStore } from "@/game/state/store";
 import { PixelIcon } from "../PixelIcon";
 import { StatBar } from "../StatBar";
 import { RankBadge } from "./RankBadge";
 
-const freelanceGoal = SIM_CATALOG.milestones.reduce(
-  (max, row) => Math.max(max, row.freelance_completed),
-  0,
-);
+const goal = freelanceGoal(SIM_CATALOG.milestones);
 
 export function SkillRankPanel({ iconFiles }: { iconFiles: readonly string[] }) {
   const skills = useGameStore((s) => s.career.player_skills);
@@ -25,7 +23,7 @@ export function SkillRankPanel({ iconFiles }: { iconFiles: readonly string[] }) 
           Uy tín {reputation}
         </span>
         <span data-testid="freelance-count">
-          Freelance {freelance}/{freelanceGoal}
+          Freelance {freelance}/{goal}
         </span>
       </div>
       <ul className="flex flex-col gap-2">
