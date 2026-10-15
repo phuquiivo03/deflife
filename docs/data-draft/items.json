@@ -16,10 +16,7 @@
    "category": "bed",
    "kind": "floor",
    "sprite": "furniture/junior/bed",
-   "shadow": "furniture/junior/bed_shadow",
-   "notes": [
-    "proportions off vs reference; redraw later"
-   ]
+   "shadow": "furniture/junior/bed_shadow"
   },
   {
    "id": "student.folding_table",
@@ -107,9 +104,6 @@
    "seat": [
     5,
     22
-   ],
-   "notes": [
-    "drawn from a different angle than the reference; redraw later"
    ]
   },
   {
@@ -383,10 +377,7 @@
    "category": "wardrobe",
    "kind": "floor",
    "sprite": "furniture/junior/wardrobe",
-   "shadow": "furniture/junior/wardrobe_shadow",
-   "notes": [
-    "drawn from a different angle than the reference; redraw later"
-   ]
+   "shadow": "furniture/junior/wardrobe_shadow"
   },
   {
    "id": "student.fan",
