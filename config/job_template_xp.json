@@ -1,0 +1,16 @@
+[
+  { "template_id": "landing-html", "skill_id": "frontend", "xp": 50 },
+  { "template_id": "fix-css", "skill_id": "frontend", "xp": 30 },
+  { "template_id": "readme", "skill_id": "soft", "xp": 40 },
+  { "template_id": "static-page", "skill_id": "frontend", "xp": 40 },
+  { "template_id": "rest-api", "skill_id": "backend", "xp": 60 },
+  { "template_id": "sql-report", "skill_id": "database", "xp": 55 },
+  { "template_id": "ci-pipeline", "skill_id": "devops", "xp": 70 },
+  { "template_id": "code-review", "skill_id": "soft", "xp": 50 },
+  { "template_id": "dashboard", "skill_id": "frontend", "xp": 70 },
+  { "template_id": "auth-flow", "skill_id": "backend", "xp": 90 },
+  { "template_id": "migration", "skill_id": "database", "xp": 80 },
+  { "template_id": "oncall-doc", "skill_id": "devops", "xp": 40 },
+  { "template_id": "oncall-doc", "skill_id": "soft", "xp": 30 },
+  { "template_id": "remote-intern", "skill_id": "frontend", "xp": 120 }
+]

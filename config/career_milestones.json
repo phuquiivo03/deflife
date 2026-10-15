@@ -1,0 +1,6 @@
+[
+  { "id": "freelance-10", "freelance_completed": 10, "label": "10 freelance" },
+  { "id": "freelance-30", "freelance_completed": 30, "label": "30 freelance" },
+  { "id": "freelance-60", "freelance_completed": 60, "label": "60 freelance" },
+  { "id": "freelance-100", "freelance_completed": 100, "label": "100 freelance" }
+]

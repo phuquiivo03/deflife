@@ -15,8 +15,12 @@ export const STAGES = ["student", "junior", "senior"] as const;
 export type StageId = (typeof STAGES)[number];
 
 export const PERSIST_KEY = "devlife:v1";
-/** v1: stage, loadouts, showCharacter. v2: in-game `totalMinutes` (see docs/systems/time.md). */
-export const PERSIST_VERSION = 2;
+/**
+ * v1: stage, loadouts, showCharacter.
+ * v2: in-game `totalMinutes` (see docs/systems/time.md).
+ * v3: career tables for knowledge + jobs (see docs/systems/knowledge.md).
+ */
+export const PERSIST_VERSION = 3;
 
 export const CHAR_POSE_SIT_BACK = "character/derived/char_sit_back";
 export const ATLAS_URL = "/atlas/devlife.png";

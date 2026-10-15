@@ -1,0 +1,16 @@
+[
+  { "template_id": "landing-html", "skill_id": "frontend", "min_level": 1 },
+  { "template_id": "fix-css", "skill_id": "frontend", "min_level": 1 },
+  { "template_id": "readme", "skill_id": "soft", "min_level": 1 },
+  { "template_id": "static-page", "skill_id": "frontend", "min_level": 1 },
+  { "template_id": "rest-api", "skill_id": "backend", "min_level": 2 },
+  { "template_id": "sql-report", "skill_id": "database", "min_level": 2 },
+  { "template_id": "ci-pipeline", "skill_id": "devops", "min_level": 2 },
+  { "template_id": "code-review", "skill_id": "soft", "min_level": 2 },
+  { "template_id": "dashboard", "skill_id": "frontend", "min_level": 2 },
+  { "template_id": "auth-flow", "skill_id": "backend", "min_level": 3 },
+  { "template_id": "migration", "skill_id": "database", "min_level": 3 },
+  { "template_id": "oncall-doc", "skill_id": "devops", "min_level": 2 },
+  { "template_id": "oncall-doc", "skill_id": "soft", "min_level": 2 },
+  { "template_id": "remote-intern", "skill_id": "frontend", "min_level": 3 }
+]

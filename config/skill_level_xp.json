@@ -1,0 +1,12 @@
+[
+  { "level": 1, "xp_to_next": 100 },
+  { "level": 2, "xp_to_next": 160 },
+  { "level": 3, "xp_to_next": 220 },
+  { "level": 4, "xp_to_next": 300 },
+  { "level": 5, "xp_to_next": 400 },
+  { "level": 6, "xp_to_next": 520 },
+  { "level": 7, "xp_to_next": 660 },
+  { "level": 8, "xp_to_next": 820 },
+  { "level": 9, "xp_to_next": 1000 },
+  { "level": 10, "xp_to_next": 0 }
+]

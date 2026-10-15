@@ -201,6 +201,102 @@ body {
   }
 }
 
+.float-gain {
+  animation: float-up 900ms steps(6, end) forwards;
+}
+
+.badge-bounce {
+  animation: badge-bounce 700ms steps(3, end) infinite;
+}
+
+.card-slide {
+  animation: card-slide 280ms steps(4, end) both;
+}
+
+.card-done {
+  opacity: 0.55;
+  animation: card-fade 400ms steps(4, end) both;
+}
+
+.btn-shake {
+  animation: btn-shake 280ms steps(2, end);
+}
+
+.fast-forward-flash {
+  animation: ff-flash 700ms steps(4, end);
+}
+
+.xp-fill {
+  transition: width 600ms steps(8, end);
+}
+
+@keyframes float-up {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-28px);
+    opacity: 0;
+  }
+}
+
+@keyframes badge-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-8px);
+  }
+  70% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes card-slide {
+  from {
+    transform: translateX(12px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes card-fade {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.55;
+  }
+}
+
+@keyframes btn-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  75% {
+    transform: translateX(3px);
+  }
+}
+
+@keyframes ff-flash {
+  0%,
+  100% {
+    box-shadow: none;
+  }
+  50% {
+    box-shadow: 0 0 0 3px var(--accent-sky);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .transition-opacity,
   .transition-bouncy {
@@ -210,5 +306,22 @@ body {
   .sleep-glow {
     animation: none;
     box-shadow: 0 0 12px 2px rgba(90, 99, 196, 0.75);
+  }
+
+  .float-gain,
+  .badge-bounce,
+  .card-slide,
+  .card-done,
+  .btn-shake,
+  .fast-forward-flash {
+    animation: none;
+  }
+
+  .xp-fill {
+    transition: none;
+  }
+
+  .card-done {
+    opacity: 0.55;
   }
 }
