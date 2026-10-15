@@ -23,7 +23,19 @@ export const itemSchema = z.object({
   seat: vec.optional(),
   seatPoint: vec.optional(),
   overlayFromY: z.number().int().optional(),
+  floorSit: z
+    .object({
+      pose: z.string(),
+      offset: vec,
+      drawAfter: z.array(z.string()),
+    })
+    .optional(),
   notes: z.array(z.string()).optional(),
+});
+
+export const poseSchema = z.object({
+  sprite: z.string(),
+  hipFromBottom: z.number().int(),
 });
 
 export const slotSchema = z.object({
@@ -62,6 +74,7 @@ export const catalogSchema = z.object({
   version: z.number().int(),
   units: z.literal(UNITS),
   socketOrder: z.array(z.string()),
+  poses: z.record(z.string(), poseSchema),
   items: z.array(itemSchema),
 });
 

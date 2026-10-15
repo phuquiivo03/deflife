@@ -23,7 +23,7 @@ function listSprites(): PackInput[] {
         walk(p);
         continue;
       }
-      if (!name.endsWith(".png") || name.endsWith("_x2.png")) continue;
+      if (!name.endsWith(".png") || /_x\d+\.png$/.test(name)) continue;
       const rel = path.relative(ASSETS, p).replace(/\\/g, "/").replace(/\.png$/, "");
       const isShadow = name.endsWith("_shadow.png");
       out.push({ key: rel, file: p, trim: !isShadow });

@@ -15,7 +15,7 @@
   ],
   "floorTopY": 122
  },
- "focusX": 184,
+ "focusX": 262,
  "slots": [
   {
    "id": "wall_hanging",
@@ -119,8 +119,8 @@
    ],
    "default": "student.folding_table",
    "anchor": [
-    184,
-    198
+    262,
+    133
    ],
    "required": true
   },
@@ -170,7 +170,7 @@
    "accepts": [
     "chair"
    ],
-   "default": "student.plastic_stool",
+   "default": null,
    "parent": "desk",
    "socket": "seat"
   },
