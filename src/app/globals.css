@@ -292,6 +292,11 @@ body {
   border-top: 1px solid var(--panel-border);
 }
 
+.audio-controls img {
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+}
+
 .audio-mute {
   display: inline-flex;
   align-items: center;
