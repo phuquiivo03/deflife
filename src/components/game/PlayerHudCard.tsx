@@ -2,15 +2,46 @@
 
 import { SIM_CATALOG } from "@/game/career/content";
 import { STUB_PLAYER } from "@/game/state/playerStats";
-import { useGameStore } from "@/game/state/store";
+import { useGameStore, type CareerPanel } from "@/game/state/store";
 import { canSleepAt, phaseById, snapshot, type PhaseId } from "@/game/time";
 import { resolveShippedIcon } from "@/lib/pixel-assets";
+import { cn } from "@/lib/utils";
 import { PixelIcon } from "./PixelIcon";
 import { formatVnd } from "@/lib/format-currency";
 import { PixelAvatar } from "./PixelAvatar";
 import { PanelCard } from "@/components/ui/panel-card";
 import { Button } from "@/components/ui/button";
 import { StatBar } from "./StatBar";
+
+const CAREER_ACTIONS = [
+  {
+    id: "study",
+    testId: "open-study",
+    label: "Học",
+    icon: "learn_course",
+    tone: "hud-action-study",
+  },
+  {
+    id: "jobs",
+    testId: "open-jobs",
+    label: "Việc làm",
+    icon: "job",
+    tone: "hud-action-jobs",
+  },
+  {
+    id: "skills",
+    testId: "open-skills",
+    label: "Kỹ năng",
+    icon: "skill_up",
+    tone: "hud-action-skills",
+  },
+] as const satisfies readonly {
+  id: CareerPanel;
+  testId: string;
+  label: string;
+  icon: string;
+  tone: string;
+}[];
 
 export function PlayerHudCard({ iconFiles = [] }: { iconFiles?: readonly string[] }) {
   const p = STUB_PLAYER;
@@ -84,36 +115,6 @@ export function PlayerHudCard({ iconFiles = [] }: { iconFiles?: readonly string[
               type="button"
               size="sm"
               showArrow={false}
-              variant="outline"
-              data-testid="open-study"
-              onClick={() => openCareerPanel("study")}
-            >
-              Học
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              showArrow={false}
-              variant="outline"
-              data-testid="open-jobs"
-              onClick={() => openCareerPanel("jobs")}
-            >
-              Việc làm
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              showArrow={false}
-              variant="outline"
-              data-testid="open-skills"
-              onClick={() => openCareerPanel("skills")}
-            >
-              Kỹ năng
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              showArrow={false}
               disabled={!canSleep}
               aria-disabled={!canSleep}
               title={
@@ -130,7 +131,41 @@ export function PlayerHudCard({ iconFiles = [] }: { iconFiles?: readonly string[
           </div>
         </div>
       </div>
+      <div className="hud-actions mt-3">
+        <div className="hud-actions-grid">
+          {CAREER_ACTIONS.map((action) => (
+            <CareerHudButton
+              key={action.id}
+              action={action}
+              iconFiles={iconFiles}
+              onClick={() => openCareerPanel(action.id)}
+            />
+          ))}
+        </div>
+      </div>
     </PanelCard>
+  );
+}
+
+function CareerHudButton({
+  action,
+  iconFiles,
+  onClick,
+}: {
+  action: (typeof CAREER_ACTIONS)[number];
+  iconFiles: readonly string[];
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      data-testid={action.testId}
+      className={cn("hud-action", action.tone)}
+      onClick={onClick}
+    >
+      <PixelIcon name={action.icon} size={22} alt="" files={iconFiles} />
+      <span>{action.label}</span>
+    </button>
   );
 }
 
