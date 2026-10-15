@@ -6,7 +6,7 @@ import {
   resolveCueKey,
   type TimeAudioPlan,
 } from "./cues";
-import { bgmUrl, clamp01, mixGain, parseManifest, type AudioCue } from "./manifest";
+import { bgmUrl, busGain, clamp01, cueUrls, mixGain, parseManifest, type AudioCue } from "./manifest";
 import { DEFAULT_AUDIO_LEVELS, type AudioLevels } from "./settings";
 import {
   bgmLeadSeconds,
@@ -16,6 +16,14 @@ import {
   type AudioFormat,
   type SpriteMap,
 } from "./sprite";
+import {
+  createFileAudioElement,
+  createSilentKeepAlive,
+  decodeAudioBuffer,
+  enablePlaybackSession,
+  logAudioOnce,
+  type KeepAlive,
+} from "./webaudio";
 
 export type GainParamLike = { value: number };
 
@@ -51,9 +59,14 @@ export type AudioContextLike = {
   currentTime: number;
   baseLatency?: number;
   destination: AudioNodeLike;
-  resume(): Promise<void>;
+  resume(): Promise<void> | void;
   close(): Promise<void>;
-  decodeAudioData(data: ArrayBuffer): Promise<AudioBufferLike>;
+  onstatechange?: (() => void) | null;
+  decodeAudioData(
+    data: ArrayBuffer,
+    success?: (buffer: AudioBufferLike) => void,
+    failure?: (error: Error) => void,
+  ): Promise<AudioBufferLike> | undefined;
   createBuffer(channels: number, length: number, sampleRate: number): AudioBufferLike;
   createBufferSource(): BufferSourceLike;
   createGain(): GainNodeLike;
@@ -66,6 +79,20 @@ export type AudioResponseLike = {
 };
 
 export type AudioFetch = (input: string) => Promise<AudioResponseLike>;
+
+export type SfxElementLike = {
+  src: string;
+  loop: boolean;
+  volume: number;
+  preload: string;
+  playsInline: boolean;
+  currentTime: number;
+  play(): Promise<void>;
+  pause(): void;
+  addEventListener(type: "error" | "loadedmetadata" | "playing" | "seeked", listener: () => void): void;
+};
+
+export type KeepAliveHandle = KeepAlive;
 
 export type AudioEngineOptions = {
   createContext: () => AudioContextLike | null;
@@ -80,6 +107,14 @@ export type AudioEngineOptions = {
   fetch?: AudioFetch;
   trace?: boolean;
   onLatency?: (ms: number, id: string) => void;
+  /** Test hook. Defaults to the callback-compatible Web Audio decoder. */
+  decodeAudioData?: (ctx: AudioContextLike, data: ArrayBuffer) => Promise<AudioBufferLike>;
+  /** Test hook. Defaults to `navigator.audioSession.type = "playback"`. */
+  enableSession?: () => boolean;
+  /** Test hook. Silent looping `<audio>` used when audioSession is missing. */
+  createKeepAlive?: () => KeepAlive | null;
+  /** Test hook. Per-file SFX element used after the sprite cannot be decoded. */
+  createSfxElement?: () => SfxElementLike | null;
 };
 
 export type AudioEngine = {
@@ -88,8 +123,13 @@ export type AudioEngine = {
   notePhase(phase: PhaseId): void;
   /** Fetch and decode the SFX sprite. Does not fetch BGM. */
   preloadSfx(): Promise<void>;
-  /** Resume the context and play a 1-sample silent buffer. Idempotent. */
+  /**
+   * Resume inside the gesture, then play a 1-sample silent buffer.
+   * Later calls resume again when iOS has interrupted or suspended the context.
+   */
   unlock(): void;
+  /** Resume after the page becomes visible, including the `interrupted` state. */
+  resume(): void;
   /**
    * `gestureAt` is `performance.now()` from the pointerdown handler.
    * When set, the engine records the time until `source.start`.
@@ -139,6 +179,7 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
   const now = options.now ?? (() => (typeof performance !== "undefined" ? performance.now() : 0));
   const fetchImpl = options.fetch ?? defaultFetch;
 
+  let playbackFormat: AudioFormat = format;
   let ctx: AudioContextLike | null = null;
   try {
     ctx = options.createContext();
@@ -171,16 +212,21 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
   let byId = new Map<string, AudioCue>();
   let sprite: SpriteMap | null = null;
   let sfxBuffer: AudioBufferLike | null = null;
+  let sfxRoute: "sprite" | "element" = "sprite";
   let settings: AudioLevels = { ...DEFAULT_AUDIO_LEVELS };
   let unlocked = false;
   let phase: PhaseId | null = null;
   let bed: LiveBed | null = null;
+  let bedElement: SfxElementLike | null = null;
+  let bedCue: AudioCue | null = null;
+  let bedUrlValue: string | null = null;
   let bedJob = 0;
   let loadingUrl: string | null = null;
   let fadeToken = 0;
   let queued: { key: CueKey; gestureAt?: number } | null = null;
-  let spriteBytes: ArrayBuffer | null = null;
-  let decoding: Promise<void> | null = null;
+  let keepAlive: KeepAlive | null = null;
+  let sessionOn = false;
+  let resuming = false;
   const decoded = new Map<string, AudioBufferLike>();
 
   applyGains();
@@ -228,10 +274,14 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
   }
 
   function playCue(cue: AudioCue, gestureAt?: number) {
-    if (!cue || cue.type === "bgm" || !unlocked || !ctx || !sfxBuffer || !sprite) return;
-    const slice = spriteSlice(sprite, format, cue.id);
+    if (!cue || cue.type === "bgm" || !unlocked) return;
+    if (sfxRoute === "element" || !ctx || !sfxBuffer || !sprite) {
+      if (sfxRoute === "element") playElement(cue, gestureAt);
+      return;
+    }
+    const slice = spriteSlice(sprite, playbackFormat, cue.id);
     const bus = busFor(cue);
-    if (!slice || !bus) return;
+    if (!slice || !bus || !ctx) return;
     const source = ctx.createBufferSource();
     const trim = ctx.createGain();
     trim.gain.value = cue.volume;
@@ -269,7 +319,7 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
         ? cueForKey("phase")
         : null);
     if (!cue) return;
-    if (!sfxBuffer) {
+    if (sfxRoute !== "element" && !sfxBuffer) {
       queued = { key: cue === specific ? key : "phase", gestureAt };
       return;
     }
@@ -277,33 +327,117 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
   }
 
   function flushQueued() {
-    if (!queued || !sfxBuffer || !unlocked) return;
+    if (!queued || !unlocked) return;
+    if (sfxRoute !== "element" && !sfxBuffer) return;
     const pending = queued;
     queued = null;
     playResolved(pending.key, pending.gestureAt);
   }
 
-  function decodeSprite(): Promise<void> {
-    if (sfxBuffer || !spriteBytes || !ctx) return Promise.resolve();
-    if (decoding) return decoding;
-    const bytes = spriteBytes;
-    const context = ctx;
-    decoding = context
-      .decodeAudioData(bytes.slice(0))
-      .then((buffer) => {
-        if (ctx !== context) return;
-        sfxBuffer = buffer;
-        spriteBytes = null;
-        markReady();
-        flushQueued();
-      })
-      .catch(() => {
-        /* keep the bytes and try again after resume */
-      })
-      .finally(() => {
-        decoding = null;
-      });
-    return decoding;
+  function playElement(cue: AudioCue, gestureAt?: number) {
+    const urls = cueUrls(cue);
+    if (!urls.length) return;
+    const el = (options.createSfxElement ?? createFileAudioElement)() as SfxElementLike | null;
+    if (!el) return;
+    let index = 0;
+    const arm = () => {
+      const url = urls[index];
+      if (!url) return false;
+      el.src = url;
+      el.loop = false;
+      el.preload = "auto";
+      el.playsInline = true;
+      el.volume = busGain(settings.sfx, cue.volume, settings.muted);
+      return true;
+    };
+    el.addEventListener("error", () => {
+      index += 1;
+      if (!arm()) return;
+      try {
+        const played = el.play();
+        if (played && typeof played.catch === "function") void played.catch(() => {});
+      } catch {
+        /* ignore */
+      }
+    });
+    if (!arm()) return;
+    try {
+      const played = el.play();
+      if (gestureAt != null && Number.isFinite(gestureAt)) {
+        reportLatency(Math.max(0, now() - gestureAt), cue.id);
+      }
+      if (played && typeof played.catch === "function") void played.catch(() => {});
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function resumeNow() {
+    if (!ctx || ctx.state === "running" || ctx.state === "closed" || resuming) return;
+    resuming = true;
+    try {
+      const result = ctx.resume();
+      if (result && typeof result.catch === "function") void result.catch(() => {});
+    } catch {
+      /* ignore */
+    } finally {
+      resuming = false;
+    }
+  }
+
+  if (ctx) {
+    try {
+      ctx.onstatechange = () => {
+        if (ctx?.state === "interrupted") resumeNow();
+      };
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function playOneSample() {
+    if (!ctx) return;
+    try {
+      const silence = ctx.createBuffer(1, 1, ctx.sampleRate || 32000);
+      const source = ctx.createBufferSource();
+      source.buffer = silence;
+      source.connect(ctx.destination);
+      source.start(ctx.currentTime);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function ensureMediaChannel() {
+    if (!sessionOn) {
+      const enable =
+        options.enableSession ??
+        (() => {
+          try {
+            return enablePlaybackSession(typeof navigator === "undefined" ? null : navigator);
+          } catch {
+            return false;
+          }
+        });
+      try {
+        sessionOn = enable();
+      } catch {
+        sessionOn = false;
+      }
+    }
+    if (sessionOn) return;
+    if (!keepAlive) {
+      try {
+        keepAlive = (options.createKeepAlive ?? createSilentKeepAlive)();
+      } catch {
+        keepAlive = null;
+      }
+    }
+    try {
+      keepAlive?.play();
+    } catch {
+      /* ignore */
+    }
   }
 
   function stopBed(live: LiveBed) {
@@ -342,6 +476,7 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
       return;
     }
     bed = { url, source, fade };
+    bedUrlValue = url;
     fadeToken += 1;
     const token = fadeToken;
     const target = cue.volume;
@@ -364,16 +499,67 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
     schedule(step);
   }
 
-  function leadsReady(): boolean {
-    return format === "ogg" || sprite !== null;
+  function stopBedElement() {
+    if (!bedElement) return;
+    try {
+      bedElement.pause();
+    } catch {
+      /* ignore */
+    }
+    bedElement = null;
+    bedCue = null;
+  }
+
+  function placeLead(el: SfxElementLike, lead: number) {
+    if (lead <= 0) return;
+    let placed = false;
+    const jump = () => {
+      if (placed) return;
+      try {
+        if (el.currentTime < lead) el.currentTime = lead;
+        placed = el.currentTime + 0.0001 >= lead;
+      } catch {
+        /* ignore */
+      }
+    };
+    el.addEventListener("loadedmetadata", jump);
+    el.addEventListener("playing", jump);
+    el.addEventListener("seeked", jump);
+  }
+
+  function startBedElement(cue: AudioCue, url: string) {
+    if (bed?.url === url || bedUrlValue === url) return;
+    stopBedElement();
+    if (bed) {
+      stopBed(bed);
+      bed = null;
+    }
+    const el = (options.createSfxElement ?? createFileAudioElement)() as SfxElementLike | null;
+    if (!el) return;
+    el.src = url;
+    el.loop = true;
+    el.preload = "auto";
+    el.playsInline = true;
+    el.volume = busGain(settings.music, cue.volume, settings.muted);
+    placeLead(el, bgmLeadSeconds(sprite, playbackFormat, cue.id));
+    bedElement = el;
+    bedCue = cue;
+    bedUrlValue = url;
+    try {
+      const played = el.play();
+      if (played && typeof played.catch === "function") void played.catch(() => {});
+    } catch {
+      /* ignore */
+    }
   }
 
   function requestBed() {
-    if (!unlocked || !phase || !ctx || !leadsReady()) return;
+    if (!unlocked || !phase) return;
+    if (playbackFormat === "mp3" && !sprite && sfxRoute !== "element") return;
     const cue = byId.get(bgmIdForPhase(phase));
     if (!cue) return;
-    const url = bgmUrl(cue, format);
-    if (!url || bed?.url === url || loadingUrl === url) return;
+    const url = bgmUrl(cue, playbackFormat);
+    if (!url || bed?.url === url || bedUrlValue === url || loadingUrl === url) return;
     loadingUrl = url;
     const job = ++bedJob;
     const phaseNow = phase;
@@ -382,27 +568,82 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
 
   async function startBed(phaseNow: PhaseId, job: number, url: string): Promise<void> {
     try {
-      if (job !== bedJob || !ctx || !unlocked) return;
+      if (job !== bedJob || !unlocked) return;
       const cue = byId.get(bgmIdForPhase(phaseNow));
-      if (!cue) return;
-      if (bed?.url === url) return;
+      if (!cue || bed?.url === url || bedUrlValue === url) return;
+      if (!ctx) {
+        startBedElement(cue, url);
+        return;
+      }
       let buffer = decoded.get(url);
       if (!buffer) {
         const response = await fetchImpl(url);
         if (!response.ok || job !== bedJob) return;
         const bytes = await response.arrayBuffer();
-        if (job !== bedJob || !ctx) return;
-        buffer = await ctx.decodeAudioData(bytes.slice(0));
-        decoded.set(url, buffer);
+        if (job !== bedJob || !unlocked) return;
+        const decode = options.decodeAudioData ?? decodeAudioBuffer;
+        try {
+          buffer = ctx ? await decode(ctx, bytes) : undefined;
+        } catch {
+          logAudioOnce("BGM decode failed; using an audio element");
+          if (job !== bedJob) return;
+          startBedElement(cue, url);
+          return;
+        }
+        if (buffer) decoded.set(url, buffer);
       }
-      if (job !== bedJob || !unlocked || !buffer) return;
-      const lead = bgmLeadSeconds(sprite, format, cue.id);
+      if (job !== bedJob || !unlocked || !buffer || !ctx) return;
+      const lead = bgmLeadSeconds(sprite, playbackFormat, cue.id);
       spinBed(cue, url, buffer, lead, bed !== null && bed.url !== url);
     } catch {
       /* ignore */
     } finally {
       if (loadingUrl === url) loadingUrl = null;
     }
+  }
+
+  async function loadSprite(fmt: AudioFormat): Promise<boolean> {
+    if (!sprite || !ctx) return false;
+    const url = spriteFileUrl(sprite, fmt);
+    if (!url) return false;
+    try {
+      const response = await fetchImpl(url);
+      if (!response.ok) {
+        logAudioOnce(`SFX sprite failed (${fmt})`);
+        return false;
+      }
+      const bytes = await response.arrayBuffer();
+      if (!ctx) return false;
+      const decode = options.decodeAudioData ?? decodeAudioBuffer;
+      const buffer = await decode(ctx, bytes);
+      if (!ctx) return false;
+      sfxBuffer = buffer;
+      if (fmt !== playbackFormat) {
+        playbackFormat = fmt;
+        loadingUrl = null;
+        bedJob += 1;
+        if (bed) stopBed(bed);
+        bed = null;
+        stopBedElement();
+        bedUrlValue = null;
+      }
+      markReady();
+      flushQueued();
+      if (unlocked) requestBed();
+      return true;
+    } catch {
+      logAudioOnce(`SFX sprite failed (${fmt})`);
+      return false;
+    }
+  }
+
+  function fallBackToElements(reason: string) {
+    if (sfxRoute === "element") return;
+    sfxRoute = "element";
+    logAudioOnce(reason);
+    markReady();
+    flushQueued();
+    if (unlocked) requestBed();
   }
 
   async function readJson(url: string): Promise<unknown | null> {
@@ -428,6 +669,9 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
         muted: levels.muted,
       };
       applyGains();
+      if (bedElement && bedCue) {
+        bedElement.volume = busGain(settings.music, bedCue.volume, settings.muted);
+      }
     },
     notePhase(next: PhaseId) {
       phase = next;
@@ -441,54 +685,50 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
         if (manifestData) indexManifest(manifestData);
         if (offsetsData) sprite = parseSpriteMap(offsetsData);
         if (unlocked) requestBed();
-        if (!sprite || !ctx) return;
-        const url = spriteFileUrl(sprite, format);
-        if (!url) return;
-        const response = await fetchImpl(url);
-        if (!response.ok) return;
-        const bytes = await response.arrayBuffer();
-        if (!ctx) return;
-        spriteBytes = bytes.slice(0);
-        await decodeSprite();
+        if (!ctx) {
+          fallBackToElements("No Web Audio context; using per-file SFX");
+          return;
+        }
+        if (!sprite) {
+          fallBackToElements("SFX sprite missing; using per-file SFX");
+          return;
+        }
+        let ok = await loadSprite(playbackFormat);
+        if (!ok && playbackFormat !== "mp3") ok = await loadSprite("mp3");
+        if (!ok) fallBackToElements("SFX sprite decode failed; using per-file audio");
       } catch {
-        /* audio must not surface */
+        fallBackToElements("SFX sprite decode failed; using per-file audio");
       }
     },
     unlock() {
-      if (unlocked) return;
-      unlocked = true;
-      if (!ctx) return;
-      try {
-        void ctx.resume().catch(() => {});
-      } catch {
-        /* ignore */
-      }
-      try {
-        const silence = ctx.createBuffer(1, 1, ctx.sampleRate || 32000);
-        const source = ctx.createBufferSource();
-        source.buffer = silence;
-        source.connect(ctx.destination);
-        source.start(ctx.currentTime);
-      } catch {
-        /* ignore */
-      }
-      if (typeof window !== "undefined" && window.__DEVLIFE_AUDIO_TRACE && ctx.baseLatency != null) {
+      const wasRunning = ctx?.state === "running";
+      resumeNow();
+      ensureMediaChannel();
+      if (ctx && !wasRunning) playOneSample();
+      if (typeof window !== "undefined" && window.__DEVLIFE_AUDIO_TRACE && ctx?.baseLatency != null) {
         window.__DEVLIFE_AUDIO_BASE_LATENCY = ctx.baseLatency;
       }
+      if (unlocked) return;
+      unlocked = true;
+      if (!ctx) fallBackToElements("No Web Audio context; using per-file SFX");
       requestBed();
-      if (!sfxBuffer && spriteBytes) {
-        try {
-          void decodeSprite();
-        } catch {
-          /* ignore */
-        }
-      } else {
-        try {
-          flushQueued();
-        } catch {
-          /* ignore */
-        }
+      try {
+        flushQueued();
+      } catch {
+        /* ignore */
       }
+    },
+    resume() {
+      resumeNow();
+      if (keepAlive) {
+        try {
+          keepAlive.play();
+        } catch {
+          /* ignore */
+        }
+        return;
+      }
+      if (!sessionOn) ensureMediaChannel();
     },
     playKey(key: CueKey, gestureAt?: number) {
       try {
@@ -519,8 +759,23 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
       loadingUrl = null;
       if (bed) stopBed(bed);
       bed = null;
+      stopBedElement();
+      bedUrlValue = null;
+      try {
+        keepAlive?.stop();
+      } catch {
+        /* ignore */
+      }
+      keepAlive = null;
       const closing = ctx;
       ctx = null;
+      if (closing) {
+        try {
+          closing.onstatechange = null;
+        } catch {
+          /* ignore */
+        }
+      }
       try {
         void closing?.close().catch(() => {});
       } catch {
@@ -528,7 +783,7 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
       }
     },
     bedUrl() {
-      return bed?.url ?? null;
+      return bedUrlValue ?? bed?.url ?? null;
     },
   };
 }

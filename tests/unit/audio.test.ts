@@ -13,7 +13,7 @@ import {
   shouldCrossfadeBgm,
   type CueKey,
 } from "../../src/game/audio/cues";
-import { createAudioEngine, type AudioBufferLike, type AudioContextLike, type AudioNodeLike, type BufferSourceLike, type GainNodeLike } from "../../src/game/audio/engine";
+import { createAudioEngine, type AudioBufferLike, type AudioContextLike, type AudioEngineOptions, type AudioNodeLike, type BufferSourceLike, type GainNodeLike, type SfxElementLike } from "../../src/game/audio/engine";
 import {
   bgmUrl,
   busGain,
@@ -36,6 +36,12 @@ import {
   parseAudioSettings,
   serializeAudioSettings,
 } from "../../src/game/audio/settings";
+import {
+  createAudioContextFrom,
+  decodeAudioBuffer,
+  enablePlaybackSession,
+  resetLoggedAudio,
+} from "../../src/game/audio/webaudio";
 import type { PhaseId } from "../../src/game/time/config";
 import type { TimeEvent } from "../../src/game/time/types";
 
@@ -80,6 +86,7 @@ class FakeContext implements AudioContextLike {
   sources: FakeSource[] = [];
   gains: FakeGain[] = [];
   resumes = 0;
+  onstatechange: (() => void) | null = null;
 
   resume(): Promise<void> {
     this.resumes += 1;
@@ -200,7 +207,33 @@ const OFFSETS: SpriteMap = {
   },
 };
 
-function harness(format: "ogg" | "mp3" = "ogg") {
+class FakeElement implements SfxElementLike {
+  src = "";
+  loop = false;
+  volume = 1;
+  preload = "";
+  playsInline = false;
+  currentTime = 0;
+  plays = 0;
+  private listeners: Record<string, Array<() => void>> = {};
+
+  play(): Promise<void> {
+    this.plays += 1;
+    return Promise.resolve();
+  }
+
+  pause(): void {}
+
+  addEventListener(type: "error" | "loadedmetadata" | "playing" | "seeked", listener: () => void): void {
+    (this.listeners[type] ??= []).push(listener);
+  }
+
+  emit(type: "error" | "loadedmetadata" | "playing" | "seeked"): void {
+    for (const listener of this.listeners[type] ?? []) listener();
+  }
+}
+
+function harness(format: "ogg" | "mp3" = "ogg", extra: Partial<AudioEngineOptions> = {}) {
   const ctx = new FakeContext();
   const calls: string[] = [];
   const jobs: Array<() => Promise<void>> = [];
@@ -228,6 +261,7 @@ function harness(format: "ogg" | "mp3" = "ogg") {
       }
       return { ok: false, json: async () => null, arrayBuffer: async () => new ArrayBuffer(0) };
     },
+    ...extra,
   });
   return {
     ctx,
@@ -596,6 +630,197 @@ describe("audio engine", () => {
     expect((trim.dest as FakeGain).gain.value).toBe(0.9);
     const bed = audio.ctx.sources.find((source) => source.loop);
     expect((bed?.dest as FakeGain).dest).toMatchObject({ gain: { value: 0.5 } });
+  });
+
+  it("does not stack a second silent buffer once the context is running", async () => {
+    const audio = harness();
+    await audio.engine.preloadSfx();
+    audio.engine.unlock();
+    const silence = audio.ctx.sources.filter((source) => source.buffer?.length === 1);
+    expect(silence).toHaveLength(1);
+    expect(audio.ctx.resumes).toBe(1);
+    audio.engine.unlock();
+    expect(audio.ctx.sources.filter((source) => source.buffer?.length === 1)).toHaveLength(1);
+    expect(audio.ctx.resumes).toBe(1);
+  });
+
+  it("resumes an interrupted context on unlock and on state change", async () => {
+    const audio = harness();
+    audio.ctx.resume = () => {
+      audio.ctx.resumes += 1;
+      audio.ctx.state = "interrupted";
+      return Promise.resolve();
+    };
+    audio.engine.unlock();
+    expect(audio.ctx.resumes).toBe(1);
+    audio.engine.unlock();
+    expect(audio.ctx.resumes).toBe(2);
+    audio.ctx.state = "interrupted";
+    audio.ctx.onstatechange?.();
+    expect(audio.ctx.resumes).toBe(3);
+  });
+
+  it("uses the media session when it is available and a silent element otherwise", () => {
+    let created = 0;
+    let plays = 0;
+    const withSession = harness("ogg", {
+      enableSession: () => true,
+      createKeepAlive: () => {
+        created += 1;
+        return {
+          play() {
+            plays += 1;
+          },
+          stop() {},
+        };
+      },
+    });
+    withSession.engine.unlock();
+    expect(created).toBe(0);
+
+    const channel = harness("ogg", {
+      enableSession: () => false,
+      createKeepAlive: () => {
+        created += 1;
+        return {
+          play() {
+            plays += 1;
+          },
+          stop() {},
+        };
+      },
+    });
+    channel.engine.unlock();
+    channel.engine.resume();
+    expect(created).toBe(1);
+    expect(plays).toBe(2);
+  });
+
+  it("falls back from an ogg sprite to the mp3 sprite", async () => {
+    resetLoggedAudio();
+    let decodes = 0;
+    const audio = harness("ogg", {
+      decodeAudioData: async () => {
+        decodes += 1;
+        if (decodes === 1) throw new Error("ogg sprite");
+        return {
+          duration: 30,
+          length: 30 * 32000,
+          numberOfChannels: 1,
+          sampleRate: 32000,
+        };
+      },
+    });
+    await audio.engine.preloadSfx();
+    expect(audio.calls).toContain("/audio/sprite/sfx.ogg");
+    expect(audio.calls).toContain("/audio/sprite/sfx.mp3");
+    audio.engine.notePhase("morning");
+    audio.engine.unlock();
+    audio.engine.playKey("click", 0);
+    const click = sfxStarts(audio.ctx).at(-1)!;
+    expect(click.started?.offset).toBeCloseTo(CLICK.mp3.offset, 6);
+    await audio.flush();
+    expect(audio.engine.bedUrl()).toBe("/audio/mp3/bgm/bgm_student_day.mp3");
+  });
+
+  it("falls back to per-file audio when every sprite decode fails", async () => {
+    resetLoggedAudio();
+    const warnings: string[] = [];
+    const original = console.warn;
+    console.warn = (...args: unknown[]) => {
+      warnings.push(args.map(String).join(" "));
+    };
+    const elements: FakeElement[] = [];
+    try {
+      const audio = harness("ogg", {
+        decodeAudioData: async () => {
+          throw new Error("decode");
+        },
+        createSfxElement: () => {
+          const element = new FakeElement();
+          elements.push(element);
+          return element;
+        },
+        enableSession: () => true,
+      });
+      await audio.engine.preloadSfx();
+      audio.engine.setSettings({ music: 1, sfx: 0.5, muted: false });
+      audio.engine.notePhase("morning");
+      audio.engine.unlock();
+      audio.engine.playKey("click");
+      const sfx = elements.find((element) => !element.loop);
+      expect(sfx?.src).toBe("/audio/ogg/sfx/sfx_ui_click.ogg");
+      expect(sfx?.volume).toBe(0.5);
+      sfx?.emit("error");
+      expect(sfx?.src).toBe("/audio/mp3/sfx/sfx_ui_click.mp3");
+      audio.engine.playKey("click");
+      const spriteWarnings = warnings.filter((line) => line.includes("SFX sprite"));
+      expect(spriteWarnings).toHaveLength(3);
+      expect(warnings.filter((line) => line.includes("[devlife-audio]"))).toEqual(spriteWarnings);
+      await audio.flush();
+      const bed = elements.find((element) => element.loop);
+      expect(bed?.src).toBe("/audio/ogg/bgm/bgm_student_day.ogg");
+      expect(warnings.some((line) => line.includes("BGM decode failed"))).toBe(true);
+      const logged = warnings.length;
+      audio.engine.playKey("click");
+      expect(warnings).toHaveLength(logged);
+    } finally {
+      console.warn = original;
+    }
+  });
+});
+
+describe("ios web audio helpers", () => {
+  it("decodes from the callback form and from a promise", async () => {
+    const buffer: AudioBufferLike = { duration: 1, length: 8, numberOfChannels: 1, sampleRate: 8 };
+    const callbackOnly = await decodeAudioBuffer(
+      {
+        decodeAudioData(_data, success) {
+          success?.(buffer);
+          return undefined;
+        },
+      },
+      new ArrayBuffer(4),
+    );
+    expect(callbackOnly).toBe(buffer);
+    const promised = await decodeAudioBuffer(
+      {
+        decodeAudioData() {
+          return Promise.resolve(buffer);
+        },
+      },
+      new ArrayBuffer(4),
+    );
+    expect(promised).toBe(buffer);
+  });
+
+  it("sets the playback session only when the browser exposes one", () => {
+    const session = { type: "auto" };
+    expect(enablePlaybackSession({ audioSession: session })).toBe(true);
+    expect(session.type).toBe("playback");
+    expect(enablePlaybackSession(undefined)).toBe(false);
+    expect(enablePlaybackSession({})).toBe(false);
+  });
+
+  it("constructs a context without latencyHint when that option throws", () => {
+    let calls = 0;
+    class Older {
+      constructor(options?: { latencyHint?: string }) {
+        calls += 1;
+        if (options) throw new Error("no options");
+      }
+    }
+    expect(createAudioContextFrom(Older as unknown as new (options?: { latencyHint?: string }) => AudioContextLike)).toBeInstanceOf(
+      Older,
+    );
+    expect(calls).toBe(2);
+    class Broken {
+      constructor() {
+        throw new Error("no context");
+      }
+    }
+    expect(createAudioContextFrom(Broken as unknown as new () => AudioContextLike)).toBeNull();
+    expect(createAudioContextFrom(undefined)).toBeNull();
   });
 });
 

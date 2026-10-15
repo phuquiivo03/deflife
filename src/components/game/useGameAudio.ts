@@ -163,18 +163,34 @@ export function useGameAudio(): void {
         /* ignore */
       }
     };
+    const onVisible = () => {
+      if (document.visibilityState !== "visible") return;
+      try {
+        engine.resume();
+      } catch {
+        /* ignore */
+      }
+    };
     window.addEventListener("touchstart", onUnlock, gestureListener);
+    window.addEventListener("touchend", onUnlock, gestureListener);
     window.addEventListener("pointerdown", onPointerDown, gestureListener);
+    window.addEventListener("pointerup", onUnlock, gestureListener);
+    window.addEventListener("click", onUnlock, gestureListener);
     window.addEventListener("pointerover", onPointerOver, true);
     window.addEventListener("keydown", onUnlock, gestureListener);
+    document.addEventListener("visibilitychange", onVisible);
 
     return () => {
       offSettings();
       for (const off of offs) off();
       window.removeEventListener("touchstart", onUnlock, gestureListener);
+      window.removeEventListener("touchend", onUnlock, gestureListener);
       window.removeEventListener("pointerdown", onPointerDown, gestureListener);
+      window.removeEventListener("pointerup", onUnlock, gestureListener);
+      window.removeEventListener("click", onUnlock, gestureListener);
       window.removeEventListener("pointerover", onPointerOver, true);
       window.removeEventListener("keydown", onUnlock, gestureListener);
+      document.removeEventListener("visibilitychange", onVisible);
       attachAudioEngine(null);
       engine.dispose();
     };
