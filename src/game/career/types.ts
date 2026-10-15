@@ -97,6 +97,10 @@ export type GameConfig = {
   starting_money: number;
   starting_energy: number;
   starting_reputation: number;
+  /** Default music bus gain, 0–1. Players can override it from the HUD. */
+  audio_music_volume: number;
+  /** Default SFX bus gain, 0–1. */
+  audio_sfx_volume: number;
   rank_brackets: RankBracket[];
 };
 

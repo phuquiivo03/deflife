@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { playCueKey } from "@/game/audio/client";
 import { SIM_CATALOG } from "@/game/career/content";
 import { gameBus } from "@/game/events/bus";
 import type { GameEvent } from "@/game/events/types";
@@ -53,6 +54,7 @@ export function CareerChrome({
 
   useEffect(() => {
     const push = (label: string) => {
+      playCueKey("toast");
       floatSeq += 1;
       const id = floatSeq;
       setFloats((current) => [...current, { id, label }]);
@@ -68,6 +70,7 @@ export function CareerChrome({
       push(event.delta > 0 ? `+${formatVnd(event.delta)}` : formatVnd(event.delta));
     });
     const offLevel = gameBus.on("skillLevelUp", (event: GameEvent & { type: "skillLevelUp" }) => {
+      playCueKey("toast");
       setPopup({ skillId: event.skillId, level: event.level, rankId: event.rankId });
     });
     return () => {
@@ -91,6 +94,14 @@ export function CareerChrome({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [panel, close]);
+
+  const panelRef = useRef(panel);
+  useEffect(() => {
+    const previous = panelRef.current;
+    panelRef.current = panel;
+    if (panel && panel !== previous) playCueKey("panelOpen");
+    if (!panel && previous) playCueKey("panelClose");
+  }, [panel]);
 
   const title =
     panel === "study" ? "Khóa học" : panel === "jobs" ? "Bảng việc" : panel === "skills" ? "Kỹ năng" : "";
