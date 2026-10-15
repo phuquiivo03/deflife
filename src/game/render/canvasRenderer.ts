@@ -2,11 +2,21 @@ import { DEFAULT_LETTERBOX, WORLD } from "../config";
 import type { DrawEntry, ViewState } from "../types";
 import type { LoadedAtlas } from "./atlas";
 
+/** Flat wash drawn over the room. The time system owns the palette. */
+export type AmbientTint = {
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+};
+
 export type Renderer = {
   setScene: (entries: DrawEntry[], backgroundUrl: string) => void;
   setView: (view: ViewState) => void;
   setHighlight: (slotId: string | null) => void;
   setDebug: (draw: DebugDraw | null) => void;
+  setTint: (tint: AmbientTint | null) => void;
+  getTint: () => AmbientTint | null;
   destroy: () => void;
 };
 
@@ -34,6 +44,7 @@ export function createRenderer(
   let view: ViewState | null = null;
   let highlight: string | null = null;
   let debug: DebugDraw | null = null;
+  let tint: AmbientTint | null = null;
 
   const loadBg = (url: string) => {
     bgUrl = url;
@@ -102,6 +113,14 @@ export function createRenderer(
     }
     wctx.restore();
 
+    if (tint && tint.a > 0) {
+      wctx.save();
+      wctx.globalCompositeOperation = "source-over";
+      wctx.fillStyle = `rgba(${Math.round(tint.r)},${Math.round(tint.g)},${Math.round(tint.b)},${tint.a})`;
+      wctx.fillRect(0, 0, WORLD.w, WORLD.h);
+      wctx.restore();
+    }
+
     if (highlight) {
       for (const e of entries) {
         if (e.slotId !== highlight) continue;
@@ -168,6 +187,13 @@ export function createRenderer(
     setDebug(d) {
       debug = d;
       paint();
+    },
+    setTint(next) {
+      tint = next;
+      paint();
+    },
+    getTint() {
+      return tint ? { r: tint.r, g: tint.g, b: tint.b, a: tint.a } : null;
     },
     destroy() {
       entries = [];

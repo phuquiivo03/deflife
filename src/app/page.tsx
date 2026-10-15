@@ -1,7 +1,9 @@
 import { Suspense } from "react";
 import { GameShell } from "@/components/game/GameShell";
+import { listUiIconFiles } from "@/lib/ui-icon-files";
 
 export default function Home() {
+  const iconFiles = listUiIconFiles();
   return (
     <Suspense
       fallback={
@@ -10,7 +12,7 @@ export default function Home() {
         </div>
       }
     >
-      <GameShell />
+      <GameShell iconFiles={iconFiles} />
     </Suspense>
   );
 }

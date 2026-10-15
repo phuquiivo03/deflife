@@ -7,7 +7,7 @@
 ## 0. TL;DR
 
 - **Game:** *devlife*, a cozy 2D pixel-art developer life-sim. A Vietnamese dev progresses student → junior → senior.
-- **Milestone 1 scope:** one room scene, three stages (student / junior / senior), swap or toggle furniture per slot, a character seated at the desk. No auth, no DB, no game loop beyond redraw-on-change.
+- **Milestone 1 scope:** one room scene, three stages (student / junior / senior), swap or toggle furniture per slot, a character seated at the desk. No auth, no DB. The room redraws when the scene or the day/night tint changes. The day/night clock is the first sim system (§10).
 - **Stack:** Next.js (App Router, TypeScript), Tailwind, shadcn/ui, Zustand, zod. Rendering is **Canvas2D**. Deploy on Vercel; Supabase comes later behind interfaces.
 - **UI chrome:** [`docs/design/DESIGN_SYSTEM.md`](design/DESIGN_SYSTEM.md) (Galmuri / soft gradient) governs all app shell UI. The canvas room is not restyled. The future in-game terminal is a scoped exception: [`docs/design/TERMINAL.md`](design/TERMINAL.md).
 - **World / logical resolution:** **427 × 240 native pixels**, exactly the native room PNGs. Everything is authored in this grid. It is upscaled by an **integer factor computed in device pixels** with nearest-neighbour sampling.
@@ -433,13 +433,14 @@ Resolution rules (`resolveScene`):
 
 ## 6. State management
 
-Zustand with `persist` → localStorage key `devlife:v1`. Include a `version` and `migrate` from day one.
+Zustand with `persist` → localStorage key `devlife:v1`. Include a `version` and `migrate` from day one. **Version 2** adds the in-game clock (`totalMinutes`). v1 saves migrate to day 1, 08:00. See [`docs/systems/time.md`](systems/time.md).
 
 ```ts
 type GameState = {
   stage: StageId;                                    // default 'student'
   loadouts: Record<StageId, Loadout>;                // per stage, sparse (only overrides)
   showCharacter: boolean;                            // default true
+  totalMinutes: number;                              // in-game clock, persisted (v2)
   selectedSlot: string | null;                       // UI only, not persisted
   hoveredSlot: string | null;                        // UI only, not persisted
   cameraX: Record<StageId, number | null>;           // portrait pan, not persisted
@@ -448,7 +449,7 @@ type GameState = {
 };
 ```
 
-- Persist only `stage`, `loadouts` and `showCharacter` (`partialize`).
+- Persist `stage`, `loadouts`, `showCharacter`, and `totalMinutes` (`partialize`). Dev clock speed and pause are not persisted.
 - Hydration: render the loading skeleton until `persist.hasHydrated()` and the atlas are both ready. This avoids SSR mismatch; the canvas is client-only anyway.
 - Derived scene = `useMemo(() => resolveScene(room, catalog, loadouts[stage], { showCharacter }), [...])` → `renderer.setScene()`. Hover and selection only call `setHighlight`.
 - Optional URL sync: `?stage=junior` is read on load (shareable) and written with `router.replace` on change.
@@ -584,7 +585,7 @@ Commit after each step.
    - Outline highlight.
    - `hitTest.ts`.
 8. **SceneCanvas.** ResizeObserver (device-pixel box), DPR change listener, pointer → world mapping, hover/click → store, drag-to-pan in portrait mode, `data-scale` attribute.
-9. **Store.** Zustand + persist (`devlife:v1`, version 1), selectors, URL `?stage=` sync.
+9. **Store.** Zustand + persist (`devlife:v1`, version 2), selectors, URL `?stage=` sync. Version 2 stores `totalMinutes` for the day/night clock.
 10. **UI.** GameShell layout (desktop, mobile portrait, mobile landscape), StageSwitcher, CustomizePanel/SlotRow/ItemThumb, keyboard shortcuts, loading/error/empty states, a11y labels, the reduced-motion fade.
 11. **Debug overlay and `/debug` route.** Use them to fine-tune every (tune) value. Write the final numbers back into the content JSON.
 12. **E2E.** Playwright config (port 4317, `webServer`), flows and screenshot baselines. Do the one-time comparison with `docs/art/expected_*.png`.
@@ -592,3 +593,18 @@ Commit after each step.
 14. **Vercel check.** `pnpm build && pnpm start` locally. Make sure `/debug` is excluded in prod and there are no `fs` reads at runtime.
 
 Out of scope for M1: walking or animation, progression logic, unlocks, auth, Supabase, sound, i18n switching (store both strings; show English with Vietnamese subtitles where specified).
+
+---
+
+## 10. Day/night clock
+
+The first game system. Full API and the subscriber guide: [`docs/systems/time.md`](systems/time.md).
+
+- **1 in-game day = 10 real minutes** (`REAL_MS_PER_GAME_DAY` in `src/game/time/config.ts`). State is total in-game minutes. Day, `HH:MM`, and phase are derived.
+- **Phases** (data, not hard-coded branches): `morning` Sáng 05:00–11:00, `noon` Trưa 11:00–17:00, `evening` Tối 17:00–22:00, `night` Khuya 22:00–05:00. The phase key is the icon key. Pixel icons are `public/ui/icons/icon_<key>.png` (44×44) and `_x4` (176×176). The HUD draws them at an integer scale; an emoji shows only if a file is missing.
+- **HUD:** live `HH:MM` beside `Ngày N`, plus the phase icon and label. **Đi ngủ** is disabled during Sáng/Trưa and enabled (glowing) during Tối/Khuya. Sleep jumps to 06:00 the next day and emits `sleep` for a future energy/health restore.
+- **Room:** per-phase color wash on the canvas, crossfaded. The pixel grid is unchanged.
+- **Loop:** one delta-time ticker, speed multiplier, pause. Large gaps (fast-forward, background tab) still emit every hour, phase, and day boundary.
+- **Bus:** `minute`, `hourChanged`, `phaseChanged`, `dayStarted`, `sleep`. New systems subscribe; they do not edit the clock.
+- **Debug** (`NODE_ENV !== "production"` or `?debug=1`): speed ×1 / ×10 / ×60, pause, jump to phase.
+- **Save:** `devlife:v1` version 2. v1 saves gain `totalMinutes` at 08:00 on day 1.

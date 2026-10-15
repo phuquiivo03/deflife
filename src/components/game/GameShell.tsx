@@ -12,6 +12,8 @@ import { NotificationsPanel } from "./NotificationsPanel";
 import { PlayerInfoPanel } from "./PlayerInfoPanel";
 import { PlayerHudCard } from "./PlayerHudCard";
 import { RoomChamferFrame } from "./RoomChamferFrame";
+import { TimeDebugPanel } from "./TimeDebugPanel";
+import { useGameClock } from "./useGameClock";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
@@ -30,17 +32,19 @@ const ROOM_VIEWPORT_W = 480;
 
 type SidebarTab = "player" | "edit-room";
 
-export function GameShell() {
+export function GameShell({ iconFiles = [] }: { iconFiles?: readonly string[] }) {
   const areaRef = useRef<HTMLDivElement>(null);
   const [isDesktop, setIsDesktop] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>("player");
   const searchParams = useSearchParams();
   const router = useRouter();
   const debug = searchParams.get("debug") === "1";
+  const showTimeDebug = debug || process.env.NODE_ENV !== "production";
 
   const stage = useGameStore((s) => s.stage);
   const setStage = useGameStore((s) => s.setStage);
   const hydrated = useGameStore((s) => s._hasHydrated);
+  useGameClock(hydrated);
   const showCharacter = useGameStore((s) => s.showCharacter);
   const setShowCharacter = useGameStore((s) => s.setShowCharacter);
   const resetStage = useGameStore((s) => s.resetStage);
@@ -188,8 +192,9 @@ export function GameShell() {
             >
               <SceneCanvas areaRef={areaRef} debug={debug} />
             </RoomChamferFrame>
-            <div className="mt-3 w-full flex justify-center px-2">
-              <PlayerHudCard />
+            <div className="mt-3 flex w-full flex-col items-center gap-3 px-2">
+              <PlayerHudCard iconFiles={iconFiles} />
+              {showTimeDebug ? <TimeDebugPanel /> : null}
             </div>
           </div>
         </main>
