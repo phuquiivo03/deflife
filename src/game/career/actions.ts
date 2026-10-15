@@ -1,5 +1,13 @@
 import type { GameEvent } from "../events/types";
-import { addSkillXp, grantedXp, skillXpEvents, studyBlockReason } from "../knowledge/logic";
+import {
+  addSkillXp,
+  canStudyCourse,
+  grantedXp,
+  skillXpEvents,
+  studyBlockReason,
+} from "../knowledge/logic";
+import { MINUTES_PER_DAY } from "../time/config";
+import { advanceMinutes, snapshot } from "../time";
 import {
   boardHasToday,
   jobEligibility,
@@ -16,6 +24,7 @@ import {
   type PlayerEvent,
   type PlayerJob,
   type PlayerSkill,
+  type PlayerStudyCompletion,
   type SimCatalog,
   type SkillId,
 } from "./types";
@@ -76,6 +85,7 @@ export function defaultCareer(
       freelance_completed: 0,
     },
     player_skills: SKILL_IDS.map((skill_id) => ({ skill_id, level: 1, xp: 0 })),
+    player_study_completions: [],
     player_jobs: [],
     player_unlocks: [],
     player_events: [],
@@ -218,6 +228,9 @@ export function applyStudy(
   const activity = catalog.studyActivities.find((row) => row.id === activityId);
   if (!activity) return fail(state, "Không tìm thấy khóa học");
 
+  const completions = state.player_study_completions ?? [];
+  if (!canStudyCourse(activity, completions)) return fail(state, "Đã học khóa này");
+
   const reason = studyBlockReason(
     state.players.money,
     state.players.energy,
@@ -250,6 +263,20 @@ export function applyStudy(
     events.push(...applied.events);
     xpShown += amount;
   }
+  const minutes = activity.hours * 60;
+  const completion: PlayerStudyCompletion = {
+    activity_id: activity.id,
+    skill_id: activity.skill_id,
+    xp_gained: xpShown,
+    completed_day: studyCompletedDay(state, minutes),
+  };
+  next = {
+    ...next,
+    player_study_completions: [
+      ...completions.filter((row) => row.activity_id !== activity.id),
+      completion,
+    ],
+  };
   events.push({
     type: "studyCompleted",
     activityId: activity.id,
@@ -257,7 +284,14 @@ export function applyStudy(
     xp: xpShown,
   });
 
-  return ok(next, events, activity.hours * 60);
+  return ok(next, events, minutes);
+}
+
+/** Day the clock shows after the course hours, using the same advance as the store. */
+function studyCompletedDay(state: CareerState, minutes: number): number {
+  const start =
+    (state.players.game_day - 1) * MINUTES_PER_DAY + state.players.game_minute;
+  return snapshot(advanceMinutes(start, minutes).totalMinutes).day;
 }
 
 export function applyAccept(

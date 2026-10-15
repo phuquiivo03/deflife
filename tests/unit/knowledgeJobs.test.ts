@@ -351,6 +351,39 @@ describe("study and instant jobs", () => {
     const frontend = bought.state.player_skills.find((row) => row.skill_id === "frontend");
     expect(frontend).toEqual({ skill_id: "frontend", level: 1, xp: 80 });
     expect(bought.events.some((event) => event.type === "studyCompleted")).toBe(true);
+    expect(bought.state.player_study_completions).toEqual([
+      { activity_id: "html", skill_id: "frontend", xp_gained: 80, completed_day: 1 },
+    ]);
+
+    const again = applyStudy(bought.state, "html", SIM_CATALOG);
+    expect(again.error).toBe("Đã học khóa này");
+    expect(again.state.players.money).toBe(bought.state.players.money);
+    expect(again.state.player_study_completions).toHaveLength(1);
+  });
+
+  it("records the finish day after a course crosses midnight", () => {
+    const start = defaultCareer(1, 23 * 60, "student", SIM_CATALOG);
+    const bought = applyStudy(start, "html", SIM_CATALOG);
+    expect(bought.state.player_study_completions).toEqual([
+      { activity_id: "html", skill_id: "frontend", xp_gained: 80, completed_day: 2 },
+    ]);
+  });
+
+  it("lets a repeatable course be bought again and replaces its completion", () => {
+    const catalog = {
+      ...SIM_CATALOG,
+      studyActivities: SIM_CATALOG.studyActivities.map((activity) =>
+        activity.id === "html" ? { ...activity, repeatable: true } : activity,
+      ),
+    };
+    const start = defaultCareer(1, 480, "student", catalog);
+    const first = applyStudy(start, "html", catalog);
+    const second = applyStudy(first.state, "html", catalog);
+    expect(second.error).toBeNull();
+    expect(second.state.players.money).toBe(1_500_000 - 400_000);
+    expect(second.state.player_study_completions).toEqual([
+      { activity_id: "html", skill_id: "frontend", xp_gained: 80, completed_day: 1 },
+    ]);
   });
 
   it("completes an offered task in one step and applies the job multiplier", () => {
@@ -503,6 +536,50 @@ describe("migration", () => {
     expect(saved.career.player_jobs[0]?.status).toBe("completed");
     expect(saved.career.player_unlocks).toHaveLength(1);
     expect(saved.career.player_events).toHaveLength(1);
+    expect(saved.career.player_study_completions).toEqual([]);
+  });
+
+  it("treats a version 3 save as having completed no courses", () => {
+    expect(SIM_CATALOG.studyActivities.every((activity) => activity.repeatable === false)).toBe(
+      true,
+    );
+    const saved = migrateSave(
+      {
+        stage: "student",
+        showCharacter: true,
+        totalMinutes: 480,
+        career: {
+          players: { money: 900_000, energy: 40 },
+          player_study_completions: [
+            { activity_id: "html", skill_id: "frontend", xp_gained: 80, completed_day: 3 },
+          ],
+        },
+      },
+      3,
+    );
+    expect(saved.career.players.money).toBe(900_000);
+    expect(saved.career.player_study_completions).toEqual([]);
+  });
+
+  it("keeps course completions written by a version 4 save", () => {
+    const saved = migrateSave(
+      {
+        stage: "student",
+        showCharacter: true,
+        totalMinutes: 480,
+        career: {
+          players: { money: 900_000, energy: 40 },
+          player_study_completions: [
+            { activity_id: "html", skill_id: "frontend", xp_gained: 80, completed_day: 2 },
+            { activity_id: "nope", skill_id: "not-a-skill", xp_gained: 1, completed_day: 1 },
+          ],
+        },
+      },
+      4,
+    );
+    expect(saved.career.player_study_completions).toEqual([
+      { activity_id: "html", skill_id: "frontend", xp_gained: 80, completed_day: 2 },
+    ]);
   });
 });
 

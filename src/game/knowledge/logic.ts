@@ -2,6 +2,7 @@ import type { GameEvent } from "../events/types";
 import type {
   GameConfig,
   PlayerSkill,
+  PlayerStudyCompletion,
   RankBracket,
   SimCatalog,
   SkillId,
@@ -210,6 +211,27 @@ export function skillProgressList(
       xpLine: formatSkillXpLine(row.xp, xpToNext),
     };
   });
+}
+
+/** Missing `repeatable` is once-only, matching the config default. */
+export function isRepeatableCourse(activity: Pick<StudyActivity, "repeatable">): boolean {
+  return activity.repeatable === true;
+}
+
+export function hasCompletedCourse(
+  completions: readonly PlayerStudyCompletion[],
+  activityId: string,
+): boolean {
+  return completions.some((row) => row.activity_id === activityId);
+}
+
+/** Repeatable courses stay buyable. Others leave the shop after one finish. */
+export function canStudyCourse(
+  activity: Pick<StudyActivity, "id" | "repeatable">,
+  completions: readonly PlayerStudyCompletion[],
+): boolean {
+  if (isRepeatableCourse(activity)) return true;
+  return !hasCompletedCourse(completions, activity.id);
 }
 
 export function studyBlockReason(

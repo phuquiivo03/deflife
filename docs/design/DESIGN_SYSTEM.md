@@ -116,6 +116,7 @@ Use `PixelAvatar` + `resolveAvatarAsset()` with the same integer-scale rule.
 
 - HUD card under the room has **no avatar**. Three labeled bars, each with `current/max`: **Sức khỏe** (coral), **Tinh thần** (mint), **Năng lượng** (sky). Health and mood stay stubbed in `src/game/state/playerStats.ts`. Energy, money, and the clock are the career/time state.
 - Same card: money chip, `Ngày` + clock + phase icon, **Đi ngủ**, then **Học** / **Việc làm** / **Kỹ năng**. The Kỹ năng icon is `icon_skills.png`, chosen by `SKILL_MENU_ICON` in `PlayerHudCard.tsx`.
+- **Học** panel has two tabs: **Khóa học** (courses still available to buy) and **Đã học** (finished courses, read-only: skill, XP granted, day completed). Empty states: “Không còn khóa để học.” and “Chưa học khóa nào.” A non-repeatable course moves to **Đã học** after one purchase.
 - **Nhân vật** panel: avatar, name, stage, overall rank badge (rounded mean of the five skill levels), **Danh tiếng**, Freelance `n/100` with a bar, then the five catalog skills from `skillProgressList` (icon, name, rank badge, `Junior 60%`, bar). No stub skill percents.
 - Bars: 1px border, fill coral / mint / sky per vital.
 
