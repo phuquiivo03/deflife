@@ -2,8 +2,8 @@
   "meta": {
     "image": "devlife.png",
     "size": {
-      "w": 483,
-      "h": 439
+      "w": 470,
+      "h": 467
     },
     "scale": "1"
   },
@@ -656,6 +656,30 @@
         "y": 72
       }
     },
+    "character/derived/char_sit_floor": {
+      "frame": {
+        "x": 309,
+        "y": 241,
+        "w": 41,
+        "h": 72
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 1,
+        "w": 41,
+        "h": 72
+      },
+      "sourceSize": {
+        "w": 42,
+        "h": 74
+      },
+      "pivot": {
+        "x": 20,
+        "y": 72
+      }
+    },
     "furniture/junior/bookshelf_shadow": {
       "frame": {
         "x": 80,
@@ -683,7 +707,7 @@
     "furniture/senior/armchair_shadow": {
       "frame": {
         "x": 336,
-        "y": 166,
+        "y": 316,
         "w": 71,
         "h": 21
       },
@@ -706,8 +730,8 @@
     },
     "furniture/student/fan": {
       "frame": {
-        "x": 309,
-        "y": 241,
+        "x": 332,
+        "y": 166,
         "w": 36,
         "h": 70
       },
@@ -730,8 +754,8 @@
     },
     "character/derived/char_sit_side": {
       "frame": {
-        "x": 348,
-        "y": 190,
+        "x": 371,
+        "y": 156,
         "w": 47,
         "h": 68
       },
@@ -754,8 +778,8 @@
     },
     "furniture/junior/office_chair": {
       "frame": {
-        "x": 348,
-        "y": 261,
+        "x": 336,
+        "y": 340,
         "w": 49,
         "h": 68
       },
@@ -778,8 +802,8 @@
     },
     "furniture/senior/sideboard": {
       "frame": {
-        "x": 336,
-        "y": 332,
+        "x": 1,
+        "y": 417,
         "w": 68,
         "h": 49
       },
@@ -802,8 +826,8 @@
     },
     "furniture/senior/keyboard_mat": {
       "frame": {
-        "x": 336,
-        "y": 384,
+        "x": 353,
+        "y": 239,
         "w": 63,
         "h": 22
       },
@@ -826,8 +850,8 @@
     },
     "furniture/senior/monstera_shadow": {
       "frame": {
-        "x": 1,
-        "y": 417,
+        "x": 353,
+        "y": 264,
         "w": 62,
         "h": 21
       },
@@ -850,8 +874,8 @@
     },
     "furniture/junior/monitor": {
       "frame": {
-        "x": 421,
-        "y": 1,
+        "x": 72,
+        "y": 417,
         "w": 61,
         "h": 41
       },
@@ -874,8 +898,8 @@
     },
     "furniture/junior/keyboard_mat": {
       "frame": {
-        "x": 66,
-        "y": 417,
+        "x": 353,
+        "y": 288,
         "w": 59,
         "h": 19
       },
@@ -898,8 +922,8 @@
     },
     "furniture/senior/ergo_chair_shadow": {
       "frame": {
-        "x": 128,
-        "y": 415,
+        "x": 336,
+        "y": 411,
         "w": 59,
         "h": 22
       },
@@ -922,8 +946,8 @@
     },
     "furniture/junior/office_chair_shadow": {
       "frame": {
-        "x": 421,
-        "y": 45,
+        "x": 136,
+        "y": 436,
         "w": 57,
         "h": 19
       },
@@ -946,8 +970,8 @@
     },
     "furniture/student/backpack": {
       "frame": {
-        "x": 402,
-        "y": 384,
+        "x": 244,
+        "y": 414,
         "w": 42,
         "h": 52
       },
@@ -970,8 +994,8 @@
     },
     "furniture/student/backpack_shadow": {
       "frame": {
-        "x": 152,
-        "y": 164,
+        "x": 136,
+        "y": 415,
         "w": 50,
         "h": 16
       },
@@ -994,7 +1018,7 @@
     },
     "furniture/student/books_stack_shadow": {
       "frame": {
-        "x": 190,
+        "x": 189,
         "y": 415,
         "w": 50,
         "h": 14
@@ -1018,8 +1042,8 @@
     },
     "furniture/student/bedside_cabinet_shadow": {
       "frame": {
-        "x": 243,
-        "y": 415,
+        "x": 152,
+        "y": 164,
         "w": 48,
         "h": 14
       },
@@ -1043,7 +1067,7 @@
     "furniture/student/laptop": {
       "frame": {
         "x": 421,
-        "y": 67,
+        "y": 1,
         "w": 48,
         "h": 36
       },
@@ -1066,8 +1090,8 @@
     },
     "furniture/student/plastic_stool_shadow": {
       "frame": {
-        "x": 294,
-        "y": 413,
+        "x": 196,
+        "y": 432,
         "w": 45,
         "h": 14
       },
@@ -1090,8 +1114,8 @@
     },
     "furniture/senior/espresso_machine": {
       "frame": {
-        "x": 447,
-        "y": 106,
+        "x": 289,
+        "y": 413,
         "w": 32,
         "h": 44
       },
@@ -1115,7 +1139,7 @@
     "furniture/student/bedside_cabinet": {
       "frame": {
         "x": 421,
-        "y": 153,
+        "y": 40,
         "w": 40,
         "h": 44
       },
@@ -1138,8 +1162,8 @@
     },
     "furniture/student/fan_shadow": {
       "frame": {
-        "x": 342,
-        "y": 409,
+        "x": 421,
+        "y": 87,
         "w": 44,
         "h": 20
       },
@@ -1162,8 +1186,8 @@
     },
     "furniture/student/books_stack": {
       "frame": {
-        "x": 398,
-        "y": 200,
+        "x": 421,
+        "y": 110,
         "w": 42,
         "h": 43
       },
@@ -1186,8 +1210,8 @@
     },
     "furniture/junior/laptop_stand": {
       "frame": {
-        "x": 443,
-        "y": 200,
+        "x": 421,
+        "y": 156,
         "w": 39,
         "h": 42
       },
@@ -1210,8 +1234,8 @@
     },
     "furniture/student/plastic_stool": {
       "frame": {
-        "x": 443,
-        "y": 245,
+        "x": 421,
+        "y": 201,
         "w": 37,
         "h": 42
       },
@@ -1234,7 +1258,7 @@
     },
     "furniture/junior/drawer_pedestal": {
       "frame": {
-        "x": 407,
+        "x": 419,
         "y": 246,
         "w": 30,
         "h": 35
@@ -1258,8 +1282,8 @@
     },
     "furniture/student/mirror": {
       "frame": {
-        "x": 400,
-        "y": 290,
+        "x": 418,
+        "y": 284,
         "w": 25,
         "h": 34
       },
@@ -1306,8 +1330,8 @@
     },
     "furniture/junior/poster_1": {
       "frame": {
-        "x": 421,
-        "y": 106,
+        "x": 446,
+        "y": 284,
         "w": 23,
         "h": 32
       },
@@ -1330,8 +1354,8 @@
     },
     "furniture/senior/coffee_grinder": {
       "frame": {
-        "x": 165,
-        "y": 131,
+        "x": 452,
+        "y": 246,
         "w": 17,
         "h": 29
       },
@@ -1354,8 +1378,8 @@
     },
     "furniture/senior/frame_1": {
       "frame": {
-        "x": 447,
-        "y": 290,
+        "x": 165,
+        "y": 131,
         "w": 21,
         "h": 28
       },
@@ -1378,8 +1402,8 @@
     },
     "furniture/senior/frame_2": {
       "frame": {
-        "x": 447,
-        "y": 321,
+        "x": 446,
+        "y": 319,
         "w": 21,
         "h": 27
       },
@@ -1402,8 +1426,8 @@
     },
     "furniture/student/kettle": {
       "frame": {
-        "x": 407,
-        "y": 351,
+        "x": 324,
+        "y": 436,
         "w": 21,
         "h": 24
       },
@@ -1426,8 +1450,8 @@
     },
     "furniture/junior/plant_small": {
       "frame": {
-        "x": 428,
-        "y": 290,
+        "x": 189,
+        "y": 131,
         "w": 15,
         "h": 22
       },
@@ -1474,8 +1498,8 @@
     },
     "furniture/senior/plant_small": {
       "frame": {
-        "x": 332,
-        "y": 190,
+        "x": 348,
+        "y": 436,
         "w": 13,
         "h": 22
       },
@@ -1498,8 +1522,8 @@
     },
     "furniture/student/noodle_cup": {
       "frame": {
-        "x": 407,
-        "y": 327,
+        "x": 364,
+        "y": 436,
         "w": 15,
         "h": 20
       },
@@ -1522,8 +1546,8 @@
     },
     "furniture/senior/smart_speaker": {
       "frame": {
-        "x": 472,
-        "y": 67,
+        "x": 154,
+        "y": 390,
         "w": 10,
         "h": 19
       },
@@ -1570,8 +1594,8 @@
     },
     "furniture/junior/mouse": {
       "frame": {
-        "x": 389,
-        "y": 409,
+        "x": 307,
+        "y": 316,
         "w": 10,
         "h": 10
       },
@@ -1594,8 +1618,8 @@
     },
     "furniture/student/mouse": {
       "frame": {
-        "x": 336,
-        "y": 314,
+        "x": 349,
+        "y": 156,
         "w": 9,
         "h": 7
       },

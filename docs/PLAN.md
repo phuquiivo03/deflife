@@ -255,7 +255,7 @@ M1 uses only `sit_back`. The other poses are cut now for later milestones. The f
   - folding_table `[0,6]`: in front of the table, under the window. The room default leaves the chair empty.
   - junior desk `[5,22]`
   - standing_desk `[1,35]`
-- No chair, and the desk defines `floorSit`: hip at `desk.anchor + floorSit.offset`, sprite from `poses[floorSit.pose]`, drawn on the desk's baseline after every socket named in `drawAfter` (later sockets stay in front). The student table uses pose `sit_back` and `drawAfter: ["display"]`, so the head covers the laptop and the mouse stays in front. There is no cross-legged frame; `sit_back` is the seated back-view approximation.
+- No chair, and the desk defines `floorSit`: hip at `desk.anchor + floorSit.offset`, sprite from `poses[floorSit.pose]`, drawn on the desk's baseline after every socket named in `drawAfter` (later sockets stay in front). The student table uses pose `sit_floor` (`character/derived/char_sit_floor.png`, hip 9px from the bottom) and `drawAfter: ["display"]`, so the head covers the laptop and the mouse stays in front.
 - No chair and no `floorSit`: hip at `desk.anchor + desk.seat + [0, −4]` with `sit_back` (the previous fallback).
 - Toggle "Show character" hides him.
 - Long-term the art should provide split `chair_back` / `chair_front` layers. When those exist, the item JSON gets `overlaySprite` and `overlayFromY` is dropped. Keep the renderer code path generic: "draw overlay = sprite + optional source rect".

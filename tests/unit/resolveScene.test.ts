@@ -11,6 +11,7 @@ const frames = (sprite: string) => {
     "furniture/student/laptop": [48, 36],
     "furniture/student/mouse": [9, 7],
     "character/derived/char_sit_back": [40, 72],
+    "character/derived/char_sit_floor": [41, 72],
   };
   const [w, h] = sizes[sprite] ?? [32, 32];
   return { w, h, pivotX: Math.floor(w / 2), pivotY: h };
@@ -61,7 +62,7 @@ describe("resolveScene", () => {
     const character = entries.find((e) => e.key === "character");
     expect(laptop?.x).toBe(238);
     expect(laptop?.y).toBe(78);
-    expect(character?.sprite).toBe("character/derived/char_sit_back");
+    expect(character?.sprite).toBe("character/derived/char_sit_floor");
     expect(character?.x).toBe(242);
     expect(character?.y).toBe(76);
     const order = entries.map((e) => e.key);
