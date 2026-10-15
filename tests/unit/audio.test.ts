@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
 import { SIM_CATALOG } from "../../src/game/career/content";
+import { resolveShippedIcon } from "../../src/lib/pixel-assets";
 import {
   bgmBedForPhase,
   bgmIdForPhase,
@@ -149,6 +150,33 @@ describe("audio manifest", () => {
     );
     expect(stored).toEqual({ music: 0.3, sfx: 1, muted: true });
     expect(AUDIO_STORAGE_KEY).toBe("devlife:audio:v1");
+  });
+});
+
+describe("sound icons", () => {
+  const names = ["sound_on", "sound_off", "volume_low", "volume_high"] as const;
+
+  it("scales the 44px native icons to 22px and does not look for an x4 file", () => {
+    const files = names.map((name) => `icon_${name}.png`);
+    for (const name of names) {
+      expect(resolveShippedIcon(name, 22, files)).toEqual({
+        src: `/ui/icons/icon_${name}.png`,
+        displayPx: 22,
+      });
+    }
+  });
+
+  it("ships each sound icon as a 44×44 png", () => {
+    for (const name of names) {
+      const file = path.join(process.cwd(), "public/ui/icons", `icon_${name}.png`);
+      const bytes = fs.readFileSync(file);
+      expect(bytes.subarray(0, 8).toString("hex")).toBe("89504e470d0a1a0a");
+      expect(bytes.readUInt32BE(16)).toBe(44);
+      expect(bytes.readUInt32BE(20)).toBe(44);
+      expect(
+        fs.existsSync(path.join(process.cwd(), "public/ui/icons", `icon_${name}_x4.png`)),
+      ).toBe(false);
+    }
   });
 });
 
