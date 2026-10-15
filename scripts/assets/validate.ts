@@ -49,6 +49,11 @@ async function main() {
     if (item.shadow && !frameKeys.has(item.shadow)) {
       fail(`Missing shadow frame ${item.shadow}`);
     }
+    if (item.floorSit) {
+      const pose = catalog.poses[item.floorSit.pose];
+      if (!pose) fail(`Unknown pose ${item.floorSit.pose} on ${item.id}`);
+      if (!frameKeys.has(pose.sprite)) fail(`Missing pose sprite ${pose.sprite}`);
+    }
     const spriteFile = path.join(ROOT, "public/assets", `${item.sprite}.png`);
     if (!item.shadow && item.kind !== "wall" && item.kind !== "decal") {
       await checkHardAlpha(spriteFile);

@@ -7,6 +7,7 @@ import type {
   DrawEntry,
   Item,
   Loadout,
+  PoseDef,
   ResolvedPlacement,
   ResolveSceneOptions,
   Room,
@@ -22,6 +23,7 @@ export type FrameLookup = (
 type Catalog = {
   itemsById: Map<string, Item>;
   socketOrder: string[];
+  poses: Record<string, PoseDef>;
 };
 
 const LAYER_WALL = 1;
@@ -231,12 +233,22 @@ export function resolveScene(
   if (opts.showCharacter && deskPlacement) {
     const deskItem = catalog.itemsById.get(deskPlacement.itemId);
     if (deskItem?.seat) {
-      const charFrame = frames(CHAR_POSE_SIT_BACK);
+      const onChair = Boolean(seatPlacement && seatItem?.seatPoint);
+      const floorPose = !onChair ? deskItem.floorSit : undefined;
+      const pose = floorPose ? catalog.poses[floorPose.pose] : undefined;
+      const sprite = pose?.sprite ?? CHAR_POSE_SIT_BACK;
+      const hipFromBottom = pose?.hipFromBottom ?? SIT_HIP_FROM_BOTTOM;
+      const charFrame = frames(sprite);
       let hipAnchor: [number, number];
-      if (seatPlacement && seatItem?.seatPoint) {
+      if (onChair && seatPlacement && seatItem?.seatPoint) {
         hipAnchor = [
           seatPlacement.anchor[0] + seatItem.seatPoint[0],
           seatPlacement.anchor[1] + seatItem.seatPoint[1],
+        ];
+      } else if (floorPose) {
+        hipAnchor = [
+          deskPlacement.anchor[0] + floorPose.offset[0],
+          deskPlacement.anchor[1] + floorPose.offset[1],
         ];
       } else {
         hipAnchor = [
@@ -247,17 +259,27 @@ export function resolveScene(
       const cx = hipAnchor[0];
       const cy = hipAnchor[1];
       const charX = cx - Math.floor(charFrame.w / 2);
-      const charY = cy - charFrame.h + SIT_HIP_FROM_BOTTOM;
-      const baseline = seatPlacement?.baseline ?? hipAnchor[1];
+      const charY = cy - charFrame.h + hipFromBottom;
+      let sortBaseline = seatPlacement?.baseline ?? hipAnchor[1];
+      let sortSub: DrawEntry["sortSub"] = 1;
+      if (floorPose) {
+        sortBaseline = deskPlacement.baseline;
+        let maxPrimary = 0;
+        for (const socket of floorPose.drawAfter) {
+          const primary = 1 + socketRank(socketOrder, socket);
+          if (primary > maxPrimary) maxPrimary = primary;
+        }
+        sortSub = [maxPrimary, 1_000_000, 0];
+      }
 
       entries.push({
         key: "character",
-        sprite: CHAR_POSE_SIT_BACK,
+        sprite,
         x: charX,
         y: charY,
         layer: LAYER_OBJECT,
-        sortBaseline: baseline,
-        sortSub: 1,
+        sortBaseline,
+        sortSub,
         anchor: hipAnchor,
         hitTest: false,
       });
@@ -278,7 +300,7 @@ export function resolveScene(
             srcW: chairFrame.w,
             srcH: chairFrame.h - cutY,
             layer: LAYER_OBJECT,
-            sortBaseline: baseline,
+            sortBaseline,
             sortSub: 2,
             hitTest: false,
           });

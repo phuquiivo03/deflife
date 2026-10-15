@@ -1,4 +1,4 @@
-import type { Item, Room, StageId } from "../types";
+import type { Item, PoseDef, Room, StageId } from "../types";
 import { assertRoomSize, catalogSchema, roomSchema } from "./schema";
 import catalogJson from "./items.json";
 import studentRoom from "./rooms/student.json";
@@ -16,6 +16,14 @@ for (const room of roomsParsed) {
   assertRoomSize(room);
 }
 
+const poses = catalogParsed.poses as Record<string, PoseDef>;
+for (const item of catalogParsed.items) {
+  const poseId = item.floorSit?.pose;
+  if (poseId && !poses[poseId]) {
+    throw new Error(`Unknown pose ${poseId} on ${item.id}`);
+  }
+}
+
 const itemsById = new Map<string, Item>(
   catalogParsed.items.map((i) => [i.id, i as Item]),
 );
@@ -29,6 +37,7 @@ export function getCatalog() {
     version: catalogParsed.version,
     units: catalogParsed.units,
     socketOrder: catalogParsed.socketOrder,
+    poses,
     items: catalogParsed.items as Item[],
     itemsById,
   };

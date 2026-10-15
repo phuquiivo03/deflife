@@ -73,13 +73,13 @@ The room art has an effective "art pixel" ≈ 1 native px (3 source px).
 | Stage / item | trimmed w×h | default anchor (bottom-centre) | v1→v2 scale | flag |
 |---|---|---|---|---|
 | student/mattress | 111×83 | (45,221) | 1.40 | resampled up |
-| student/folding_table | 89×59 | (184,198) | 1.24 | |
+| student/folding_table | 89×35 | (262,133) under the window | native | redrawn; shadow kept; no chair |
 | student/plastic_stool | 37×42 | seat socket | 1.10 | |
 | student/fan | 36×70 | (126,144) | 1.12 | |
 | student/bedside_cabinet | 40×44 | (158,139) | 1 | |
 | student/backpack | 42×52 | (110,221) | 1 | |
 | student/books_stack | 42×43 | (143,235) | 1 | |
-| student/laptop | 53×51 | desk.display | 1 | |
+| student/laptop | 48×36 | desk.display `[0,−19]` | native | redrawn |
 | student/mouse | 9×7 | desk.mouse | 0.70 | |
 | student/kettle | 21×24 | cabinet.top | 0.75 | |
 | student/noodle_cup ×2 | 15×20 | (203,128), (189,126) | 0.73 | |
@@ -252,10 +252,11 @@ M1 uses only `sit_back`. The other poses are cut now for later milestones. The f
   - Mid-height cuts leave a visible horizontal seam.
   - Drawing the character fully over the chair looks like he is standing in front of it.
 - Desk `seat` offsets (where the chair anchor goes):
-  - folding_table `[26,24]`: the stool sits right of the laptop so his head doesn't hide the screen (tune)
+  - folding_table `[0,6]`: in front of the table, under the window. The room default leaves the chair empty.
   - junior desk `[5,22]`
   - standing_desk `[1,35]`
-- No chair selected (seat = None) → he sits cross-legged on the floor with the same `sit_back` pose: hip at `desk.anchor + desk.seat + [0, −4]`, baseline = that y (tune). This is a nice student-room vibe.
+- No chair, and the desk defines `floorSit`: hip at `desk.anchor + floorSit.offset`, sprite from `poses[floorSit.pose]`, drawn on the desk's baseline after every socket named in `drawAfter` (later sockets stay in front). The student table uses pose `sit_back` and `drawAfter: ["display"]`, so the head covers the laptop and the mouse stays in front. There is no cross-legged frame; `sit_back` is the seated back-view approximation.
+- No chair and no `floorSit`: hip at `desk.anchor + desk.seat + [0, −4]` with `sit_back` (the previous fallback).
 - Toggle "Show character" hides him.
 - Long-term the art should provide split `chair_back` / `chair_front` layers. When those exist, the item JSON gets `overlaySprite` and `overlayFromY` is dropped. Keep the renderer code path generic: "draw overlay = sprite + optional source rect".
 

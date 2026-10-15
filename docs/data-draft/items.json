@@ -28,37 +28,47 @@
    "sockets": {
     "display": [
      0,
-     -20
+     -19
     ],
     "keyboard": [
      0,
-     -16
+     -18
     ],
     "mouse": [
-     24,
-     -26
+     30,
+     -20
     ],
     "cup": [
-     -32,
-     -26
+     -34,
+     -25
     ],
     "plant": [
      -36,
-     -34
+     -27
     ],
     "side": [
      -28,
-     -24
+     -23
     ],
     "gadget": [
      34,
-     -32
+     -27
     ]
    },
    "seat": [
-    26,
-    24
-   ]
+    0,
+    6
+   ],
+   "floorSit": {
+    "pose": "sit_back",
+    "offset": [
+     0,
+     6
+    ],
+    "drawAfter": [
+     "display"
+    ]
+   }
   },
   {
    "id": "junior.desk",
@@ -486,5 +496,15 @@
   "top",
   "top2",
   "mouse"
- ]
+ ],
+ "poses": {
+  "sit_back": {
+   "sprite": "character/derived/char_sit_back",
+   "hipFromBottom": 9
+  },
+  "sit_side": {
+   "sprite": "character/derived/char_sit_side",
+   "hipFromBottom": 9
+  }
+ }
 }

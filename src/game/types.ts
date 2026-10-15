@@ -42,6 +42,23 @@ export type ItemKind = "floor" | "surface" | "wall" | "decal";
 
 export type Localized = { en: string; vi: string };
 
+/** Seated pose looked up by id. `hipFromBottom` is how far the hip sits above the sprite bottom. */
+export type PoseDef = {
+  sprite: string;
+  hipFromBottom: number;
+};
+
+/**
+ * How to draw the character when this desk has no chair.
+ * `offset` is the hip relative to the desk anchor.
+ * `drawAfter` lists desk sockets the pose is painted over (later sockets stay in front).
+ */
+export type FloorSit = {
+  pose: string;
+  offset: Vec;
+  drawAfter: string[];
+};
+
 export type Item = {
   id: string;
   stage: StageId;
@@ -57,6 +74,7 @@ export type Item = {
   seat?: Vec;
   seatPoint?: Vec;
   overlayFromY?: number;
+  floorSit?: FloorSit;
   notes?: string[];
 };
 
