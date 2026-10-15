@@ -155,12 +155,12 @@ function HudVital({
   testId: string;
 }) {
   return (
-    <div className="min-w-0" data-testid={testId} data-value={value} data-max={max}>
-      <div className="mb-1 flex items-center gap-1">
+    <div className="hud-vital min-w-0" data-testid={testId} data-value={value} data-max={max}>
+      <div className="hud-vital-head mb-1">
         <PixelIcon name={icon} size={22} alt="" />
-        <span className="flex min-w-0 flex-1 items-baseline justify-between gap-1 font-galmuri-7 text-galmuri-small">
-          <span className="truncate text-[var(--muted-foreground)]">{label}</span>
-          <span className="shrink-0 text-[var(--foreground)]">
+        <span className="flex min-w-0 flex-col font-galmuri-7 text-galmuri-small leading-tight">
+          <span className="whitespace-nowrap text-[var(--muted-foreground)]">{label}</span>
+          <span className="whitespace-nowrap text-[var(--foreground)]">
             {value}/{max}
           </span>
         </span>
