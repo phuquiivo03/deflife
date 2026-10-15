@@ -13,7 +13,8 @@
     "assets:cut": "tsx scripts/assets/cut-character.ts",
     "assets:atlas": "tsx scripts/assets/build-atlas.ts",
     "assets": "pnpm assets:cut && pnpm assets:atlas",
-    "assets:check": "pnpm assets && tsx scripts/assets/validate.ts"
+    "assets:check": "pnpm assets && tsx scripts/assets/validate.ts",
+    "audio:sprite": "node scripts/audio/build-sfx-sprite.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.3.0",

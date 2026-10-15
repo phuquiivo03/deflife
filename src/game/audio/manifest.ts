@@ -1,12 +1,15 @@
 export type AudioCueType = "bgm" | "sfx";
 
+export type AudioCategory = "ui" | "economy" | "time" | "bgm";
+
 export type AudioCue = {
   id: string;
   /** Ogg path relative to `public/audio`, e.g. `ogg/sfx/sfx_ui_click.ogg`. */
   file: string;
-  /** Optional mp3 fallback. Ignored for BGM. */
+  /** Mp3 path. Used for BGM when the browser cannot play ogg, and kept for the per-file pack. */
   mp3?: string;
   type: AudioCueType;
+  category: AudioCategory;
   loop: boolean;
   volume: number;
 };
@@ -55,7 +58,17 @@ function asCue(row: unknown): AudioCue | null {
     typeof record.loop === "boolean" ? record.loop : type === "bgm";
   const volume =
     typeof record.volume === "number" ? clamp01(record.volume) : 1;
-  return { id, file, mp3, type, loop, volume };
+  const category = cueCategory(
+    typeof record.category === "string" ? record.category : undefined,
+    type,
+  );
+  return { id, file, mp3, type, category, loop, volume };
+}
+
+function cueCategory(value: string | undefined, type: AudioCueType): AudioCategory {
+  if (type === "bgm") return "bgm";
+  if (value === "economy" || value === "time" || value === "ui") return value;
+  return "ui";
 }
 
 /** Accepts an array or `{ assets | cues | sounds | files | items | audio }`. Bad rows are dropped. */
@@ -71,7 +84,7 @@ export function parseManifest(data: unknown): AudioCue[] {
   return cues;
 }
 
-function audioPublicPath(file: string): string {
+export function publicAudioUrl(file: string): string {
   const cleaned = file.replace(/^\/+/, "");
   if (!cleaned) return "";
   if (cleaned.startsWith("audio/")) return `/${cleaned}`;
@@ -79,15 +92,21 @@ function audioPublicPath(file: string): string {
 }
 
 /**
- * BGM is ogg only — the mp3 exports have leading silence that clicks on loop.
- * SFX tries the ogg `file`, then the manifest `mp3` path.
+ * Per-file URLs for the shipped pack. Playback does not use these for SFX
+ * (those come from the sprite). BGM selects ogg or mp3 separately via `bgmUrl`.
  */
 export function cueUrls(cue: Pick<AudioCue, "file" | "mp3" | "type">): string[] {
-  const ogg = audioPublicPath(cue.file);
+  const ogg = publicAudioUrl(cue.file);
   if (!ogg) return [];
   if (cue.type === "bgm") return [ogg];
-  const mp3 = cue.mp3 ? audioPublicPath(cue.mp3) : "";
+  const mp3 = cue.mp3 ? publicAudioUrl(cue.mp3) : "";
   return mp3 ? [ogg, mp3] : [ogg];
+}
+
+/** Ogg when the browser can play it. Mp3 otherwise — callers skip encoder padding. */
+export function bgmUrl(cue: Pick<AudioCue, "file" | "mp3">, format: "ogg" | "mp3"): string {
+  if (format === "mp3" && cue.mp3) return publicAudioUrl(cue.mp3);
+  return publicAudioUrl(cue.file);
 }
 
 export function resolveCueId(

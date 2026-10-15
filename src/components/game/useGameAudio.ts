@@ -6,6 +6,8 @@ import type { GameEvent } from "@/game/events/types";
 import { SIM_CATALOG } from "@/game/career/content";
 import { cueForHit, cueKeysForGameEvent, planTimeAudio, type PointerHit } from "@/game/audio/cues";
 import { createAudioEngine } from "@/game/audio/engine";
+import { preferredAudioFormat } from "@/game/audio/sprite";
+import { createBrowserAudioContext } from "@/game/audio/webaudio";
 import { attachAudioEngine } from "@/game/audio/client";
 import { getAudioSettings, subscribeAudioSettings } from "@/game/audio/settings";
 import { useGameStore } from "@/game/state/store";
@@ -50,15 +52,17 @@ export function useGameAudio(): void {
       const reduced =
         typeof window.matchMedia === "function" &&
         window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const format = preferredAudioFormat((mime) => {
+        try {
+          return document.createElement("audio").canPlayType(mime);
+        } catch {
+          return "";
+        }
+      });
       engine = createAudioEngine({
         fadeMs: reduced ? 0 : 700,
-        createSink: () => {
-          try {
-            return new Audio();
-          } catch {
-            return null;
-          }
-        },
+        format,
+        createContext: createBrowserAudioContext,
       });
     } catch {
       return;
@@ -72,14 +76,7 @@ export function useGameAudio(): void {
       /* ignore */
     }
 
-    let cancelled = false;
-    void fetch("/audio/manifest.json")
-      .then((response) => (response.ok ? response.json() : null))
-      .then((data) => {
-        if (cancelled || data == null) return;
-        engine.setManifest(data);
-      })
-      .catch(() => {});
+    void engine.preloadSfx();
 
     const offSettings = subscribeAudioSettings((levels) => {
       try {
@@ -133,11 +130,20 @@ export function useGameAudio(): void {
     ];
 
     let lastHover = 0;
+    const gestureListener: AddEventListenerOptions = { capture: true, passive: true };
+    const onUnlock = () => {
+      try {
+        engine.unlock();
+      } catch {
+        /* ignore */
+      }
+    };
     const onPointerDown = (event: PointerEvent) => {
+      const at = performance.now();
       try {
         engine.unlock();
         const cue = cueForHit(describePointerTarget(event.target), "down");
-        if (cue) engine.playKey(cue);
+        if (cue) engine.playKey(cue, at);
       } catch {
         /* ignore */
       }
@@ -157,25 +163,18 @@ export function useGameAudio(): void {
         /* ignore */
       }
     };
-    const onKeyDown = () => {
-      try {
-        engine.unlock();
-      } catch {
-        /* ignore */
-      }
-    };
-
-    window.addEventListener("pointerdown", onPointerDown, true);
+    window.addEventListener("touchstart", onUnlock, gestureListener);
+    window.addEventListener("pointerdown", onPointerDown, gestureListener);
     window.addEventListener("pointerover", onPointerOver, true);
-    window.addEventListener("keydown", onKeyDown, true);
+    window.addEventListener("keydown", onUnlock, gestureListener);
 
     return () => {
-      cancelled = true;
       offSettings();
       for (const off of offs) off();
-      window.removeEventListener("pointerdown", onPointerDown, true);
+      window.removeEventListener("touchstart", onUnlock, gestureListener);
+      window.removeEventListener("pointerdown", onPointerDown, gestureListener);
       window.removeEventListener("pointerover", onPointerOver, true);
-      window.removeEventListener("keydown", onKeyDown, true);
+      window.removeEventListener("keydown", onUnlock, gestureListener);
       attachAudioEngine(null);
       engine.dispose();
     };
