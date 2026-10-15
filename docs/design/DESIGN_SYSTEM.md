@@ -134,13 +134,14 @@ Octagonal **clip-path** frame around the room (`RoomChamferFrame`), reference `u
 | f1 | 16px | 3px | `#1C1745` outer line |
 | f2 | 14px | 3px | gradient `#A99CF0` → `#7E70D0` bevel |
 | f3 | 12px | 7px | gradient 160deg `#4A3F8C`, `#2D2763` 60%, `#3A2F78` body |
-| f4 | 8px | 2px | `#15112F` inner line |
-| f5 | 6px | — | canvas + **inset** shadow `0 4px 10px rgba(0,0,0,.5)` (scaled) |
+| f5 | 6px | — | canvas clip, flush on f3, + **inset** shadow `0 4px 10px rgba(0,0,0,.5)` (scaled) |
+
+There is **no f4 / `#15112F` inner line** and no padding between the purple body and the canvas. The canvas slot (`.room-canvas-slot`) is transparent and shrink-wraps the canvas, so the purple frame meets the canvas edge. No dark letterbox behind the canvas.
 
 **Glow:** `.room-frame-glow` wrapper uses `filter: drop-shadow(...)` (not `box-shadow` — clip-path clips box-shadow).  
 **Label plate:** chamfer `c6`, bg `#E9E4F5`, text `#3B3466`, stage title from room content.
 
-Canvas sizing `ref` stays on the inner room area; pointer hit-testing and `?debug=1` unchanged.
+Canvas sizing `ref` stays on the room-size cap box; the visible frame wraps the canvas inside it. Pointer hit-testing and `?debug=1` unchanged.
 
 ---
 

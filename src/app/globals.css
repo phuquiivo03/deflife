@@ -152,8 +152,8 @@ body {
   background: linear-gradient(160deg, #4a3f8c, #2d2763 60%, #3a2f78);
 }
 
-.chamfer-frame-f4 {
-  background: #15112f;
+.room-canvas-slot {
+  background: transparent;
 }
 
 .chamfer-stage-plate {

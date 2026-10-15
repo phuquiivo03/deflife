@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getCatalog, getRoom } from "@/game/content";
 import { resolveScene } from "@/game/layout/resolveScene";
 import { loadAtlas, type LoadedAtlas } from "@/game/render/atlas";
+import { canvasCssWithinFrame } from "@/lib/chamfer-frame";
 import { createRenderer } from "@/game/render/canvasRenderer";
 import { hitTestEntries } from "@/game/render/hitTest";
 import { computeView } from "@/game/view/computeView";
@@ -155,7 +156,8 @@ export function SceneCanvas({ areaRef, debug = false }: Props) {
         focusX: room.focusX,
         cameraX: cam,
       });
-      rendererRef.current?.setView(view);
+      const fitted = canvasCssWithinFrame(view.cssW, view.cssH, rect.width, rect.height);
+      rendererRef.current?.setView({ ...view, cssW: fitted.cssW, cssH: fitted.cssH });
     };
 
     const ro = new ResizeObserver(update);
@@ -180,8 +182,8 @@ export function SceneCanvas({ areaRef, debug = false }: Props) {
       const el = areaRef.current;
       if (!canvas || !el) return null;
       const rect = canvas.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return null;
       const dpr = window.devicePixelRatio || 1;
-      const scale = Number(canvas.dataset.scale || "1");
       const view = computeView({
         areaCssW: el.getBoundingClientRect().width,
         areaCssH: el.getBoundingClientRect().height,
@@ -190,9 +192,9 @@ export function SceneCanvas({ areaRef, debug = false }: Props) {
         focusX: room.focusX,
         cameraX: cameraXStore,
       });
-      const lx = ((clientX - rect.left) * dpr) / scale;
-      const ly = ((clientY - rect.top) * dpr) / scale;
-      return { x: Math.floor(lx + view.cameraX), y: Math.floor(ly) };
+      const x = ((clientX - rect.left) / rect.width) * view.viewW + view.cameraX;
+      const y = ((clientY - rect.top) / rect.height) * view.viewH;
+      return { x: Math.floor(x), y: Math.floor(y) };
     },
     [areaRef, room.focusX, cameraXStore],
   );
@@ -217,11 +219,21 @@ export function SceneCanvas({ areaRef, debug = false }: Props) {
       const el = areaRef.current;
       if (!canvas || !el) return;
       const dpr = window.devicePixelRatio || 1;
-      const scale = Number(canvas.dataset.scale || "1");
-      const dx = ((e.clientX - dragRef.current.x) * dpr) / scale;
+      const rect = canvas.getBoundingClientRect();
+      const area = el.getBoundingClientRect();
+      const shown = computeView({
+        areaCssW: area.width,
+        areaCssH: area.height,
+        dpr,
+        portrait: true,
+        focusX: room.focusX,
+        cameraX: dragRef.current.cam,
+      });
+      const worldPerPx = rect.width > 0 ? shown.viewW / rect.width : 1;
+      const dx = (e.clientX - dragRef.current.x) * worldPerPx;
       const view = computeView({
-        areaCssW: el.getBoundingClientRect().width,
-        areaCssH: el.getBoundingClientRect().height,
+        areaCssW: area.width,
+        areaCssH: area.height,
         dpr,
         portrait: true,
         focusX: room.focusX,
@@ -293,7 +305,7 @@ export function SceneCanvas({ areaRef, debug = false }: Props) {
       areaRef.current.getBoundingClientRect().width;
 
   return (
-    <div className="relative flex items-center justify-center">
+    <div className="relative flex w-max items-center justify-center">
       {portrait && (
         <>
           <Button
