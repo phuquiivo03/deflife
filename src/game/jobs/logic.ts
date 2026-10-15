@@ -1,4 +1,5 @@
 import type {
+  CareerMilestone,
   JobTemplate,
   JobTemplateRequirement,
   PlayerJob,
@@ -6,6 +7,17 @@ import type {
   PlayerSkill,
   SkillDef,
 } from "../career/types";
+
+/** Highest freelance milestone, used as the profile bar's full mark. */
+export function freelanceGoal(
+  milestones: readonly Pick<CareerMilestone, "freelance_completed">[],
+): number {
+  let max = 0;
+  for (const row of milestones) {
+    if (row.freelance_completed > max) max = row.freelance_completed;
+  }
+  return max;
+}
 
 export type JobBlock = {
   ok: boolean;

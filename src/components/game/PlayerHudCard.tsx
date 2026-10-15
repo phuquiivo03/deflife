@@ -1,38 +1,40 @@
 "use client";
 
 import { SIM_CATALOG } from "@/game/career/content";
-import { STUB_PLAYER } from "@/game/state/playerStats";
+import { STUB_PLAYER, VITAL_MAX } from "@/game/state/playerStats";
 import { useGameStore, type CareerPanel } from "@/game/state/store";
 import { canSleepAt, phaseById, snapshot, type PhaseId } from "@/game/time";
 import { resolveShippedIcon } from "@/lib/pixel-assets";
 import { cn } from "@/lib/utils";
 import { PixelIcon } from "./PixelIcon";
 import { formatVnd } from "@/lib/format-currency";
-import { PixelAvatar } from "./PixelAvatar";
 import { PanelCard } from "@/components/ui/panel-card";
 import { Button } from "@/components/ui/button";
 import { StatBar } from "./StatBar";
+
+/** Native icon for the Kỹ năng button. Swap this name when a new file ships. */
+export const SKILL_MENU_ICON = "skills";
 
 const CAREER_ACTIONS = [
   {
     id: "study",
     testId: "open-study",
     label: "Học",
-    icon: "learn_course",
+    icon: "learn_book",
     tone: "hud-action-study",
   },
   {
     id: "jobs",
     testId: "open-jobs",
     label: "Việc làm",
-    icon: "job",
+    icon: "job_freelance",
     tone: "hud-action-jobs",
   },
   {
     id: "skills",
     testId: "open-skills",
     label: "Kỹ năng",
-    icon: "skill_up",
+    icon: SKILL_MENU_ICON,
     tone: "hud-action-skills",
   },
 ] as const satisfies readonly {
@@ -55,81 +57,71 @@ export function PlayerHudCard({ iconFiles = [] }: { iconFiles?: readonly string[
   const canSleep = useGameStore((s) => canSleepAt(s.totalMinutes));
   const openCareerPanel = useGameStore((s) => s.openCareerPanel);
 
+  const energyMax = SIM_CATALOG.config.energy_max;
+
   return (
     <PanelCard className="w-full max-w-[520px] p-3">
-      <div className="flex gap-3">
-        <div
-          className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[var(--panel-border)] bg-[#b8d9f0]"
+      <div className="grid grid-cols-3 gap-2">
+        <HudVital
+          icon="health"
+          label="Sức khỏe"
+          value={p.health}
+          max={VITAL_MAX}
+          tone="coral"
+          testId="hud-health"
+        />
+        <HudVital
+          icon="mood"
+          label="Tinh thần"
+          value={p.mood}
+          max={VITAL_MAX}
+          tone="mint"
+          testId="hud-mood"
+        />
+        <HudVital
+          icon="energy"
+          label="Năng lượng"
+          value={energy}
+          max={energyMax}
+          tone="sky"
+          testId="hud-energy"
+        />
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <span className="hud-chip font-galmuri-9 text-galmuri-body text-[var(--foreground)]">
+          <PixelIcon name="savings" size={22} alt="" />
+          <span data-testid="hud-money">{formatVnd(money)}</span>
+        </span>
+        <span
+          className={
+            fastForward
+              ? "hud-chip fast-forward-flash font-galmuri-7 text-galmuri-small text-[var(--foreground)]"
+              : "hud-chip font-galmuri-7 text-galmuri-small text-[var(--foreground)]"
+          }
+          data-testid="game-clock"
+          data-day={day}
+          data-time={clockLabel}
+          data-phase={phaseId}
+          data-fast-forward={fastForward ? "1" : "0"}
         >
-          <PixelAvatar role="player" size={64} alt={p.name} />
-        </div>
-        <div className="min-w-0 flex-1 space-y-2">
-          <div className="space-y-1">
-            <div className="flex items-center gap-1.5">
-              <PixelIcon name="health" size={22} />
-              <StatBar value={p.health} tone="coral" className="flex-1" />
-            </div>
-            <div className="flex items-center gap-1.5">
-              <PixelIcon name="mood" size={22} />
-              <StatBar value={p.mood} tone="mint" className="flex-1" />
-            </div>
-            <div
-              className="flex items-center gap-1.5"
-              data-testid="hud-energy"
-              data-value={energy}
-            >
-              <PixelIcon name="energy" size={22} />
-              <StatBar
-                value={energy}
-                max={SIM_CATALOG.config.energy_max}
-                tone="sky"
-                className="flex-1"
-              />
-            </div>
-          </div>
-          <div className="flex flex-wrap items-center justify-between gap-2 font-galmuri-9 text-galmuri-body text-[var(--foreground)]">
-            <span className="inline-flex items-center gap-1.5">
-              <PixelIcon name="savings" size={22} />
-              <span data-testid="hud-money">{formatVnd(money)}</span>
-            </span>
-            <span
-              className={
-                fastForward
-                  ? "fast-forward-flash inline-flex flex-wrap items-center gap-x-2 gap-y-1 text-[var(--muted-foreground)]"
-                  : "inline-flex flex-wrap items-center gap-x-2 gap-y-1 text-[var(--muted-foreground)]"
-              }
-              data-testid="game-clock"
-              data-day={day}
-              data-time={clockLabel}
-              data-phase={phaseId}
-              data-fast-forward={fastForward ? "1" : "0"}
-            >
-              <PixelIcon name="clock" size={22} alt="" />
-              <span>Ngày {day}</span>
-              <span className="text-[var(--foreground)]">{clockLabel}</span>
-              <PhaseMark phaseId={phaseId} iconFiles={iconFiles} />
-            </span>
-          </div>
-          <div className="flex flex-wrap items-center justify-end gap-2">
-            <Button
-              type="button"
-              size="sm"
-              showArrow={false}
-              disabled={!canSleep}
-              aria-disabled={!canSleep}
-              title={
-                canSleep
-                  ? "Ngủ đến 06:00 ngày mai"
-                  : "Chỉ ngủ được vào Tối hoặc Khuya"
-              }
-              className={canSleep ? "sleep-glow" : undefined}
-              onClick={sleep}
-              data-testid="sleep-button"
-            >
-              Đi ngủ
-            </Button>
-          </div>
-        </div>
+          <PhaseMark phaseId={phaseId} iconFiles={iconFiles} />
+          <span>Ngày {day}</span>
+          <span>{clockLabel}</span>
+          <span>{phaseById(phaseId).label}</span>
+        </span>
+        <Button
+          type="button"
+          size="sm"
+          showArrow={false}
+          disabled={!canSleep}
+          aria-disabled={!canSleep}
+          title={canSleep ? "Ngủ đến 06:00 ngày mai" : "Chỉ ngủ được vào Tối hoặc Khuya"}
+          className={canSleep ? "hud-sleep sleep-glow ml-auto" : "hud-sleep ml-auto"}
+          onClick={sleep}
+          data-testid="sleep-button"
+        >
+          Đi ngủ
+        </Button>
       </div>
       <div className="hud-actions mt-3">
         <div className="hud-actions-grid">
@@ -144,6 +136,37 @@ export function PlayerHudCard({ iconFiles = [] }: { iconFiles?: readonly string[
         </div>
       </div>
     </PanelCard>
+  );
+}
+
+function HudVital({
+  icon,
+  label,
+  value,
+  max,
+  tone,
+  testId,
+}: {
+  icon: string;
+  label: string;
+  value: number;
+  max: number;
+  tone: "coral" | "mint" | "sky";
+  testId: string;
+}) {
+  return (
+    <div className="min-w-0" data-testid={testId} data-value={value} data-max={max}>
+      <div className="mb-1 flex items-center gap-1">
+        <PixelIcon name={icon} size={22} alt="" />
+        <span className="flex min-w-0 flex-1 items-baseline justify-between gap-1 font-galmuri-7 text-galmuri-small">
+          <span className="truncate text-[var(--muted-foreground)]">{label}</span>
+          <span className="shrink-0 text-[var(--foreground)]">
+            {value}/{max}
+          </span>
+        </span>
+      </div>
+      <StatBar value={value} max={max} tone={tone} />
+    </div>
   );
 }
 
@@ -193,7 +216,6 @@ function PhaseMark({
           </span>
         )}
       </span>
-      <span>{phase.label}</span>
     </span>
   );
 }

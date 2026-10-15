@@ -25,6 +25,7 @@
   --shadow-panel: 0 8px 24px rgba(30, 20, 80, 0.25);
   --accent-coral: #f0625f;
   --accent-mint: #5ccb9a;
+  --hud-job: #3fb487;
   --accent-sky: #4a90e2;
   --accent-violet: #5a63c4;
   --tab-lavender: #e8e2f4;
@@ -240,16 +241,38 @@ body {
   animation: hud-action-pulse 2.4s steps(4, end) infinite;
 }
 
+.hud-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-panel);
+  background: #fff;
+  padding: 2px 10px;
+}
+
+.hud-sleep {
+  border-color: transparent;
+  background: var(--room-frame);
+  color: #fff;
+  box-shadow: none;
+}
+
+.hud-sleep:hover:not(:disabled) {
+  background: #3b3466;
+  color: #fff;
+}
+
 .hud-action-study {
   --hud-glow: var(--accent-sky);
   background: var(--accent-sky);
-  color: var(--foreground);
+  color: #fff;
 }
 
 .hud-action-jobs {
-  --hud-glow: var(--accent-mint);
-  background: var(--accent-mint);
-  color: var(--foreground);
+  --hud-glow: var(--hud-job);
+  background: var(--hud-job);
+  color: #fff;
 }
 
 .hud-action-jobs::after {

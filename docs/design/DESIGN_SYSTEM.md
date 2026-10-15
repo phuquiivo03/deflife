@@ -91,6 +91,8 @@ Art-agent PNGs with clean alpha (no chroma-key). Naming: `icon_<name>.png` and `
 
 **IDs (23):** `health`, `mood`, `energy`, `burnout`, `clock`, `level`, `job`, `reputation`, `stars`, `relationship`, `frontend`, `backend`, `devops`, `algorithms`, `english`, `communication`, `balance`, `salary`, `rent`, `food`, `savings`, `debt`, `skill_up`.
 
+**HUD menu:** `skills` is `icon_skills.png` only (44×44, no `_x4`). The Kỹ năng button picks it through `SKILL_MENU_ICON`.
+
 **Phase clock:** `morning`, `noon`, `evening`, `night` (same `icon_<key>.png` / `_x4` files). The HUD uses them next to the in-game clock and falls back to an emoji only when a file is missing.
 
 Use `PixelIcon` + `resolveIconAsset()` in `src/lib/pixel-assets.ts`: pick native or `_x4` so CSS display size is an **integer downscale/upscale** only (e.g. 22px display → 44px native @ 2×, 88px display → 176px `_x4` @ 2×).
@@ -112,9 +114,10 @@ Use `PixelAvatar` + `resolveAvatarAsset()` with the same integer-scale rule.
 
 ## HUD & stat bars
 
-- HUD card under room: framed `avatar_player`, `health` / `mood` / `energy` bars, `savings` + `formatVnd`, `clock` + game day.
-- Bars: 1px border, fill coral / mint / sky per stat.
-- Name, title, overall level, health, and mood stay stubbed in `src/game/state/playerStats.ts`. Skill rows, energy, and money read the career store.
+- HUD card under the room has **no avatar**. Three labeled bars, each with `current/max`: **Sức khỏe** (coral), **Tinh thần** (mint), **Năng lượng** (sky). Health and mood stay stubbed in `src/game/state/playerStats.ts`. Energy, money, and the clock are the career/time state.
+- Same card: money chip, `Ngày` + clock + phase icon, **Đi ngủ**, then **Học** / **Việc làm** / **Kỹ năng**. The Kỹ năng icon is `icon_skills.png`, chosen by `SKILL_MENU_ICON` in `PlayerHudCard.tsx`.
+- **Nhân vật** panel: avatar, name, stage, overall rank badge (rounded mean of the five skill levels), **Danh tiếng**, Freelance `n/100` with a bar, then the five catalog skills from `skillProgressList` (icon, name, rank badge, `Junior 60%`, bar). No stub skill percents.
+- Bars: 1px border, fill coral / mint / sky per vital.
 
 ---
 

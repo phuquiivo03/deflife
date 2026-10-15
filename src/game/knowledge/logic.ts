@@ -108,6 +108,17 @@ export function rankBracketForLevel(
   return found ?? brackets[0]!;
 }
 
+/** Overall rank is the bracket of the rounded mean skill level. */
+export function overallRankBracket(
+  levels: readonly number[],
+  brackets: readonly RankBracket[],
+): RankBracket {
+  if (levels.length === 0) return rankBracketForLevel(1, brackets);
+  let sum = 0;
+  for (const level of levels) sum += level;
+  return rankBracketForLevel(Math.round(sum / levels.length), brackets);
+}
+
 /**
  * Progress inside the rank bracket, 0–100.
  * `(level - min + step) / (max - min + 1)`, where `step` is xp/xp_to_next
