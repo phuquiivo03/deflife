@@ -180,6 +180,21 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
   const fetchImpl = options.fetch ?? defaultFetch;
 
   let playbackFormat: AudioFormat = format;
+  let sessionOn = false;
+  const enableSession =
+    options.enableSession ??
+    (() => {
+      try {
+        return enablePlaybackSession(typeof navigator === "undefined" ? null : navigator);
+      } catch {
+        return false;
+      }
+    });
+  try {
+    sessionOn = enableSession();
+  } catch {
+    sessionOn = false;
+  }
   let ctx: AudioContextLike | null = null;
   try {
     ctx = options.createContext();
@@ -225,7 +240,6 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
   let fadeToken = 0;
   let queued: { key: CueKey; gestureAt?: number } | null = null;
   let keepAlive: KeepAlive | null = null;
-  let sessionOn = false;
   let resuming = false;
   const decoded = new Map<string, AudioBufferLike>();
 
@@ -410,17 +424,8 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
 
   function ensureMediaChannel() {
     if (!sessionOn) {
-      const enable =
-        options.enableSession ??
-        (() => {
-          try {
-            return enablePlaybackSession(typeof navigator === "undefined" ? null : navigator);
-          } catch {
-            return false;
-          }
-        });
       try {
-        sessionOn = enable();
+        sessionOn = enableSession();
       } catch {
         sessionOn = false;
       }
@@ -584,8 +589,9 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
         const decode = options.decodeAudioData ?? decodeAudioBuffer;
         try {
           buffer = ctx ? await decode(ctx, bytes) : undefined;
-        } catch {
-          logAudioOnce("BGM decode failed; using an audio element");
+        } catch (error) {
+          const detail = error instanceof Error ? error.message : "decode failed";
+          logAudioOnce(`BGM decode failed; using an audio element: ${detail}`);
           if (job !== bedJob) return;
           startBedElement(cue, url);
           return;
@@ -609,7 +615,7 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
     try {
       const response = await fetchImpl(url);
       if (!response.ok) {
-        logAudioOnce(`SFX sprite failed (${fmt})`);
+        logAudioOnce(`SFX sprite failed (${fmt}): HTTP error`);
         return false;
       }
       const bytes = await response.arrayBuffer();
@@ -631,8 +637,9 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
       flushQueued();
       if (unlocked) requestBed();
       return true;
-    } catch {
-      logAudioOnce(`SFX sprite failed (${fmt})`);
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : "decode failed";
+      logAudioOnce(`SFX sprite failed (${fmt}): ${detail}`);
       return false;
     }
   }

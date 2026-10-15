@@ -65,9 +65,42 @@ export function decodeAudioBuffer(ctx: DecodeHost, data: ArrayBuffer): Promise<A
       settled = true;
       reject(error instanceof Error ? error : new Error("decodeAudioData failed"));
     };
+    // "unknown" while decodeAudioData is on the stack. A sync callback is held
+    // until we know whether the promise form exists. Some WebKit builds call the
+    // error callback with null and still return a promise that succeeds.
+    let mode: "unknown" | "promise" | "callback" = "unknown";
+    const early: { buffer?: AudioBufferLike; error?: unknown } = {};
+    let sawEarly = false;
     try {
-      const result = ctx.decodeAudioData(copy, ok, fail);
-      if (result && typeof result.then === "function") void result.then(ok, fail);
+      const result = ctx.decodeAudioData(
+        copy,
+        (buffer) => {
+          if (mode === "promise") return;
+          if (mode === "unknown") {
+            sawEarly = true;
+            early.buffer = buffer;
+            return;
+          }
+          ok(buffer);
+        },
+        (error) => {
+          if (mode === "promise") return;
+          if (mode === "unknown") {
+            sawEarly = true;
+            early.error = error;
+            return;
+          }
+          fail(error);
+        },
+      );
+      if (result && typeof result.then === "function") {
+        mode = "promise";
+        void result.then(ok, fail);
+        return;
+      }
+      mode = "callback";
+      if (early.buffer) ok(early.buffer);
+      else if (sawEarly) fail(early.error);
     } catch (error) {
       fail(error);
     }

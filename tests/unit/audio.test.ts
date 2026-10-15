@@ -792,6 +792,16 @@ describe("ios web audio helpers", () => {
       new ArrayBuffer(4),
     );
     expect(promised).toBe(buffer);
+    const promiseWins = await decodeAudioBuffer(
+      {
+        decodeAudioData(_data, _success, failure) {
+          failure?.(null as unknown as Error);
+          return Promise.resolve(buffer);
+        },
+      },
+      new ArrayBuffer(4),
+    );
+    expect(promiseWins).toBe(buffer);
   });
 
   it("sets the playback session only when the browser exposes one", () => {
