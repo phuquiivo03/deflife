@@ -129,6 +129,7 @@ export function useGameAudio(): void {
       gameBus.on("jobCompleted", onGame),
       gameBus.on("milestoneReached", onGame),
       gameBus.on("moneyChanged", onGame),
+      gameBus.on("energyChanged", onGame),
     ];
 
     let lastHover = 0;

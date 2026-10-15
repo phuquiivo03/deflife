@@ -252,7 +252,7 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
           const specific = cueForKey(key);
           playCue(specific ?? cueForKey("phase"));
         }
-        if (plan.hourChime) playCue(cueForKey("hour"));
+        if (plan.timeSkip) playCue(cueForKey("timeSkip"));
         if (plan.dayStarted) playCue(cueForKey("dayStarted"));
         if (plan.sleep) playCue(cueForKey("sleep"));
       } catch {

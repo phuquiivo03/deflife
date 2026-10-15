@@ -10,6 +10,7 @@ import {
   planTimeAudio,
   resolveCueKey,
   shouldCrossfadeBgm,
+  type CueKey,
 } from "../../src/game/audio/cues";
 import { createAudioEngine, type AudioSink } from "../../src/game/audio/engine";
 import {
@@ -67,14 +68,34 @@ function factory() {
 }
 
 const PACK: AudioCue[] = [
-  { id: "bgm_student_day", file: "bgm_student_day", type: "bgm", loop: true, volume: 0.8 },
-  { id: "bgm_student_night", file: "ogg/bgm_student_night.ogg", type: "bgm", loop: true, volume: 0.8 },
-  { id: "ui_click", file: "ui_click", type: "sfx", loop: false, volume: 1 },
-  { id: "phase_morning", file: "phase_morning", type: "sfx", loop: false, volume: 0.7 },
-  { id: "phase_noon", file: "phase_noon", type: "sfx", loop: false, volume: 0.7 },
-  { id: "phase_evening", file: "phase_evening", type: "sfx", loop: false, volume: 0.7 },
-  { id: "sleep", file: "sleep", type: "sfx", loop: false, volume: 1 },
-  { id: "hour_chime", file: "hour_chime", type: "sfx", loop: false, volume: 0.4 },
+  {
+    id: "bgm_student_day",
+    file: "ogg/bgm/bgm_student_day.ogg",
+    mp3: "mp3/bgm/bgm_student_day.mp3",
+    type: "bgm",
+    loop: true,
+    volume: 0.8,
+  },
+  {
+    id: "bgm_student_night",
+    file: "ogg/bgm/bgm_student_night.ogg",
+    mp3: "mp3/bgm/bgm_student_night.mp3",
+    type: "bgm",
+    loop: true,
+    volume: 0.8,
+  },
+  {
+    id: "sfx_ui_click",
+    file: "ogg/sfx/sfx_ui_click.ogg",
+    mp3: "mp3/sfx/sfx_ui_click.mp3",
+    type: "sfx",
+    loop: false,
+    volume: 1,
+  },
+  { id: "sfx_phase_noon", file: "ogg/sfx/sfx_phase_noon.ogg", type: "sfx", loop: false, volume: 0.7 },
+  { id: "sfx_phase_evening", file: "ogg/sfx/sfx_phase_evening.ogg", type: "sfx", loop: false, volume: 0.7 },
+  { id: "sfx_phase_night", file: "ogg/sfx/sfx_phase_night.ogg", type: "sfx", loop: false, volume: 0.7 },
+  { id: "sfx_sleep", file: "ogg/sfx/sfx_sleep.ogg", type: "sfx", loop: false, volume: 1 },
 ];
 
 function phaseChange(phase: PhaseId, previous: PhaseId): TimeEvent {
@@ -86,9 +107,14 @@ describe("audio manifest", () => {
     expect(parseManifest([{ id: "ui_click", file: "ui_click", type: "sfx", loop: false, volume: 2 }])).toEqual([
       { id: "ui_click", file: "ui_click", type: "sfx", loop: false, volume: 1 },
     ]);
-    expect(parseManifest({ sounds: [{ id: "bgm_student_day", type: "music" }] })[0]).toMatchObject({
+    expect(
+      parseManifest({
+        assets: [{ id: "bgm_student_day", type: "bgm", file: "ogg/bgm/bgm_student_day.ogg", mp3: "mp3/bgm/bgm_student_day.mp3", loop: true, volume: 0.5 }],
+      })[0],
+    ).toMatchObject({
       id: "bgm_student_day",
       type: "bgm",
+      mp3: "mp3/bgm/bgm_student_day.mp3",
       loop: true,
     });
     expect(parseManifest({ nope: true })).toEqual([]);
@@ -99,9 +125,12 @@ describe("audio manifest", () => {
     const day = PACK[0]!;
     const night = PACK[1]!;
     const click = PACK[2]!;
-    expect(cueUrls(day)).toEqual(["/audio/ogg/bgm_student_day.ogg"]);
-    expect(cueUrls(night)).toEqual(["/audio/ogg/bgm_student_night.ogg"]);
-    expect(cueUrls(click)).toEqual(["/audio/ogg/ui_click.ogg", "/audio/mp3/ui_click.mp3"]);
+    expect(cueUrls(day)).toEqual(["/audio/ogg/bgm/bgm_student_day.ogg"]);
+    expect(cueUrls(night)).toEqual(["/audio/ogg/bgm/bgm_student_night.ogg"]);
+    expect(cueUrls(click)).toEqual([
+      "/audio/ogg/sfx/sfx_ui_click.ogg",
+      "/audio/mp3/sfx/sfx_ui_click.mp3",
+    ]);
     expect(cueUrls(day).some((url) => url.endsWith(".mp3"))).toBe(false);
   });
 
@@ -137,18 +166,18 @@ describe("audio cues", () => {
     expect(shouldCrossfadeBgm("noon", "evening")).toBe(true);
   });
 
-  it("skips the hour chime on sleep and on a multi-hour skip", () => {
+  it("plays one time-skip sting for a multi-hour jump, not for sleep or a single hour", () => {
     const oneHour = planTimeAudio([
       { type: "hourChanged", day: 1, hour: 9, totalMinutes: 9 * 60 },
     ]);
-    expect(oneHour.hourChime).toBe(true);
+    expect(oneHour.timeSkip).toBe(false);
 
     const skip = planTimeAudio([
       { type: "hourChanged", day: 1, hour: 10, totalMinutes: 10 * 60 },
       { type: "hourChanged", day: 1, hour: 11, totalMinutes: 11 * 60 },
       phaseChange("noon", "morning"),
     ]);
-    expect(skip.hourChime).toBe(false);
+    expect(skip.timeSkip).toBe(true);
     expect(skip.bgmPhase).toBe("noon");
     expect(shouldCrossfadeBgm(skip.bgmPrevious!, skip.bgmPhase!)).toBe(false);
 
@@ -159,7 +188,7 @@ describe("audio cues", () => {
       { type: "sleep", fromTotalMinutes: 22 * 60, toTotalMinutes: 30 * 60, day: 2 },
     ]);
     expect(sleep.sleep).toBe(true);
-    expect(sleep.hourChime).toBe(false);
+    expect(sleep.timeSkip).toBe(false);
     expect(sleep.dayStarted).toBe(false);
     expect(sleep.phaseChimes).toEqual(["morning"]);
     expect(shouldCrossfadeBgm("night", "morning")).toBe(true);
@@ -179,8 +208,17 @@ describe("audio cues", () => {
     expect(
       cueKeysForGameEvent({ type: "skillLevelUp", skillId: "frontend", level: 3, rankId: "junior" }, brackets),
     ).toEqual(["rankUp", "levelUp"]);
-    expect(resolveCueKey(["ui_click"], "hover")).toBeNull();
-    expect(resolveCueKey(["ui_click", "hover"], "hover")).toBe("hover");
+    expect(resolveCueKey(["sfx_ui_click"], "hover")).toBeNull();
+    expect(resolveCueKey(["sfx_ui_click", "sfx_ui_hover"], "hover")).toBe("sfx_ui_hover");
+    expect(
+      cueKeysForGameEvent({ type: "energyChanged", delta: -15, energy: 18 }, brackets),
+    ).toEqual(["energyLow"]);
+    expect(
+      cueKeysForGameEvent({ type: "energyChanged", delta: -5, energy: 10 }, brackets),
+    ).toEqual([]);
+    expect(
+      cueKeysForGameEvent({ type: "energyChanged", delta: 30, energy: 100 }, brackets),
+    ).toEqual(["energyRestored"]);
   });
 
   it("plays a locked cue for aria-disabled controls and a tab cue for tabs", () => {
@@ -209,17 +247,17 @@ describe("audio engine", () => {
     expect(engine.bedUrl()).toBeNull();
 
     engine.setManifest(PACK);
-    expect(engine.bedUrl()).toBe("/audio/ogg/bgm_student_day.ogg");
+    expect(engine.bedUrl()).toBe("/audio/ogg/bgm/bgm_student_day.ogg");
     expect(audio.sinks).toHaveLength(1);
     expect(audio.sinks[0]).toMatchObject({ loop: true, paused: false, volume: 0.8 });
 
     engine.applyTimePlan(planTimeAudio([phaseChange("noon", "morning")]));
-    expect(engine.bedUrl()).toBe("/audio/ogg/bgm_student_day.ogg");
+    expect(engine.bedUrl()).toBe("/audio/ogg/bgm/bgm_student_day.ogg");
     expect(audio.sinks).toHaveLength(2);
-    expect(audio.sinks[1]!.src).toBe("/audio/ogg/phase_noon.ogg");
+    expect(audio.sinks[1]!.src).toBe("/audio/ogg/sfx/sfx_phase_noon.ogg");
 
     engine.applyTimePlan(planTimeAudio([phaseChange("evening", "noon")]));
-    expect(engine.bedUrl()).toBe("/audio/ogg/bgm_student_night.ogg");
+    expect(engine.bedUrl()).toBe("/audio/ogg/bgm/bgm_student_night.ogg");
     expect(audio.sinks[0]!.paused).toBe(true);
     const night = audio.sinks.find((sink) => sink.src.endsWith("bgm_student_night.ogg"));
     expect(night?.loop).toBe(true);
@@ -238,9 +276,9 @@ describe("audio engine", () => {
 
     engine.playKey("click");
     const click = audio.sinks.at(-1)!;
-    expect(click.src).toBe("/audio/ogg/ui_click.ogg");
+    expect(click.src).toBe("/audio/ogg/sfx/sfx_ui_click.ogg");
     click.emitError();
-    expect(click.src).toBe("/audio/mp3/ui_click.mp3");
+    expect(click.src).toBe("/audio/mp3/sfx/sfx_ui_click.mp3");
   });
 
   it("does not start playback before the first gesture", () => {
@@ -252,7 +290,7 @@ describe("audio engine", () => {
     expect(audio.sinks).toHaveLength(0);
     expect(engine.bedUrl()).toBeNull();
     engine.unlock();
-    expect(engine.bedUrl()).toBe("/audio/ogg/bgm_student_night.ogg");
+    expect(engine.bedUrl()).toBe("/audio/ogg/bgm/bgm_student_night.ogg");
   });
 
   it("silences the bed while muted", () => {
@@ -277,12 +315,15 @@ describe.skipIf(!hasManifest)("shipped audio pack", () => {
     const night = cues.find((cue) => cue.id === "bgm_student_night");
     expect(day?.type).toBe("bgm");
     expect(night?.type).toBe("bgm");
-    expect(cueUrls(day!)).toEqual(["/audio/ogg/bgm_student_day.ogg"]);
-    expect(cueUrls(night!)).toEqual(["/audio/ogg/bgm_student_night.ogg"]);
+    expect(cueUrls(day!)).toEqual(["/audio/ogg/bgm/bgm_student_day.ogg"]);
+    expect(cueUrls(night!)).toEqual(["/audio/ogg/bgm/bgm_student_night.ogg"]);
+    expect(cues.filter((cue) => cue.type === "sfx")).toHaveLength(29);
+    expect(fs.existsSync(path.join(process.cwd(), "public/audio/CREDITS.md"))).toBe(true);
+
     const phaseKeys = ["phaseMorning", "phaseNoon", "phaseEvening", "phaseNight"] as const;
-    const required = [
+    const required: CueKey[] = [
       ...phaseKeys,
-      "hour",
+      "timeSkip",
       "sleep",
       "dayStarted",
       "jobAccepted",
@@ -302,11 +343,18 @@ describe.skipIf(!hasManifest)("shipped audio pack", () => {
       "tab",
       "locked",
       "toast",
-    ] as const;
-    const missing = required.filter((key) => {
-      if (resolveCueKey(ids, key)) return false;
-      return !(phaseKeys.includes(key as (typeof phaseKeys)[number]) && resolveCueKey(ids, "phase"));
-    });
+      "energyLow",
+      "energyRestored",
+    ];
+    const missing = required.filter((key) => resolveCueKey(ids, key) == null);
     expect(missing, `unmapped ids: ${ids.join(", ")}`).toEqual([]);
+
+    for (const cue of cues) {
+      for (const url of cueUrls(cue)) {
+        const relative = url.replace(/^\/audio\//, "");
+        expect(fs.existsSync(path.join(process.cwd(), "public/audio", relative)), url).toBe(true);
+        if (cue.type === "bgm") expect(url.endsWith(".ogg")).toBe(true);
+      }
+    }
   });
 });

@@ -30,7 +30,7 @@ export type CueKey =
   | "phaseEvening"
   | "phaseNight"
   | "phase"
-  | "hour"
+  | "timeSkip"
   | "sleep"
   | "dayStarted"
   | "jobAccepted"
@@ -49,7 +49,9 @@ export type CueKey =
   | "panelClose"
   | "tab"
   | "locked"
-  | "toast";
+  | "toast"
+  | "energyLow"
+  | "energyRestored";
 
 export const CUE_KEYS = [
   "phaseMorning",
@@ -57,7 +59,7 @@ export const CUE_KEYS = [
   "phaseEvening",
   "phaseNight",
   "phase",
-  "hour",
+  "timeSkip",
   "sleep",
   "dayStarted",
   "jobAccepted",
@@ -77,39 +79,47 @@ export const CUE_KEYS = [
   "tab",
   "locked",
   "toast",
+  "energyLow",
+  "energyRestored",
 ] as const satisfies readonly CueKey[];
 
 /**
  * Manifest ids tried in order. The pack is the source of truth: a key with
  * no matching id is silent. Aliases cover likely spellings; exact ids win first.
  */
+/** Ids from `public/audio/manifest.json`. A missing id stays silent. */
 export const CUE_IDS: Record<CueKey, readonly string[]> = {
-  phaseMorning: ["phase_morning", "sfx_phase_morning", "chime_morning", "morning"],
-  phaseNoon: ["phase_noon", "sfx_phase_noon", "chime_noon", "noon"],
-  phaseEvening: ["phase_evening", "sfx_phase_evening", "chime_evening", "evening"],
-  phaseNight: ["phase_night", "sfx_phase_night", "chime_night", "night"],
-  phase: ["phase_chime", "sfx_phase", "ui_phase", "chime", "phase"],
-  hour: ["hour_chime", "sfx_hour", "ui_hour", "hour"],
-  sleep: ["sleep", "sfx_sleep", "ui_sleep"],
-  dayStarted: ["day_started", "sfx_day_start", "day_start", "ui_day"],
-  jobAccepted: ["job_accepted", "sfx_job_accept", "job_accept"],
-  jobCompleted: ["job_completed", "sfx_job_complete", "job_complete", "job_success"],
-  jobFailed: ["job_failed", "sfx_job_fail", "job_fail"],
-  xp: ["xp_gain", "sfx_xp", "xp", "skill_xp"],
-  levelUp: ["level_up", "sfx_level_up", "skill_level_up"],
-  rankUp: ["rank_up", "sfx_rank_up", "skill_rank_up"],
-  milestone: ["milestone", "sfx_milestone", "freelance_milestone", "milestone_reached"],
-  moneyIn: ["money_in", "sfx_money_in", "coin", "cash_in"],
-  moneyOut: ["money_out", "sfx_money_out", "cash_out", "spend"],
-  course: ["course_purchase", "sfx_course", "study_completed", "study_complete", "course"],
-  click: ["ui_click", "click", "sfx_click"],
-  hover: ["ui_hover", "hover", "sfx_hover"],
-  panelOpen: ["ui_panel_open", "panel_open", "sfx_panel_open"],
-  panelClose: ["ui_panel_close", "panel_close", "sfx_panel_close"],
-  tab: ["ui_tab", "tab_switch", "sfx_tab", "tab"],
-  locked: ["ui_locked", "sfx_locked", "locked", "ui_deny"],
-  toast: ["ui_toast", "toast", "sfx_toast", "notification"],
+  phaseMorning: ["sfx_phase_morning"],
+  phaseNoon: ["sfx_phase_noon"],
+  phaseEvening: ["sfx_phase_evening"],
+  phaseNight: ["sfx_phase_night"],
+  phase: ["sfx_phase_morning"],
+  timeSkip: ["sfx_time_skip"],
+  sleep: ["sfx_sleep"],
+  dayStarted: ["sfx_day_summary"],
+  jobAccepted: ["sfx_job_accepted"],
+  jobCompleted: ["sfx_job_complete"],
+  jobFailed: ["sfx_job_failed"],
+  xp: ["sfx_xp_gain"],
+  levelUp: ["sfx_skill_levelup"],
+  rankUp: ["sfx_tier_up"],
+  milestone: ["sfx_freelance_milestone"],
+  moneyIn: ["sfx_money_gain"],
+  moneyOut: ["sfx_money_spend"],
+  course: ["sfx_ui_purchase_confirm"],
+  click: ["sfx_ui_click"],
+  hover: ["sfx_ui_hover"],
+  panelOpen: ["sfx_ui_panel_open"],
+  panelClose: ["sfx_ui_panel_close"],
+  tab: ["sfx_ui_tab_switch"],
+  locked: ["sfx_ui_locked_denied"],
+  toast: ["sfx_ui_toast"],
+  energyLow: ["sfx_energy_low"],
+  energyRestored: ["sfx_energy_restored"],
 };
+
+/** Play the low-energy sting only when energy crosses down through this point. */
+export const ENERGY_LOW_AT = 20;
 
 const PHASE_CUE: Record<PhaseId, CueKey> = {
   morning: "phaseMorning",
@@ -124,7 +134,8 @@ export function phaseCueKey(phase: PhaseId): CueKey {
 
 export type TimeAudioPlan = {
   phaseChimes: PhaseId[];
-  hourChime: boolean;
+  /** One whoosh when a tick crosses more than one hour. Sleep does not use it. */
+  timeSkip: boolean;
   dayStarted: boolean;
   sleep: boolean;
   bgmPhase: PhaseId | null;
@@ -132,8 +143,10 @@ export type TimeAudioPlan = {
 };
 
 /**
- * One clock tick can emit several boundaries. Sleep and multi-hour skips
- * must not machine-gun the hour chime. The BGM follows only the destination phase.
+ * One clock tick can emit several boundaries. A single hour has no chime in
+ * the pack. A multi-hour skip plays one time-skip sting. Sleep uses its own
+ * cue and does not also play the day-summary or the whoosh.
+ * The BGM follows only the destination phase.
  */
 export function planTimeAudio(events: readonly TimeEvent[]): TimeAudioPlan {
   let bgmPhase: PhaseId | null = null;
@@ -159,7 +172,7 @@ export function planTimeAudio(events: readonly TimeEvent[]): TimeAudioPlan {
 
   return {
     phaseChimes,
-    hourChime: !sleep && hours === 1,
+    timeSkip: !sleep && hours > 1,
     dayStarted: dayStarted && !sleep,
     sleep,
     bgmPhase,
@@ -190,6 +203,14 @@ export function cueKeysForGameEvent(
       if (event.delta > 0) return ["moneyIn"];
       if (event.delta < 0) return ["moneyOut"];
       return [];
+    case "energyChanged": {
+      if (event.delta > 0) return ["energyRestored"];
+      const previous = event.energy - event.delta;
+      if (event.delta < 0 && previous > ENERGY_LOW_AT && event.energy <= ENERGY_LOW_AT) {
+        return ["energyLow"];
+      }
+      return [];
+    }
     default:
       return [];
   }

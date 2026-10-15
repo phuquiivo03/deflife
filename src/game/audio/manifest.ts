@@ -2,7 +2,10 @@ export type AudioCueType = "bgm" | "sfx";
 
 export type AudioCue = {
   id: string;
+  /** Ogg path relative to `public/audio`, e.g. `ogg/sfx/sfx_ui_click.ogg`. */
   file: string;
+  /** Optional mp3 fallback. Ignored for BGM. */
+  mp3?: string;
   type: AudioCueType;
   loop: boolean;
   volume: number;
@@ -30,7 +33,7 @@ function cueRows(data: unknown): unknown[] {
   if (Array.isArray(data)) return data;
   if (!data || typeof data !== "object") return [];
   const record = data as Record<string, unknown>;
-  for (const key of ["cues", "sounds", "files", "items", "audio"]) {
+  for (const key of ["assets", "cues", "sounds", "files", "items", "audio"]) {
     const value = record[key];
     if (Array.isArray(value)) return value;
   }
@@ -44,6 +47,7 @@ function asCue(row: unknown): AudioCue | null {
   if (!id) return null;
   const file =
     typeof record.file === "string" && record.file.trim() ? record.file.trim() : id;
+  const mp3 = typeof record.mp3 === "string" && record.mp3.trim() ? record.mp3.trim() : undefined;
   const typeRaw = typeof record.type === "string" ? record.type.trim().toLowerCase() : "";
   const type: AudioCueType =
     typeRaw === "bgm" || typeRaw === "music" || id.startsWith("bgm_") ? "bgm" : "sfx";
@@ -51,10 +55,10 @@ function asCue(row: unknown): AudioCue | null {
     typeof record.loop === "boolean" ? record.loop : type === "bgm";
   const volume =
     typeof record.volume === "number" ? clamp01(record.volume) : 1;
-  return { id, file, type, loop, volume };
+  return { id, file, mp3, type, loop, volume };
 }
 
-/** Accepts an array or `{ cues | sounds | files | items | audio }`. Bad rows are dropped. */
+/** Accepts an array or `{ assets | cues | sounds | files | items | audio }`. Bad rows are dropped. */
 export function parseManifest(data: unknown): AudioCue[] {
   const cues: AudioCue[] = [];
   const seen = new Set<string>();
@@ -67,21 +71,23 @@ export function parseManifest(data: unknown): AudioCue[] {
   return cues;
 }
 
-export function fileStem(file: string): string {
-  const base = file.split("/").pop() ?? file;
-  return base.replace(/\.(ogg|mp3)$/i, "");
+function audioPublicPath(file: string): string {
+  const cleaned = file.replace(/^\/+/, "");
+  if (!cleaned) return "";
+  if (cleaned.startsWith("audio/")) return `/${cleaned}`;
+  return `/audio/${cleaned}`;
 }
 
 /**
  * BGM is ogg only — the mp3 exports have leading silence that clicks on loop.
- * SFX tries ogg, then mp3.
+ * SFX tries the ogg `file`, then the manifest `mp3` path.
  */
-export function cueUrls(cue: Pick<AudioCue, "file" | "id" | "type">): string[] {
-  const stem = fileStem(cue.file || cue.id);
-  if (!stem) return [];
-  const ogg = `/audio/ogg/${stem}.ogg`;
+export function cueUrls(cue: Pick<AudioCue, "file" | "mp3" | "type">): string[] {
+  const ogg = audioPublicPath(cue.file);
+  if (!ogg) return [];
   if (cue.type === "bgm") return [ogg];
-  return [ogg, `/audio/mp3/${stem}.mp3`];
+  const mp3 = cue.mp3 ? audioPublicPath(cue.mp3) : "";
+  return mp3 ? [ogg, mp3] : [ogg];
 }
 
 export function resolveCueId(
