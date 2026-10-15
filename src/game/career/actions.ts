@@ -115,15 +115,14 @@ function replaceSkill(skills: readonly PlayerSkill[], next: PlayerSkill): Player
   return skills.map((row) => (row.skill_id === next.skill_id ? next : row));
 }
 
-export function refillEnergy(state: CareerState, catalog: SimCatalog): ActionResult {
-  const max = catalog.config.energy_max;
+function setEnergy(state: CareerState, target: number, max: number): ActionResult {
+  const energy = clampEnergy(target, max);
   const current = state.players.energy;
-  if (current >= max) return draft(state, []);
-  const energy = max;
-  const events: GameEvent[] = [
-    { type: "energyChanged", delta: energy - current, energy },
-  ];
-  return draft({ ...state, players: { ...state.players, energy } }, events);
+  if (current === energy) return draft(state, []);
+  return draft(
+    { ...state, players: { ...state.players, energy } },
+    [{ type: "energyChanged", delta: energy - current, energy }],
+  );
 }
 
 export function refreshBoard(state: CareerState, day: number, catalog: SimCatalog): ActionResult {
@@ -178,13 +177,17 @@ export function applyDayStarted(
   catalog: SimCatalog,
 ): ActionResult {
   const synced = syncPlayerClock(state, day, minuteOfDay, stage);
-  const refilled = refillEnergy(synced, catalog);
-  const board = refreshBoard(refilled.state, day, catalog);
-  return ok(board.state, [...refilled.events, ...board.events]);
+  const board = refreshBoard(synced, day, catalog);
+  return ok(board.state, board.events);
 }
 
+/** Sleep sets energy to `energyOnSleep`. `dayStarted` does not touch energy. */
 export function applyWake(state: CareerState, catalog: SimCatalog): ActionResult {
-  const refilled = refillEnergy(state, catalog);
+  const refilled = setEnergy(
+    state,
+    catalog.config.energyOnSleep,
+    catalog.config.energy_max,
+  );
   return ok(refilled.state, refilled.events);
 }
 
@@ -372,7 +375,8 @@ export function changeMoney(state: CareerState, delta: number): ActionResult {
 }
 
 export function fillEnergy(state: CareerState, catalog: SimCatalog): ActionResult {
-  return applyWake(state, catalog);
+  const filled = setEnergy(state, catalog.config.energy_max, catalog.config.energy_max);
+  return ok(filled.state, filled.events);
 }
 
 export function xpNeededForNextLevel(

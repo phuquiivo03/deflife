@@ -603,7 +603,7 @@ The first game system. Full API and the subscriber guide: [`docs/systems/time.md
 
 - **1 in-game day = 10 real minutes** (`REAL_MS_PER_GAME_DAY` in `src/game/time/config.ts`). State is total in-game minutes. Day, `HH:MM`, and phase are derived.
 - **Phases** (data, not hard-coded branches): `morning` Sáng 05:00–11:00, `noon` Trưa 11:00–17:00, `evening` Tối 17:00–22:00, `night` Khuya 22:00–05:00. The phase key is the icon key. Pixel icons are `public/ui/icons/icon_<key>.png` (44×44) and `_x4` (176×176). The HUD draws them at an integer scale; an emoji shows only if a file is missing.
-- **HUD:** live `HH:MM` beside `Ngày N`, plus the phase icon and label. **Đi ngủ** is disabled during Sáng/Trưa and enabled (glowing) during Tối/Khuya. Sleep jumps to 06:00 the next day and emits `dayStarted` then `sleep`. Knowledge refills energy on both.
+- **HUD:** live `HH:MM` beside `Ngày N`, plus the phase icon and label. **Đi ngủ** is disabled during Sáng/Trưa and enabled (glowing) during Tối/Khuya. Sleep jumps to 06:00 the next day and emits `dayStarted` then `sleep`. Energy refills on `sleep` only, to `energyOnSleep`.
 - **Room:** per-phase color wash on the canvas, crossfaded. The pixel grid is unchanged.
 - **Loop:** one delta-time ticker, speed multiplier, pause. Large gaps (fast-forward, background tab) still emit every hour, phase, and day boundary.
 - **Bus:** `minute`, `hourChanged`, `phaseChanged`, `dayStarted`, `sleep`. New systems subscribe; they do not edit the clock.

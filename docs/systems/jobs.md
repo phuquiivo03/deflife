@@ -4,7 +4,7 @@ Freelance tasks for v1. Remote templates are in `config/job_templates.json` and 
 
 ## Board
 
-On each `dayStarted`, offers still open from earlier days become `expired`. The day then gets `board_size` new `offered` rows (4 in `game_config`) when that day has none yet.
+On each `dayStarted`, offers still open from earlier days become `expired`. The day then gets `board_size` new `offered` rows (4 in `game_config`) when that day has none yet. That refresh does not change energy. Energy returns to `energyOnSleep` only on `sleep`, which the clock emits after `dayStarted`.
 
 Day 1 does not emit `dayStarted` (the clock starts at 08:00). After hydration the same generator runs once if today has no board.
 

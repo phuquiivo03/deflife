@@ -3,6 +3,7 @@ import {
   applyAccept,
   applyDayStarted,
   applyStudy,
+  applyWake,
   defaultCareer,
   ensureTodayBoard,
   grantRawXp,
@@ -25,7 +26,12 @@ import {
 } from "../../src/game/jobs/logic";
 import { MemoryStorageAdapter, toStateStorage } from "../../src/game/storage/adapter";
 import { migrateSave } from "../../src/game/storage/migrate";
-import { DEFAULT_START_MINUTES } from "../../src/game/time";
+import {
+  DEFAULT_START_MINUTES,
+  advanceMinutes,
+  sleepToNextMorning,
+  snapshot,
+} from "../../src/game/time";
 
 const config = SIM_CATALOG.config;
 
@@ -197,7 +203,63 @@ describe("board generation", () => {
     expect(expired.length).toBeGreaterThan(0);
     expect(visibleBoardJobs(day2.state.player_jobs, 2)).toHaveLength(config.board_size);
     expect(day2.events.some((event) => event.type === "jobBoardRefreshed")).toBe(true);
-    expect(day2.state.players.energy).toBe(config.energy_max);
+    expect(day2.state.players.energy).toBe(accepted.state.players.energy);
+    expect(day2.events.some((event) => event.type === "energyChanged")).toBe(false);
+  });
+});
+
+describe("energy refill", () => {
+  it("keeps the deducted energy when a course crosses midnight", () => {
+    const night = 23 * 60;
+    const start = defaultCareer(1, night, "student", SIM_CATALOG);
+    const bought = applyStudy(start, "html", SIM_CATALOG);
+    expect(bought.error).toBeNull();
+    const advanced = advanceMinutes(night, bought.minutes);
+    const dayEvent = advanced.events.find((event) => event.type === "dayStarted");
+    expect(dayEvent).toMatchObject({ type: "dayStarted", day: 2 });
+    const afterMidnight = applyDayStarted(
+      bought.state,
+      2,
+      snapshot(advanced.totalMinutes).minuteOfDay,
+      "student",
+      SIM_CATALOG,
+    );
+    expect(afterMidnight.state.players.energy).toBe(start.players.energy - 12);
+    expect(afterMidnight.events.some((event) => event.type === "energyChanged")).toBe(false);
+  });
+
+  it("refills to energyOnSleep on sleep, after dayStarted", () => {
+    expect(config.energyOnSleep).toBe(100);
+    const from = 22 * 60;
+    const base = defaultCareer(1, from, "student", SIM_CATALOG);
+    const tired = { ...base, players: { ...base.players, energy: 40 } };
+    const slept = sleepToNextMorning(from);
+    const types = slept.events.map((event) => event.type);
+    const dayIndex = types.indexOf("dayStarted");
+    const sleepIndex = types.indexOf("sleep");
+    expect(dayIndex).toBeGreaterThanOrEqual(0);
+    expect(sleepIndex).toBeGreaterThan(dayIndex);
+
+    const dayEvent = slept.events[dayIndex];
+    if (!dayEvent || dayEvent.type !== "dayStarted") {
+      throw new Error("sleep did not emit dayStarted");
+    }
+    const afterDay = applyDayStarted(
+      tired,
+      dayEvent.day,
+      snapshot(dayEvent.totalMinutes).minuteOfDay,
+      "student",
+      SIM_CATALOG,
+    );
+    expect(afterDay.state.players.energy).toBe(40);
+
+    const afterSleep = applyWake(afterDay.state, SIM_CATALOG);
+    expect(afterSleep.state.players.energy).toBe(config.energyOnSleep);
+    expect(afterSleep.events).toContainEqual({
+      type: "energyChanged",
+      delta: config.energyOnSleep - 40,
+      energy: config.energyOnSleep,
+    });
   });
 });
 

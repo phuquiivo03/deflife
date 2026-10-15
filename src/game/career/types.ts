@@ -90,6 +90,8 @@ export type GameConfig = {
   job_xp_multiplier_at_cap: number;
   board_size: number;
   energy_max: number;
+  /** Energy set when the player sleeps. The stats system can replace this with a value from hours slept. */
+  energyOnSleep: number;
   starting_money: number;
   starting_energy: number;
   starting_reputation: number;

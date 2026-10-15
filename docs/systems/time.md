@@ -74,7 +74,7 @@ The React hook `useGameClock` in `src/components/game/useGameClock.ts` owns the 
 3. `phaseChanged` — `{ phase, previous, day, totalMinutes }`
 4. `dayStarted` — `{ day, totalMinutes }`
 
-`sleep` is separate: `{ fromTotalMinutes, toTotalMinutes, day }`. A sleep skip does **not** emit one `minute` per skipped minute (so a future energy drain does not run overnight). It does emit `hourChanged`, `phaseChanged`, and `dayStarted` for the wake time, then `sleep`.
+`sleep` is separate: `{ fromTotalMinutes, toTotalMinutes, day }`. A sleep skip does **not** emit one `minute` per skipped minute (so a future energy drain does not run overnight). It does emit `hourChanged`, `phaseChanged`, and `dayStarted` for the wake time, then `sleep`. Energy is restored by the `sleep` listener, not by `dayStarted`, so the day handler can run first without undoing a course that crossed midnight.
 
 `count` on `minute` is `1` during normal play. If one tick crosses more than `MINUTE_EVENT_COALESCE_AFTER` minutes (two in-game days — a long background tab or ×60), minutes collapse to one event per hour segment and `count` is the size of that segment. Hour, phase, and day events are still emitted **once per boundary crossed**, in order. Summing `count` equals the number of in-game minutes that elapsed.
 
