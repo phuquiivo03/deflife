@@ -11,6 +11,7 @@ import {
   planTimeAudio,
   resolveCueKey,
   shouldCrossfadeBgm,
+  typingLoopKey,
   type CueKey,
 } from "../../src/game/audio/cues";
 import { createAudioEngine, type AudioBufferLike, type AudioContextLike, type AudioEngineOptions, type AudioNodeLike, type BufferSourceLike, type GainNodeLike, type SfxElementLike } from "../../src/game/audio/engine";
@@ -18,6 +19,7 @@ import {
   bgmUrl,
   busGain,
   cueUrls,
+  loopLeadSeconds,
   parseManifest,
   type AudioCue,
 } from "../../src/game/audio/manifest";
@@ -325,6 +327,27 @@ describe("audio manifest", () => {
     });
     expect(parseManifest({ nope: true })).toEqual([]);
     expect(parseManifest(null)).toEqual([]);
+  });
+
+  it("keeps an mp3 loop lead and ignores it for ogg", () => {
+    const cue = parseManifest([
+      {
+        id: "sfx_typing_loop",
+        file: "ogg/sfx/sfx_typing_loop.ogg",
+        mp3: "mp3/sfx/sfx_typing_loop.mp3",
+        type: "sfx",
+        loop: true,
+        volume: 0.38,
+        mp3LeadSeconds: 0.025057,
+      },
+    ])[0];
+    expect(cue?.volume).toBe(0.38);
+    expect(cue?.loop).toBe(true);
+    expect(loopLeadSeconds("ogg", cue?.mp3LeadSeconds)).toBe(0);
+    expect(loopLeadSeconds("mp3", cue?.mp3LeadSeconds)).toBeCloseTo(0.025057, 6);
+    expect(typingLoopKey(null)).toBe("typingLoop");
+    expect(typingLoopKey("careful")).toBe("typingLoop");
+    expect(typingLoopKey("rushed")).toBe("typingLoopFast");
   });
 
   it("keeps BGM on ogg and offers mp3 only as an SFX fallback", () => {
@@ -768,6 +791,136 @@ describe("audio engine", () => {
       console.warn = original;
     }
   });
+
+  it("loops a file buffer on the sfx bus, switches, and stops", async () => {
+    const audio = harness();
+    await audio.engine.preloadSfx();
+    audio.engine.setSettings({ music: 1, sfx: 0.5, muted: false });
+    audio.engine.unlock();
+    const loops = () => audio.ctx.sources.filter((source) => source.loop && source.loopEnd > 0 && source.loopEnd < 100);
+    const before = audio.ctx.sources.length;
+    await audio.engine.startLoop("typingLoop");
+    expect(audio.ctx.sources).toHaveLength(before);
+
+    audio.engine.setManifest([
+      ...PACK,
+      {
+        id: "sfx_typing_loop",
+        file: "ogg/sfx/sfx_typing_loop.ogg",
+        mp3: "mp3/sfx/sfx_typing_loop.mp3",
+        type: "sfx",
+        loop: true,
+        volume: 0.38,
+        category: "ui",
+        mp3LeadSeconds: 0.025057,
+      },
+      {
+        id: "sfx_typing_loop_fast",
+        file: "ogg/sfx/sfx_typing_loop_fast.ogg",
+        mp3: "mp3/sfx/sfx_typing_loop_fast.mp3",
+        type: "sfx",
+        loop: true,
+        volume: 0.38,
+        category: "ui",
+        mp3LeadSeconds: 0.025057,
+      },
+    ]);
+    await audio.engine.startLoop("typingLoop");
+    expect(audio.calls).toContain("/audio/ogg/sfx/sfx_typing_loop.ogg");
+    expect(audio.calls.some((url) => url.includes("sprite"))).toBe(true);
+    const typing = loops().at(-1)!;
+    expect(typing.loop).toBe(true);
+    expect(typing.loopStart).toBe(0);
+    expect(typing.loopEnd).toBe(30);
+    expect(typing.started).toEqual({ when: 0, offset: 0, duration: undefined });
+    const trim = typing.dest as FakeGain;
+    expect(trim.gain.value).toBe(0.38);
+    expect((trim.dest as FakeGain).gain.value).toBe(0.5);
+    expect((trim.dest as FakeGain).dest).toBe(masterGain(audio.ctx));
+
+    await audio.engine.startLoop("typingLoop");
+    expect(loops().filter((source) => !source.stopped)).toHaveLength(1);
+    expect(typing.stopped).toBe(false);
+
+    audio.engine.setSettings({ music: 1, sfx: 0.25, muted: true });
+    expect(masterGain(audio.ctx).gain.value).toBe(0);
+    expect((trim.dest as FakeGain).gain.value).toBe(0.25);
+
+    await audio.engine.startLoop("typingLoopFast");
+    expect(typing.stopped).toBe(true);
+    expect(audio.calls).toContain("/audio/ogg/sfx/sfx_typing_loop_fast.ogg");
+    const fast = loops().find((source) => !source.stopped)!;
+    expect(fast.loopStart).toBe(0);
+    expect((fast.dest as FakeGain).gain.value).toBe(0.38);
+
+    audio.engine.stopLoop();
+    expect(fast.stopped).toBe(true);
+
+    audio.engine.setManifest(PACK);
+    await audio.engine.startLoop("typingLoop");
+    expect(loops().filter((source) => !source.stopped)).toHaveLength(0);
+  });
+
+  it("skips the mp3 encoder lead when looping the file fallback", async () => {
+    const audio = harness("mp3");
+    await audio.engine.preloadSfx();
+    audio.engine.unlock();
+    audio.engine.setManifest([
+      ...PACK,
+      {
+        id: "sfx_typing_loop",
+        file: "ogg/sfx/sfx_typing_loop.ogg",
+        mp3: "mp3/sfx/sfx_typing_loop.mp3",
+        type: "sfx",
+        loop: true,
+        volume: 0.38,
+        category: "ui",
+        mp3LeadSeconds: 0.025057,
+      },
+    ]);
+    await audio.engine.startLoop("typingLoop");
+    expect(audio.calls).toContain("/audio/mp3/sfx/sfx_typing_loop.mp3");
+    const typing = audio.ctx.sources.filter((source) => source.loop).at(-1)!;
+    expect(typing.loopStart).toBeCloseTo(0.025057, 6);
+    expect(typing.loopEnd).toBe(30);
+    expect(typing.started?.offset).toBeCloseTo(0.025057, 6);
+  });
+
+  it("loops a per-file element when there is no audio context and follows mute", async () => {
+    const elements: FakeElement[] = [];
+    const audio = harness("ogg", {
+      createContext: () => null,
+      createSfxElement: () => {
+        const el = new FakeElement();
+        elements.push(el);
+        return el;
+      },
+    });
+    await audio.engine.preloadSfx();
+    audio.engine.setManifest([
+      ...PACK,
+      {
+        id: "sfx_typing_loop",
+        file: "ogg/sfx/sfx_typing_loop.ogg",
+        mp3: "mp3/sfx/sfx_typing_loop.mp3",
+        type: "sfx",
+        loop: true,
+        volume: 0.38,
+        category: "ui",
+        mp3LeadSeconds: 0.025057,
+      },
+    ]);
+    audio.engine.setSettings({ music: 0, sfx: 0.5, muted: false });
+    audio.engine.unlock();
+    await audio.engine.startLoop("typingLoop");
+    const typing = elements.find((el) => el.src.includes("sfx_typing_loop.ogg"));
+    expect(typing?.loop).toBe(true);
+    expect(typing?.volume).toBeCloseTo(0.19);
+    audio.engine.setSettings({ music: 0, sfx: 0.5, muted: true });
+    expect(typing?.volume).toBe(0);
+    audio.engine.stopLoop();
+    expect(typing?.loop).toBe(false);
+  });
 });
 
 describe("ios web audio helpers", () => {
@@ -832,7 +985,6 @@ describe("ios web audio helpers", () => {
     expect(createAudioContextFrom(Broken as unknown as new () => AudioContextLike)).toBeNull();
     expect(createAudioContextFrom(undefined)).toBeNull();
   });
-
 });
 
 const manifestPath = path.join(process.cwd(), "public/audio/manifest.json");
@@ -848,7 +1000,13 @@ describe.skipIf(!hasManifest)("shipped audio pack", () => {
     expect(night?.type).toBe("bgm");
     expect(cueUrls(day!)).toEqual(["/audio/ogg/bgm/bgm_student_day.ogg"]);
     expect(cueUrls(night!)).toEqual(["/audio/ogg/bgm/bgm_student_night.ogg"]);
-    expect(cues.filter((cue) => cue.type === "sfx")).toHaveLength(29);
+    const sfx = cues.filter((cue) => cue.type === "sfx");
+    const looped = sfx.filter((cue) => cue.loop);
+    const oneShots = sfx.filter((cue) => !cue.loop);
+    expect(oneShots).toHaveLength(29);
+    expect(looped.map((cue) => cue.id).sort()).toEqual(["sfx_typing_loop", "sfx_typing_loop_fast"]);
+    expect(looped.every((cue) => cue.volume === 0.38)).toBe(true);
+    expect(looped.every((cue) => cue.mp3LeadSeconds === 0.025057)).toBe(true);
     expect(fs.existsSync(path.join(process.cwd(), "public/audio/CREDITS.md"))).toBe(true);
 
     const phaseKeys = ["phaseMorning", "phaseNoon", "phaseEvening", "phaseNight"] as const;
@@ -876,6 +1034,8 @@ describe.skipIf(!hasManifest)("shipped audio pack", () => {
       "toast",
       "energyLow",
       "energyRestored",
+      "typingLoop",
+      "typingLoopFast",
     ];
     const missing = required.filter((key) => resolveCueKey(ids, key) == null);
     expect(missing, `unmapped ids: ${ids.join(", ")}`).toEqual([]);
@@ -895,11 +1055,14 @@ describe.skipIf(!hasManifest)("shipped audio pack", () => {
     expect(offsets?.channels).toBe(1);
     expect(fs.existsSync(path.join(process.cwd(), "public/audio/sprite/sfx.ogg"))).toBe(true);
     expect(fs.existsSync(path.join(process.cwd(), "public/audio/sprite/sfx.mp3"))).toBe(true);
-    const sfx = cues.filter((cue) => cue.type === "sfx");
-    expect(Object.keys(offsets!.ogg.cues)).toHaveLength(sfx.length);
+    expect(Object.keys(offsets!.ogg.cues)).toHaveLength(oneShots.length);
     expect(offsets!.mp3.delaySamples).toBeGreaterThan(0);
     const shift = (offsets!.mp3.delaySamples - offsets!.ogg.delaySamples) / offsets!.sampleRate;
-    for (const cue of sfx) {
+    for (const cue of looped) {
+      expect(offsets!.ogg.cues[cue.id], cue.id).toBeUndefined();
+      expect(offsets!.mp3.cues[cue.id], cue.id).toBeUndefined();
+    }
+    for (const cue of oneShots) {
       const ogg = offsets!.ogg.cues[cue.id];
       const mp3 = offsets!.mp3.cues[cue.id];
       expect(ogg?.duration, cue.id).toBeGreaterThan(0);

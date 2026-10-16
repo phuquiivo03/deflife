@@ -6,7 +6,7 @@ import {
   resolveCueKey,
   type TimeAudioPlan,
 } from "./cues";
-import { bgmUrl, busGain, clamp01, cueUrls, mixGain, parseManifest, type AudioCue } from "./manifest";
+import { bgmUrl, busGain, clamp01, cueUrls, loopLeadSeconds, mixGain, parseManifest, type AudioCue } from "./manifest";
 import { DEFAULT_AUDIO_LEVELS, type AudioLevels } from "./settings";
 import {
   bgmLeadSeconds,
@@ -135,6 +135,13 @@ export type AudioEngine = {
    * When set, the engine records the time until `source.start`.
    */
   playKey(key: CueKey, gestureAt?: number): void;
+  /**
+   * Loop one SFX from its own file (not the sprite) until `stopLoop`.
+   * A missing manifest id stops any current loop and stays silent.
+   * The same id already looping is left running.
+   */
+  startLoop(key: CueKey): Promise<void>;
+  stopLoop(): void;
   applyTimePlan(plan: TimeAudioPlan): void;
   dispose(): void;
   /** Currently looping bed, if any. */
@@ -148,6 +155,14 @@ type LiveBed = {
   url: string;
   source: BufferSourceLike;
   fade: GainNodeLike;
+};
+
+type LiveLoop = {
+  id: string;
+  volume: number;
+  source: BufferSourceLike | null;
+  trim: GainNodeLike | null;
+  element: SfxElementLike | null;
 };
 
 function defaultFetch(input: string): Promise<AudioResponseLike> {
@@ -239,6 +254,10 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
   let loadingUrl: string | null = null;
   let fadeToken = 0;
   let queued: { key: CueKey; gestureAt?: number } | null = null;
+  let pendingLoop: CueKey | null = null;
+  let liveLoop: LiveLoop | null = null;
+  let activeLoopId: string | null = null;
+  let loopToken = 0;
   let keepAlive: KeepAlive | null = null;
   let resuming = false;
   const decoded = new Map<string, AudioBufferLike>();
@@ -341,11 +360,153 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
   }
 
   function flushQueued() {
-    if (!queued || !unlocked) return;
-    if (sfxRoute !== "element" && !sfxBuffer) return;
-    const pending = queued;
-    queued = null;
-    playResolved(pending.key, pending.gestureAt);
+    if (queued && unlocked && (sfxRoute === "element" || sfxBuffer)) {
+      const pending = queued;
+      queued = null;
+      playResolved(pending.key, pending.gestureAt);
+    }
+    if (pendingLoop && unlocked) {
+      const key = pendingLoop;
+      pendingLoop = null;
+      void startLoopCue(key);
+    }
+  }
+
+  function stopLiveLoop() {
+    const live = liveLoop;
+    liveLoop = null;
+    if (!live) return;
+    try {
+      live.source?.stop();
+    } catch {
+      /* ignore */
+    }
+    try {
+      live.source?.disconnect();
+    } catch {
+      /* ignore */
+    }
+    try {
+      live.trim?.disconnect();
+    } catch {
+      /* ignore */
+    }
+    if (live.element) {
+      try {
+        live.element.pause();
+        live.element.loop = false;
+      } catch {
+        /* ignore */
+      }
+    }
+  }
+
+  function stopLoopCue() {
+    loopToken += 1;
+    pendingLoop = null;
+    activeLoopId = null;
+    stopLiveLoop();
+  }
+
+  function beginLoopElement(cue: AudioCue, url: string) {
+    const el = (options.createSfxElement ?? createFileAudioElement)() as SfxElementLike | null;
+    if (!el) {
+      activeLoopId = null;
+      return;
+    }
+    const lead = loopLeadSeconds(playbackFormat, cue.mp3LeadSeconds);
+    el.src = url;
+    el.loop = true;
+    el.preload = "auto";
+    el.playsInline = true;
+    el.volume = busGain(settings.sfx, cue.volume, settings.muted);
+    placeLead(el, lead);
+    liveLoop = { id: cue.id, volume: cue.volume, source: null, trim: null, element: el };
+    try {
+      const played = el.play();
+      if (played && typeof played.catch === "function") void played.catch(() => {});
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function beginLoopBuffer(cue: AudioCue, buffer: AudioBufferLike) {
+    if (!ctx) return;
+    const bus = busFor(cue);
+    if (!bus) {
+      activeLoopId = null;
+      return;
+    }
+    const lead = loopLeadSeconds(playbackFormat, cue.mp3LeadSeconds);
+    const safeLead = lead > 0 && lead < buffer.duration ? lead : 0;
+    const source = ctx.createBufferSource();
+    const trim = ctx.createGain();
+    trim.gain.value = cue.volume;
+    source.buffer = buffer;
+    source.loop = true;
+    source.loopStart = safeLead;
+    source.loopEnd = buffer.duration > 0 ? buffer.duration : 0;
+    source.connect(trim);
+    trim.connect(bus);
+    try {
+      source.start(ctx.currentTime, safeLead);
+    } catch {
+      activeLoopId = null;
+      return;
+    }
+    liveLoop = { id: cue.id, volume: cue.volume, source, trim, element: null };
+  }
+
+  async function startLoopCue(key: CueKey): Promise<void> {
+    const cue = cueForKey(key);
+    if (!cue || cue.type === "bgm") {
+      stopLoopCue();
+      return;
+    }
+    if (activeLoopId === cue.id) {
+      pendingLoop = null;
+      return;
+    }
+    if (!unlocked) {
+      pendingLoop = key;
+      activeLoopId = null;
+      stopLiveLoop();
+      return;
+    }
+    pendingLoop = null;
+    activeLoopId = cue.id;
+    const token = ++loopToken;
+    stopLiveLoop();
+    const url = bgmUrl(cue, playbackFormat);
+    if (!url) {
+      activeLoopId = null;
+      return;
+    }
+    if (!ctx) {
+      if (token !== loopToken) return;
+      beginLoopElement(cue, url);
+      return;
+    }
+    try {
+      let buffer = decoded.get(url);
+      if (!buffer) {
+        const response = await fetchImpl(url);
+        if (!response.ok || token !== loopToken || !ctx) {
+          if (token === loopToken) activeLoopId = null;
+          return;
+        }
+        const bytes = await response.arrayBuffer();
+        if (token !== loopToken || !ctx) return;
+        const decode = options.decodeAudioData ?? decodeAudioBuffer;
+        buffer = await decode(ctx, bytes);
+        if (buffer) decoded.set(url, buffer);
+      }
+      if (token !== loopToken || !buffer || !ctx) return;
+      beginLoopBuffer(cue, buffer);
+    } catch {
+      if (token !== loopToken) return;
+      beginLoopElement(cue, url);
+    }
   }
 
   function playElement(cue: AudioCue, gestureAt?: number) {
@@ -679,6 +840,9 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
       if (bedElement && bedCue) {
         bedElement.volume = busGain(settings.music, bedCue.volume, settings.muted);
       }
+      if (liveLoop?.element) {
+        liveLoop.element.volume = busGain(settings.sfx, liveLoop.volume, settings.muted);
+      }
     },
     notePhase(next: PhaseId) {
       phase = next;
@@ -744,6 +908,16 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
         /* ignore */
       }
     },
+    startLoop(key: CueKey) {
+      return startLoopCue(key).catch(() => {});
+    },
+    stopLoop() {
+      try {
+        stopLoopCue();
+      } catch {
+        /* ignore */
+      }
+    },
     applyTimePlan(plan: TimeAudioPlan) {
       try {
         if (plan.bgmPhase) {
@@ -763,6 +937,7 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
       fadeToken += 1;
       bedJob += 1;
       unlocked = false;
+      stopLoopCue();
       loadingUrl = null;
       if (bed) stopBed(bed);
       bed = null;

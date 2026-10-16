@@ -353,6 +353,30 @@
       "description": "Short end-of-day recap jingle"
     },
     {
+      "id": "sfx_typing_loop",
+      "type": "sfx",
+      "file": "ogg/sfx/sfx_typing_loop.ogg",
+      "mp3": "mp3/sfx/sfx_typing_loop.mp3",
+      "category": "ui",
+      "duration": 7.204,
+      "loop": true,
+      "volume": 0.38,
+      "mp3LeadSeconds": 0.025057,
+      "description": "Seamless loop of mechanical keyboard typing. Ogg loops directly; mp3 is the iOS fallback and skips leading encoder silence."
+    },
+    {
+      "id": "sfx_typing_loop_fast",
+      "type": "sfx",
+      "file": "ogg/sfx/sfx_typing_loop_fast.ogg",
+      "mp3": "mp3/sfx/sfx_typing_loop_fast.mp3",
+      "category": "ui",
+      "duration": 4.799,
+      "loop": true,
+      "volume": 0.38,
+      "mp3LeadSeconds": 0.025057,
+      "description": "Same typing loop time-stretched 1.5x, pitch preserved, for ./lam-au. Ogg loops directly; mp3 skips leading encoder silence."
+    },
+    {
       "id": "bgm_student_day",
       "type": "bgm",
       "file": "ogg/bgm/bgm_student_day.ogg",

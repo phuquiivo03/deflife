@@ -8,6 +8,8 @@
  *
  * BGM mp3 leading silence (encoder padding) is measured into the same JSON
  * so the looper can skip it with loopStart/offset. Ogg beds stay at 0.
+ *
+ * Cues with `loop: true` stay as separate files and are not mixed into the sprite.
  */
 import { execFileSync, spawnSync } from "node:child_process";
 import fs from "node:fs";
@@ -164,7 +166,7 @@ function decodeToWav(input, output, sampleRate) {
 }
 
 const manifest = JSON.parse(fs.readFileSync(MANIFEST, "utf8"));
-const sfx = (manifest.assets ?? []).filter((asset) => asset.type === "sfx");
+const sfx = (manifest.assets ?? []).filter((asset) => asset.type === "sfx" && asset.loop !== true);
 const bgm = (manifest.assets ?? []).filter((asset) => asset.type === "bgm");
 if (sfx.length === 0) throw new Error("no sfx in manifest");
 
