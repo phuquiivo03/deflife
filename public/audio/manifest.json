@@ -143,10 +143,10 @@
       "mp3": "mp3/sfx/sfx_money_gain.mp3",
       "wav": "masters/sfx/sfx_money_gain.wav",
       "category": "economy",
-      "duration": 0.329,
+      "duration": 0.88,
       "loop": false,
       "volume": 0.7,
-      "description": "Classic coin pickup"
+      "description": "Clunk + two-step B6->E7 coin ting + light coin jingle (juiciest, most 'ka-ching')"
     },
     {
       "id": "sfx_money_spend",
@@ -155,10 +155,10 @@
       "mp3": "mp3/sfx/sfx_money_spend.mp3",
       "wav": "masters/sfx/sfx_money_spend.wav",
       "category": "economy",
-      "duration": 0.309,
+      "duration": 0.49,
       "loop": false,
       "volume": 0.7,
-      "description": "Descending coin-out"
+      "description": "Two fast swipes 'xet xet' + E6-A6 double confirm beep (closest to the brief)"
     },
     {
       "id": "sfx_xp_gain",
@@ -227,10 +227,10 @@
       "mp3": "mp3/sfx/sfx_job_complete.mp3",
       "wav": "masters/sfx/sfx_job_complete.wav",
       "category": "economy",
-      "duration": 0.815,
+      "duration": 0.9,
       "loop": false,
       "volume": 0.7,
-      "description": "C-major arp resolve"
+      "description": "Quick C-E-G arp -> clunk + G6->C7 coin ting + jingle"
     },
     {
       "id": "sfx_job_failed",

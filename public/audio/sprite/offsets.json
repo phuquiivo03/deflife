@@ -52,74 +52,74 @@
       },
       "sfx_money_gain": {
         "offset": 3.479,
-        "duration": 0.326469
+        "duration": 0.877094
       },
       "sfx_money_spend": {
-        "offset": 3.885469,
-        "duration": 0.306281
+        "offset": 4.436094,
+        "duration": 0.487031
       },
       "sfx_xp_gain": {
-        "offset": 4.27175,
+        "offset": 5.003125,
         "duration": 0.181406
       },
       "sfx_skill_levelup": {
-        "offset": 4.533156,
+        "offset": 5.264531,
         "duration": 0.917125
       },
       "sfx_tier_up": {
-        "offset": 5.530281,
+        "offset": 6.261656,
         "duration": 0.831594
       },
       "sfx_freelance_milestone": {
-        "offset": 6.441875,
+        "offset": 7.17325,
         "duration": 0.917125
       },
       "sfx_job_accepted": {
-        "offset": 7.439,
+        "offset": 8.170375,
         "duration": 0.246781
       },
       "sfx_job_complete": {
-        "offset": 7.765781,
-        "duration": 0.8125
+        "offset": 8.497156,
+        "duration": 0.897125
       },
       "sfx_job_failed": {
-        "offset": 8.658281,
+        "offset": 9.474281,
         "duration": 0.917125
       },
       "sfx_phase_morning": {
-        "offset": 9.655406,
+        "offset": 10.471406,
         "duration": 0.774875
       },
       "sfx_phase_noon": {
-        "offset": 10.510281,
+        "offset": 11.326281,
         "duration": 0.782313
       },
       "sfx_phase_evening": {
-        "offset": 11.372594,
+        "offset": 12.188594,
         "duration": 0.833906
       },
       "sfx_phase_night": {
-        "offset": 12.2865,
+        "offset": 13.1025,
         "duration": 0.941875
       },
       "sfx_sleep": {
-        "offset": 13.308375,
+        "offset": 14.124375,
         "duration": 0.867375
       },
       "sfx_time_skip": {
-        "offset": 14.25575,
+        "offset": 15.07175,
         "duration": 0.941875
       },
       "sfx_energy_low": {
-        "offset": 15.277625,
+        "offset": 16.093625,
         "duration": 0.846438
       },
       "sfx_energy_restored": {
-        "offset": 16.204063,
+        "offset": 17.020063,
         "duration": 0.674344
       },
       "sfx_day_summary": {
-        "offset": 16.958406,
+        "offset": 17.774406,
         "duration": 0.941875
       }
     }
@@ -174,74 +174,74 @@
       },
       "sfx_money_gain": {
         "offset": 3.513531,
-        "duration": 0.326469
+        "duration": 0.877094
       },
       "sfx_money_spend": {
-        "offset": 3.92,
-        "duration": 0.306281
+        "offset": 4.470625,
+        "duration": 0.487031
       },
       "sfx_xp_gain": {
-        "offset": 4.306281,
+        "offset": 5.037656,
         "duration": 0.181406
       },
       "sfx_skill_levelup": {
-        "offset": 4.567688,
+        "offset": 5.299063,
         "duration": 0.917125
       },
       "sfx_tier_up": {
-        "offset": 5.564813,
+        "offset": 6.296188,
         "duration": 0.831594
       },
       "sfx_freelance_milestone": {
-        "offset": 6.476406,
+        "offset": 7.207781,
         "duration": 0.917125
       },
       "sfx_job_accepted": {
-        "offset": 7.473531,
+        "offset": 8.204906,
         "duration": 0.246781
       },
       "sfx_job_complete": {
-        "offset": 7.800313,
-        "duration": 0.8125
+        "offset": 8.531688,
+        "duration": 0.897125
       },
       "sfx_job_failed": {
-        "offset": 8.692813,
+        "offset": 9.508813,
         "duration": 0.917125
       },
       "sfx_phase_morning": {
-        "offset": 9.689938,
+        "offset": 10.505938,
         "duration": 0.774875
       },
       "sfx_phase_noon": {
-        "offset": 10.544813,
+        "offset": 11.360813,
         "duration": 0.782313
       },
       "sfx_phase_evening": {
-        "offset": 11.407125,
+        "offset": 12.223125,
         "duration": 0.833906
       },
       "sfx_phase_night": {
-        "offset": 12.321031,
+        "offset": 13.137031,
         "duration": 0.941875
       },
       "sfx_sleep": {
-        "offset": 13.342906,
+        "offset": 14.158906,
         "duration": 0.867375
       },
       "sfx_time_skip": {
-        "offset": 14.290281,
+        "offset": 15.106281,
         "duration": 0.941875
       },
       "sfx_energy_low": {
-        "offset": 15.312156,
+        "offset": 16.128156,
         "duration": 0.846438
       },
       "sfx_energy_restored": {
-        "offset": 16.238594,
+        "offset": 17.054594,
         "duration": 0.674344
       },
       "sfx_day_summary": {
-        "offset": 16.992938,
+        "offset": 17.808938,
         "duration": 0.941875
       }
     }
