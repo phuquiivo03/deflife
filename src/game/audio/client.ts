@@ -14,19 +14,3 @@ export function playCueKey(key: CueKey): void {
     /* audio must not surface */
   }
 }
-
-export function startLoopKey(key: CueKey): void {
-  try {
-    current?.startLoop(key);
-  } catch {
-    /* audio must not surface */
-  }
-}
-
-export function stopLoopKey(): void {
-  try {
-    current?.stopLoop();
-  } catch {
-    /* audio must not surface */
-  }
-}
