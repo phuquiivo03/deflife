@@ -129,6 +129,7 @@ export function offerJob(template: JobTemplate, day: number): PlayerJob {
     deadline_day: day + template.deadline_days,
     finished_day: null,
     missed_days: 0,
+    task_run: null,
   };
 }
 
@@ -149,7 +150,8 @@ export function visibleBoardJobs(
 ): PlayerJob[] {
   return jobs.filter(
     (job) =>
-      job.offered_day === day &&
-      (job.status === "offered" || job.status === "completed"),
+      job.status === "active" ||
+      (job.offered_day === day &&
+        (job.status === "offered" || job.status === "completed")),
   );
 }

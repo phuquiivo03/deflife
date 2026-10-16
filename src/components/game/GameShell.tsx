@@ -11,6 +11,7 @@ import { CustomizePanel } from "./CustomizePanel";
 import { NotificationsPanel } from "./NotificationsPanel";
 import { PlayerInfoPanel } from "./PlayerInfoPanel";
 import { PlayerHudCard } from "./PlayerHudCard";
+import { TaskRunOverlay } from "@/components/terminal/TaskRunOverlay";
 import { PanelChamferFrame } from "./PanelChamferFrame";
 import { RoomChamferFrame } from "./RoomChamferFrame";
 import { TimeDebugPanel } from "./TimeDebugPanel";
@@ -185,7 +186,7 @@ export function GameShell({ iconFiles = [] }: { iconFiles?: readonly string[] })
           </PanelChamferFrame>
         </aside>
 
-        <main className="order-1 flex min-h-0 flex-col items-center justify-center px-2 py-4 lg:order-2 lg:justify-start lg:px-0 lg:py-0">
+        <main className="relative order-1 flex min-h-0 flex-col items-center justify-center px-2 py-4 lg:order-2 lg:justify-start lg:px-0 lg:py-0">
           <div className="room-stage-glow flex w-full flex-col items-center">
             <RoomChamferFrame
               areaRef={areaRef}
@@ -205,6 +206,7 @@ export function GameShell({ iconFiles = [] }: { iconFiles?: readonly string[] })
               <CareerChrome iconFiles={iconFiles} showDebug={showTimeDebug} />
             </div>
           </div>
+          <TaskRunOverlay />
         </main>
 
         <aside className="order-3 flex min-h-0 flex-col p-3 lg:h-full lg:p-0">
