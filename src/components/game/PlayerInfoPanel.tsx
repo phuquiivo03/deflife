@@ -28,7 +28,7 @@ export function PlayerInfoPanel({ iconFiles = [] }: { iconFiles?: readonly strin
   );
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
+    <div className="flex h-full min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
       <PanelCard className="flex flex-col items-center p-3">
         <div className="mb-2 flex h-24 w-24 items-center justify-center overflow-hidden rounded-lg border-2 border-[var(--room-frame)] bg-[#b8d9f0]">
           <PixelAvatar role="player" size={96} alt={p.name} />
@@ -73,7 +73,7 @@ export function PlayerInfoPanel({ iconFiles = [] }: { iconFiles?: readonly strin
         <StatBar value={freelance} max={goal} tone="mint" className="mt-1" />
       </PanelCard>
 
-      <PanelCard className="px-3 py-1">
+      <PanelCard className="px-3 py-1 lg:flex-1">
         <ul data-testid="player-skills">
           {skills.map((skill) => (
             <PlayerSkillRow key={skill.id} skill={skill} iconFiles={iconFiles} />

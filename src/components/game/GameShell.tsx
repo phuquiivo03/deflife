@@ -176,12 +176,13 @@ export function GameShell({ iconFiles = [] }: { iconFiles?: readonly string[] })
         </div>
       </header>
 
-      <div className="relative flex min-h-0 flex-1 flex-col lg:grid lg:grid-cols-[minmax(0,22fr)_minmax(0,56fr)_minmax(0,22fr)]">
-        <aside className="order-2 flex min-h-0 flex-col p-3 lg:order-1 lg:p-4">
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto lg:items-center lg:justify-[safe_center] lg:px-4 lg:py-6">
+      <div className="relative flex min-h-0 w-full flex-1 flex-col lg:grid lg:w-full lg:max-w-[1080px] lg:flex-none lg:grid-cols-[260px_minmax(0,1fr)_260px] lg:items-stretch lg:gap-5">
+        <aside className="order-2 flex min-h-0 flex-col p-3 lg:order-1 lg:h-full lg:p-0">
           <NotificationsPanel />
         </aside>
 
-        <main className="order-1 flex min-h-0 flex-col items-center justify-center px-2 py-4 lg:order-2">
+        <main className="order-1 flex min-h-0 flex-col items-center justify-center px-2 py-4 lg:order-2 lg:justify-start lg:px-0 lg:py-0">
           <div className="room-stage-glow flex w-full flex-col items-center">
             <RoomChamferFrame
               areaRef={areaRef}
@@ -195,7 +196,7 @@ export function GameShell({ iconFiles = [] }: { iconFiles?: readonly string[] })
             >
               <SceneCanvas areaRef={areaRef} debug={debug} />
             </RoomChamferFrame>
-            <div className="mt-3 flex w-full flex-col items-center gap-3 px-2">
+            <div className="mt-3 flex w-full flex-col items-center gap-3 px-2 lg:px-0">
               <PlayerHudCard iconFiles={iconFiles} />
               {showTimeDebug ? <TimeDebugPanel /> : null}
               <CareerChrome iconFiles={iconFiles} showDebug={showTimeDebug} />
@@ -203,14 +204,14 @@ export function GameShell({ iconFiles = [] }: { iconFiles?: readonly string[] })
           </div>
         </main>
 
-        <aside className="order-3 flex min-h-0 flex-col p-3 lg:order-3 lg:p-4">
+        <aside className="order-3 flex min-h-0 flex-col p-3 lg:h-full lg:p-0">
           <Tabs
             value={sidebarTab}
             onValueChange={(v) => {
               setSidebarTab(v as SidebarTab);
               if (v === "edit-room") setCustomizeOpen(true);
             }}
-            className="flex min-h-0 flex-1 flex-col gap-3"
+            className="flex h-full min-h-0 flex-1 flex-col gap-3"
           >
             <TabsList className="tabs-lavender grid h-11 w-full grid-cols-2">
               <TabsTrigger
@@ -230,12 +231,13 @@ export function GameShell({ iconFiles = [] }: { iconFiles?: readonly string[] })
               <PlayerInfoPanel iconFiles={iconFiles} />
             </TabsContent>
             <TabsContent value="edit-room" className="mt-0 min-h-0 flex-1 overflow-hidden">
-              <div className="flex max-h-[min(50vh,520px)] min-h-[240px] flex-col lg:max-h-[calc(100vh-8rem)] lg:min-h-0">
+              <div className="flex max-h-[min(50vh,520px)] min-h-[240px] flex-col lg:h-full lg:max-h-full lg:min-h-0">
                 <CustomizePanel />
               </div>
             </TabsContent>
           </Tabs>
         </aside>
+      </div>
       </div>
     </div>
   );
