@@ -170,6 +170,8 @@ function slice(offset: number, duration: number) {
   };
 }
 
+const TYPING = slice(6, 0.4);
+const TYPING_FAST = slice(6.5, 0.25);
 const CLICK = slice(0, 0.045);
 const NOON = slice(1.2, 0.2);
 const EVENING = slice(2.4, 0.2);
@@ -188,6 +190,8 @@ const OFFSETS: SpriteMap = {
       sfx_phase_evening: EVENING.ogg,
       sfx_phase_night: NIGHT.ogg,
       sfx_sleep: SLEEP.ogg,
+      sfx_typing_loop: TYPING.ogg,
+      sfx_typing_loop_fast: TYPING_FAST.ogg,
     },
   },
   mp3: {
@@ -199,6 +203,8 @@ const OFFSETS: SpriteMap = {
       sfx_phase_evening: EVENING.mp3,
       sfx_phase_night: NIGHT.mp3,
       sfx_sleep: SLEEP.mp3,
+      sfx_typing_loop: TYPING.mp3,
+      sfx_typing_loop_fast: TYPING_FAST.mp3,
     },
   },
   bgm: {
@@ -222,7 +228,11 @@ class FakeElement implements SfxElementLike {
     return Promise.resolve();
   }
 
-  pause(): void {}
+  pauses = 0;
+
+  pause(): void {
+    this.pauses += 1;
+  }
 
   addEventListener(type: "error" | "loadedmetadata" | "playing" | "seeked", listener: () => void): void {
     (this.listeners[type] ??= []).push(listener);
@@ -831,6 +841,103 @@ describe("ios web audio helpers", () => {
     }
     expect(createAudioContextFrom(Broken as unknown as new () => AudioContextLike)).toBeNull();
     expect(createAudioContextFrom(undefined)).toBeNull();
+  });
+
+  it("loops a sprite cue on the sfx bus, switches, and stops", async () => {
+    const audio = harness();
+    await audio.engine.preloadSfx();
+    audio.engine.setSettings({ music: 1, sfx: 0.4, muted: false });
+    audio.engine.unlock();
+    const loops = () => audio.ctx.sources.filter((source) => source.loop && source.loopEnd < 20);
+    audio.engine.startLoop("typingLoop");
+    expect(loops()).toHaveLength(0);
+
+    audio.engine.setManifest([
+      ...PACK,
+      {
+        id: "sfx_typing_loop",
+        file: "ogg/sfx/sfx_typing_loop.ogg",
+        type: "sfx",
+        loop: true,
+        volume: 0.6,
+        category: "ui",
+      },
+      {
+        id: "sfx_typing_loop_fast",
+        file: "ogg/sfx/sfx_typing_loop_fast.ogg",
+        type: "sfx",
+        loop: true,
+        volume: 0.5,
+        category: "ui",
+      },
+    ]);
+    audio.engine.startLoop("typingLoop");
+    const typing = loops().at(-1)!;
+    expect(typing.loopStart).toBe(TYPING.ogg.offset);
+    expect(typing.loopEnd).toBeCloseTo(TYPING.ogg.offset + TYPING.ogg.duration);
+    expect(typing.started).toEqual({ when: 0, offset: TYPING.ogg.offset, duration: undefined });
+    const trim = typing.dest as FakeGain;
+    expect(trim.gain.value).toBe(0.6);
+    expect((trim.dest as FakeGain).gain.value).toBe(0.4);
+    expect((trim.dest as FakeGain).dest).toBe(masterGain(audio.ctx));
+
+    audio.engine.startLoop("typingLoop");
+    expect(loops()).toHaveLength(1);
+    expect(typing.stopped).toBe(false);
+
+    audio.engine.setSettings({ music: 1, sfx: 0.25, muted: true });
+    expect(masterGain(audio.ctx).gain.value).toBe(0);
+    expect((trim.dest as FakeGain).gain.value).toBe(0.25);
+
+    audio.engine.startLoop("typingLoopFast");
+    expect(typing.stopped).toBe(true);
+    const fast = loops().find((source) => !source.stopped)!;
+    expect(fast.loopStart).toBe(TYPING_FAST.ogg.offset);
+    expect(fast.loopEnd).toBeCloseTo(TYPING_FAST.ogg.offset + TYPING_FAST.ogg.duration);
+    expect((fast.dest as FakeGain).gain.value).toBe(0.5);
+
+    audio.engine.stopLoop();
+    expect(fast.stopped).toBe(true);
+    expect(loops().every((source) => source.stopped)).toBe(true);
+
+    audio.engine.setManifest(PACK);
+    audio.engine.startLoop("typingLoopFast");
+    expect(loops().filter((source) => !source.stopped)).toHaveLength(0);
+  });
+
+  it("loops a per-file cue when the sprite route is unavailable and follows mute", async () => {
+    const elements: FakeElement[] = [];
+    const audio = harness("ogg", {
+      createContext: () => null,
+      createSfxElement: () => {
+        const el = new FakeElement();
+        elements.push(el);
+        return el;
+      },
+    });
+    await audio.engine.preloadSfx();
+    audio.engine.setManifest([
+      ...PACK,
+      {
+        id: "sfx_typing_loop",
+        file: "ogg/sfx/sfx_typing_loop.ogg",
+        type: "sfx",
+        loop: true,
+        volume: 0.6,
+        category: "ui",
+      },
+    ]);
+    audio.engine.setSettings({ music: 0, sfx: 0.4, muted: false });
+    audio.engine.startLoop("typingLoop");
+    expect(elements).toHaveLength(0);
+    audio.engine.unlock();
+    const typing = elements.find((el) => el.src.includes("sfx_typing_loop"));
+    expect(typing?.loop).toBe(true);
+    expect(typing?.volume).toBeCloseTo(0.24);
+    audio.engine.setSettings({ music: 0, sfx: 0.4, muted: true });
+    expect(typing?.volume).toBe(0);
+    audio.engine.stopLoop();
+    expect(typing?.pauses).toBe(1);
   });
 });
 

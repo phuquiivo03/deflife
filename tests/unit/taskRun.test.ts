@@ -14,6 +14,7 @@ import {
 import { TASK_RUN } from "@/game/task-run/content";
 import { bugCount, rollTaskEvent } from "@/game/task-run/formula";
 import { canRetry, isCleared } from "@/game/task-run/machine";
+import { bugHitPx, spawnBugs, stepBug } from "@/game/task-run/motion";
 
 const formula = TASK_RUN.bugs;
 
@@ -202,6 +203,43 @@ describe("task run state machine", () => {
     expect(cursor.events.some((event) => event.type === "taskSucceeded")).toBe(true);
     expect(cursor.events.some((event) => event.type === "moneyChanged")).toBe(true);
     expect(cursor.state.player_unlocks.map((row) => row.milestone_id)).toContain("freelance-10");
+  });
+
+  it("spawns three sizes by weight, with small fastest and large slowest", () => {
+    const motion = TASK_RUN.bug_motion;
+    expect(motion.sizes.small.px).toBeLessThan(motion.sizes.medium.px);
+    expect(motion.sizes.medium.px).toBeLessThan(motion.sizes.large.px);
+    expect(motion.sizes.small.speed).toBeGreaterThan(motion.sizes.medium.speed);
+    expect(motion.sizes.medium.speed).toBeGreaterThan(motion.sizes.large.speed);
+    expect(motion.sizes.small.turn_ms).toBeLessThan(motion.sizes.medium.turn_ms);
+    expect(motion.sizes.medium.turn_ms).toBeLessThan(motion.sizes.large.turn_ms);
+    expect(bugHitPx(motion)).toBeGreaterThanOrEqual(44);
+
+    const count = 4000;
+    const bugs = spawnBugs(7, count, motion);
+    expect(spawnBugs(7, count, motion)).toEqual(bugs);
+    const tally = { small: 0, medium: 0, large: 0 };
+    for (const bug of bugs) tally[bug.size] += 1;
+    expect(tally.small / count).toBeCloseTo(motion.sizes.small.weight, 1);
+    expect(tally.medium / count).toBeCloseTo(motion.sizes.medium.weight, 1);
+    expect(tally.large / count).toBeCloseTo(motion.sizes.large.weight, 1);
+
+    const start = { size: "small" as const, x: 50, y: 50, angle: 0, untilTurn: 10_000 };
+    const fast = stepBug(start, 1000, motion, () => 0, false);
+    const slow = stepBug(start, 1000, motion, () => 0, true);
+    expect(fast.x).toBeCloseTo(50 + motion.sizes.small.speed, 5);
+    expect(slow.x).toBeCloseTo(50 + motion.sizes.small.speed * motion.reduced_motion_scale, 5);
+    expect(slow.x).toBeGreaterThan(start.x);
+
+    const turned = stepBug({ ...start, untilTurn: 10 }, 20, motion, () => 0.25, false);
+    expect(turned.angle).toBeCloseTo(Math.PI / 2, 5);
+    expect(turned.untilTurn).toBe(motion.sizes.small.turn_ms);
+    const turnedSlow = stepBug({ ...start, untilTurn: 10 }, 20, motion, () => 0.25, true);
+    expect(turnedSlow.untilTurn).toBeCloseTo(motion.sizes.small.turn_ms / motion.reduced_motion_scale, 5);
+
+    const bounced = stepBug({ ...start, x: 90, untilTurn: 5000 }, 1000, motion, () => 0, false);
+    expect(bounced.x).toBe(100 - motion.inset);
+    expect(bounced.angle).toBeCloseTo(Math.PI, 5);
   });
 
   it("rolls the same event for the same seed", () => {

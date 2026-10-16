@@ -22,6 +22,16 @@
     "min": 1,
     "max": 4
   },
+  "bug_motion": {
+    "hit_px": 44,
+    "reduced_motion_scale": 0.45,
+    "inset": 6,
+    "sizes": {
+      "small": { "px": 10, "speed": 34, "turn_ms": 320, "weight": 0.45 },
+      "medium": { "px": 16, "speed": 20, "turn_ms": 560, "weight": 0.35 },
+      "large": { "px": 26, "speed": 11, "turn_ms": 900, "weight": 0.2 }
+    }
+  },
   "events": [
     {
       "id": "scope",

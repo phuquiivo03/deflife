@@ -152,7 +152,7 @@ Format life events as **stdout**:
 ```
 
 - Severity drives color: default sage values; warnings may use amber (**sparingly**, same amber token as status).
-- Errors could use brighter green or underline—not red (keeps palette discipline) unless a11y review demands a second hue.
+- Errors could use brighter green or underline—not red (keeps palette discipline) unless a11y review demands a second hue. The test-step bug glyph is the bug-red exception in §6.1. Failure labels and negative numbers stay green.
 
 ---
 
@@ -172,12 +172,17 @@ Strict usage: **one phosphor accent** (`#39ff7a`) for emphasis, glow, keys, bars
 | `terminal-amber` | `#ffd24a` | **Only** live status blip, “available”/highlight tag (max 1–2 per viewport). |
 | `terminal-white` | `#ffffff` | Hero name banner only (scoped class). |
 | Traffic lights | `#ff5f57`, `#febc2e`, `#28c840` | Window chrome dots only (not UI accents). |
+| `terminal-bug-red` | `#ff4b4b` | **bug-red exception.** Test-step bug glyph only (`.terminal-bug i`). |
 
 **Rules**
 
-- No extra accent colors (no blue links, no purple tags).
+- No extra accent colors (no blue links, no purple tags), except the bug-red exception below.
 - No gradients except optional **radial green wash** on `#000000` background at very low opacity.
 - Side panels **outside** terminal keep existing zinc/cream palette.
+
+**Exception — bug-red**
+
+The crawling test-step bug sprite is the only extra hue inside the terminal. Token `terminal-bug-red` (`#ff4b4b`) paints `.terminal-bug i` and nothing else. Failure UI stays phosphor green: `[fail]` labels, minus numbers, and result copy are not red. Traffic-light chrome (`#ff5f57` / `#febc2e` / `#28c840`) is the window dots, not this token.
 
 ### 6.2 Typography
 
