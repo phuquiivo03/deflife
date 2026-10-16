@@ -2,6 +2,28 @@ import type { SkillId, TaskTicketChoice } from "../career/types";
 
 export type { TaskBuildChoice, TaskOutcome, TaskRun, TaskStep, TaskTicketChoice } from "../career/types";
 
+export type BugSizeId = "small" | "medium" | "large";
+
+export type BugSizeSpec = {
+  /** Visual glyph size in CSS pixels. The tap target stays `hit_px`. */
+  px: number;
+  /** Percent of the code area traveled per second. */
+  speed: number;
+  /** Milliseconds between random direction changes. */
+  turn_ms: number;
+  /** Relative spawn weight. Weights are normalized. */
+  weight: number;
+};
+
+export type BugMotionConfig = {
+  hit_px: number;
+  /** Multiplies speed and lengthens the turn interval while reduced motion is on. */
+  reduced_motion_scale: number;
+  /** Percent inset so a bug bounces before it leaves the code area. */
+  inset: number;
+  sizes: Record<BugSizeId, BugSizeSpec>;
+};
+
 export type BugFormula = {
   base: number;
   per_difficulty: number;
@@ -21,6 +43,18 @@ export type TaskEventDef = {
   log: string;
   bug_delta: number;
   time_delta_sec: number;
+};
+
+export type BugBody = {
+  size: BugSizeId;
+  /** Percent across the code area. */
+  x: number;
+  /** Percent down the code area. */
+  y: number;
+  /** Radians. 0 travels to the right. */
+  angle: number;
+  /** Milliseconds until the next random turn. */
+  untilTurn: number;
 };
 
 export type TaskChoice = {
@@ -52,6 +86,7 @@ export type TaskRunConfig = {
   fail_reputation: number;
   event_chance: number;
   bugs: BugFormula;
+  bug_motion: BugMotionConfig;
   events: TaskEventDef[];
   build_logs: string[];
   test_code: string[];

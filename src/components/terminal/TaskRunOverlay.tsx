@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { playCueKey } from "@/game/audio/client";
+import { useEffect, useRef, useState } from "react";
+import { playCueKey, startLoopKey, stopLoopKey } from "@/game/audio/client";
 import { SIM_CATALOG } from "@/game/career/content";
 import { formatVnd } from "@/lib/format-currency";
 import { TASK_RUN, taskDurationSec } from "@/game/task-run/content";
-import { bugSpots } from "@/game/task-run/formula";
+import { bugHitPx, bugMotionRand, spawnBugs, stepBug, type BugBody } from "@/game/task-run/motion";
 import { canRetry } from "@/game/task-run/machine";
 import { primarySkillId, ticketForSkill } from "@/game/task-run/apply";
 import type { TaskRun } from "@/game/task-run/types";
@@ -51,6 +51,7 @@ export function TaskRunOverlay() {
     window.addEventListener("keydown", onKey);
     return () => {
       window.removeEventListener("keydown", onKey);
+      stopLoopKey();
       playCueKey("panelClose");
     };
   }, [jobId, closeTask]);
@@ -186,6 +187,14 @@ function BuildStep({ run }: { run: TaskRun }) {
   );
 
   useEffect(() => {
+    startLoopKey(run.build === "rushed" ? "typingLoopFast" : "typingLoop");
+  }, [run.build]);
+
+  useEffect(() => {
+    return () => stopLoopKey();
+  }, []);
+
+  useEffect(() => {
     if (run.build) return;
     let elapsed = 0;
     const stopAt = preChoice * TASK_RUN.choice_at;
@@ -213,6 +222,7 @@ function BuildStep({ run }: { run: TaskRun }) {
       setLogCount(TASK_RUN.build_logs.length);
       if (t >= 1) {
         window.clearInterval(id);
+        stopLoopKey();
         begin();
       }
     }, 100);
@@ -258,12 +268,50 @@ function BuildStep({ run }: { run: TaskRun }) {
   );
 }
 
+function useReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const apply = () => setReduced(media.matches);
+    apply();
+    media.addEventListener("change", apply);
+    return () => media.removeEventListener("change", apply);
+  }, []);
+  return reduced;
+}
+
 function TestStep({ run }: { run: TaskRun }) {
   const catchTaskBug = useGameStore((s) => s.catchTaskBug);
   const finishTaskTest = useGameStore((s) => s.finishTaskTest);
-  const spots = useMemo(() => bugSpots(run.seed + run.retries, run.bugs_total), [run.retries, run.seed, run.bugs_total]);
+  const reduced = useReducedMotion();
+  const reducedRef = useRef(reduced);
+  reducedRef.current = reduced;
+  const randRef = useRef<(() => number) | null>(null);
+  if (!randRef.current) {
+    randRef.current = bugMotionRand(run.seed + run.retries);
+  }
+  const [bugs, setBugs] = useState<BugBody[]>(() =>
+    spawnBugs(run.seed + run.retries, run.bugs_total, TASK_RUN.bug_motion),
+  );
   const [hidden, setHidden] = useState<ReadonlySet<number>>(() => new Set());
   const [left, setLeft] = useState(TASK_RUN.test_sec);
+  const hit = bugHitPx(TASK_RUN.bug_motion);
+
+  useEffect(() => {
+    let frame = 0;
+    let last = performance.now();
+    const tick = (now: number) => {
+      const dt = Math.min(48, now - last);
+      last = now;
+      const rand = randRef.current;
+      if (rand) {
+        setBugs((current) => current.map((bug) => stepBug(bug, dt, TASK_RUN.bug_motion, rand, reducedRef.current)));
+      }
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, []);
 
   useEffect(() => {
     const id = window.setInterval(() => {
@@ -289,13 +337,21 @@ function TestStep({ run }: { run: TaskRun }) {
       </p>
       <div className="relative mt-3">
         <pre className="terminal-code">{TASK_RUN.test_code.join("\n")}</pre>
-        {spots.map((spot, index) =>
+        {bugs.map((bug, index) =>
           hidden.has(index) ? null : (
             <button
               key={index}
               type="button"
               className="terminal-bug"
-              style={{ left: `${spot.x}%`, top: `${spot.y}%`, animationDelay: `${index * 0.15}s` }}
+              data-size={bug.size}
+              style={{
+                left: `${bug.x}%`,
+                top: `${bug.y}%`,
+                width: hit,
+                height: hit,
+                marginLeft: -hit / 2,
+                marginTop: -hit / 2,
+              }}
               aria-label="Bắt bug"
               data-testid="task-bug"
               onClick={() => {
@@ -307,7 +363,12 @@ function TestStep({ run }: { run: TaskRun }) {
                 catchTaskBug();
               }}
             >
-              <i />
+              <i
+                style={{
+                  width: TASK_RUN.bug_motion.sizes[bug.size].px,
+                  height: Math.round(TASK_RUN.bug_motion.sizes[bug.size].px * 0.75),
+                }}
+              />
             </button>
           ),
         )}
