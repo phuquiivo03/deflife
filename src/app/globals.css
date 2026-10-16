@@ -162,6 +162,28 @@ body {
   text-align: center;
 }
 
+/* Side panels: same chamfer thickness as the room, softer rose so the canvas stays the focus. */
+.panel-frame-glow {
+  filter: drop-shadow(0 0 10px rgba(208, 143, 203, 0.45))
+    drop-shadow(0 8px 14px rgba(60, 30, 70, 0.28));
+}
+
+.panel-frame-f1 {
+  background: #6a4a66;
+}
+
+.panel-frame-f2 {
+  background: linear-gradient(180deg, #f8e4f2, #e3b4d8);
+}
+
+.panel-frame-f3 {
+  background: linear-gradient(160deg, #e7c6e2, #d08fcb 60%, #e4b7d8);
+}
+
+.panel-frame-well {
+  background: var(--panel-bg);
+}
+
 .tabs-lavender {
   background: var(--tab-lavender);
   border: 1px solid var(--panel-border);

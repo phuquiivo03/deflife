@@ -30,7 +30,7 @@ const NOTIFICATIONS: {
 
 export function NotificationsPanel() {
   return (
-    <PanelCard className="flex h-full min-h-0 flex-col gap-3 p-4">
+    <div className="flex h-full min-h-0 flex-col gap-3 p-4">
       <PanelCardTitle
         icon={<Bell className="h-5 w-5 text-[var(--accent-violet)]" strokeWidth={2} />}
       >
@@ -55,6 +55,6 @@ export function NotificationsPanel() {
           ))}
         </ul>
       </ScrollArea>
-    </PanelCard>
+    </div>
   );
 }

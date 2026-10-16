@@ -143,6 +143,8 @@ There is **no f4 / `#15112F` inner line** and no padding between the purple body
 **Glow:** `.room-frame-glow` wrapper uses `filter: drop-shadow(...)` (not `box-shadow` — clip-path clips box-shadow).  
 **Label plate:** chamfer `c6`, bg `#E9E4F5`, text `#3B3466`, stage title from room content.
 
+**Side panels** use the same layers, pads, corners, and inset shadow at scale 1 (`PanelChamferFrame`), in a softer rose-lavender so the deep purple canvas stays the focus. Both columns share one color: f1 `#6A4A66`, f2 `#F8E4F2` → `#E3B4D8`, f3 `#E7C6E2` / `#D08FCB` (page-gradient pink) / `#E4B7D8`. The well is `--panel-bg` (`#F3F1F8`). Glow is `.panel-frame-glow`, lighter than the room. Inner notification and skill cards stay lavender `PanelCard`s.
+
 Canvas sizing `ref` stays on the room-size cap box; the visible frame wraps the canvas inside it. Pointer hit-testing and `?debug=1` unchanged.
 
 ---
