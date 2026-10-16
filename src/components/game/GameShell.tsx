@@ -11,6 +11,7 @@ import { CustomizePanel } from "./CustomizePanel";
 import { NotificationsPanel } from "./NotificationsPanel";
 import { PlayerInfoPanel } from "./PlayerInfoPanel";
 import { PlayerHudCard } from "./PlayerHudCard";
+import { PanelChamferFrame } from "./PanelChamferFrame";
 import { RoomChamferFrame } from "./RoomChamferFrame";
 import { TimeDebugPanel } from "./TimeDebugPanel";
 import { CareerChrome } from "./career/CareerChrome";
@@ -179,7 +180,9 @@ export function GameShell({ iconFiles = [] }: { iconFiles?: readonly string[] })
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto lg:items-center lg:justify-[safe_center] lg:px-4 lg:py-6">
       <div className="relative flex min-h-0 w-full flex-1 flex-col lg:grid lg:w-full lg:max-w-[1080px] lg:flex-none lg:grid-cols-[260px_minmax(0,1fr)_260px] lg:items-stretch lg:gap-5">
         <aside className="order-2 flex min-h-0 flex-col p-3 lg:order-1 lg:h-full lg:p-0">
-          <NotificationsPanel />
+          <PanelChamferFrame>
+            <NotificationsPanel />
+          </PanelChamferFrame>
         </aside>
 
         <main className="order-1 flex min-h-0 flex-col items-center justify-center px-2 py-4 lg:order-2 lg:justify-start lg:px-0 lg:py-0">
@@ -205,37 +208,39 @@ export function GameShell({ iconFiles = [] }: { iconFiles?: readonly string[] })
         </main>
 
         <aside className="order-3 flex min-h-0 flex-col p-3 lg:h-full lg:p-0">
-          <Tabs
-            value={sidebarTab}
-            onValueChange={(v) => {
-              setSidebarTab(v as SidebarTab);
-              if (v === "edit-room") setCustomizeOpen(true);
-            }}
-            className="flex h-full min-h-0 flex-1 flex-col gap-3"
-          >
-            <TabsList className="tabs-lavender grid h-11 w-full grid-cols-2">
-              <TabsTrigger
-                value="player"
-                className="border-0 font-galmuri-11 text-galmuri-title data-[state=active]:border-0"
-              >
-                Nhân vật
-              </TabsTrigger>
-              <TabsTrigger
-                value="edit-room"
-                className="border-0 font-galmuri-11 text-galmuri-title data-[state=active]:border-0"
-              >
-                Sửa phòng
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="player" className="mt-0 min-h-0 flex-1 overflow-hidden">
-              <PlayerInfoPanel iconFiles={iconFiles} />
-            </TabsContent>
-            <TabsContent value="edit-room" className="mt-0 min-h-0 flex-1 overflow-hidden">
-              <div className="flex max-h-[min(50vh,520px)] min-h-[240px] flex-col lg:h-full lg:max-h-full lg:min-h-0">
-                <CustomizePanel />
-              </div>
-            </TabsContent>
-          </Tabs>
+          <PanelChamferFrame>
+            <Tabs
+              value={sidebarTab}
+              onValueChange={(v) => {
+                setSidebarTab(v as SidebarTab);
+                if (v === "edit-room") setCustomizeOpen(true);
+              }}
+              className="flex h-full min-h-0 flex-1 flex-col gap-3 p-3"
+            >
+              <TabsList className="tabs-lavender grid h-11 w-full grid-cols-2">
+                <TabsTrigger
+                  value="player"
+                  className="border-0 font-galmuri-11 text-galmuri-title data-[state=active]:border-0"
+                >
+                  Nhân vật
+                </TabsTrigger>
+                <TabsTrigger
+                  value="edit-room"
+                  className="border-0 font-galmuri-11 text-galmuri-title data-[state=active]:border-0"
+                >
+                  Sửa phòng
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="player" className="mt-0 min-h-0 flex-1 overflow-hidden">
+                <PlayerInfoPanel iconFiles={iconFiles} />
+              </TabsContent>
+              <TabsContent value="edit-room" className="mt-0 min-h-0 flex-1 overflow-hidden">
+                <div className="flex max-h-[min(50vh,520px)] min-h-[240px] flex-col lg:h-full lg:max-h-full lg:min-h-0">
+                  <CustomizePanel />
+                </div>
+              </TabsContent>
+            </Tabs>
+          </PanelChamferFrame>
         </aside>
       </div>
       </div>
