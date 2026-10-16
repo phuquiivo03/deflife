@@ -13,6 +13,11 @@ import {
   type PlayerStudyCompletion,
   type PlayerUnlock,
   type SkillId,
+  type TaskBuildChoice,
+  type TaskOutcome,
+  type TaskRun,
+  type TaskStep,
+  type TaskTicketChoice,
 } from "../career/types";
 import type { Loadout } from "../types";
 import { snapshot, totalMinutesFromPersisted } from "../time";
@@ -93,6 +98,7 @@ function normalizeJobs(value: unknown): PlayerJob[] {
       deadline_day: nullableNum(row.deadline_day),
       finished_day: nullableNum(row.finished_day),
       missed_days: num(row.missed_days),
+      task_run: normalizeTaskRun(row.task_run),
     });
   }
   return jobs;
@@ -146,6 +152,34 @@ function normalizeEvents(value: unknown): PlayerEvent[] {
   return events;
 }
 
+const TASK_STEPS: readonly TaskStep[] = ["ticket", "build", "test", "result"];
+const TICKET_CHOICES: readonly TaskTicketChoice[] = ["correct", "wrong", "ask"];
+const BUILD_CHOICES: readonly TaskBuildChoice[] = ["careful", "rushed"];
+
+function normalizeTaskRun(value: unknown): TaskRun | null {
+  if (!isRecord(value)) return null;
+  const step = TASK_STEPS.find((item) => item === value.step);
+  if (!step) return null;
+  const ticket = TICKET_CHOICES.find((item) => item === value.ticket) ?? null;
+  const build = BUILD_CHOICES.find((item) => item === value.build) ?? null;
+  const outcome: TaskOutcome | null =
+    value.outcome === "success" || value.outcome === "fail" ? value.outcome : null;
+  return {
+    step,
+    seed: num(value.seed),
+    ticket,
+    build,
+    event_id: typeof value.event_id === "string" ? value.event_id : null,
+    bugs_total: num(value.bugs_total),
+    bugs_caught: num(value.bugs_caught),
+    retries: num(value.retries),
+    outcome,
+    time_bonus_sec: Number.isFinite(Number(value.time_bonus_sec))
+      ? Math.trunc(Number(value.time_bonus_sec))
+      : 0,
+  };
+}
+
 function num(value: unknown, fallback = 0): number {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return fallback;
@@ -192,9 +226,10 @@ export function careerFromUnknown(
 }
 
 /**
- * Persist version 4. Versions before 3 keep the room and the clock, and gain
+ * Persist version 5. Versions before 3 keep the room and the clock, and gain
  * a fresh career document. Version 3 keeps the career tables. Versions before
- * 4 have no course history, so every course is still uncompleted.
+ * 4 have no course history, so every course is still uncompleted. Versions
+ * before 5 have no task_run; normalize stores null.
  */
 export function migrateSave(persisted: unknown, version: number): PersistedSave {
   const prev = isRecord(persisted) ? persisted : {};

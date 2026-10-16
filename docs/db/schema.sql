@@ -121,7 +121,9 @@ CREATE TABLE player_jobs (
   accepted_day integer,
   deadline_day integer,
   finished_day integer,
-  missed_days integer NOT NULL CHECK (missed_days >= 0)
+  missed_days integer NOT NULL CHECK (missed_days >= 0),
+  -- CRT task snapshot. Null while the job is only offered.
+  task_run jsonb
 );
 
 CREATE TABLE player_unlocks (

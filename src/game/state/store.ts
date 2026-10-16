@@ -6,7 +6,6 @@ import type { Loadout, StageId } from "../types";
 import { PERSIST_KEY, PERSIST_VERSION } from "../config";
 import { getCatalog, getRoom } from "../content";
 import {
-  applyAccept,
   applyDayStarted,
   applyStudy,
   applyWake,
@@ -21,6 +20,16 @@ import {
 import { SIM_CATALOG } from "../career/content";
 import type { CareerState } from "../career/types";
 import { playCueKey } from "../audio/client";
+import {
+  beginTest,
+  catchBug,
+  chooseBuild,
+  chooseTicket,
+  finishTest,
+  retryTask,
+  startTask,
+} from "../task-run/apply";
+import type { TaskBuildChoice, TaskTicketChoice } from "../task-run/types";
 import { gameBus } from "../events/bus";
 import type { GameEvent } from "../events/types";
 import { LocalStorageAdapter, toStateStorage } from "../storage/adapter";
@@ -83,7 +92,17 @@ type GameState = {
   onDayStarted: (day: number, totalMinutes: number) => void;
   onWake: () => void;
   buyCourse: (activityId: string) => void;
+  /** Job whose CRT task is on screen. Not persisted. */
+  taskJobId: string | null;
   acceptJob: (jobId: string) => void;
+  openTask: (jobId: string) => void;
+  closeTask: () => void;
+  chooseTicket: (choice: TaskTicketChoice) => void;
+  chooseBuild: (choice: TaskBuildChoice) => void;
+  beginTaskTest: () => void;
+  catchTaskBug: () => void;
+  finishTaskTest: () => void;
+  retryTaskRun: () => void;
   debugAddMoney: () => void;
   debugFillEnergy: () => void;
   debugLevelUp: () => void;
@@ -177,6 +196,7 @@ export const useGameStore = create<GameState>()(
       },
       career: defaultCareer(1, DEFAULT_START_MINUTES, "student", SIM_CATALOG),
       careerPanel: null,
+      taskJobId: null,
       fastForward: false,
       openCareerPanel: (panel) => set({ careerPanel: panel }),
       closeCareerPanel: () => set({ careerPanel: null }),
@@ -244,9 +264,62 @@ export const useGameStore = create<GameState>()(
           snap.minuteOfDay,
           current.stage,
         );
-        const result = applyAccept(synced, jobId, SIM_CATALOG);
+        const result = startTask(synced, jobId, SIM_CATALOG);
         if (result.error) {
           playCueKey("jobFailed");
+          return;
+        }
+        set({ career: result.state, careerPanel: null, taskJobId: jobId });
+        emitGame(result.events);
+      },
+      openTask: (jobId) => set({ careerPanel: null, taskJobId: jobId }),
+      closeTask: () => set({ taskJobId: null }),
+      chooseTicket: (choice) => {
+        const id = get().taskJobId;
+        if (!id) return;
+        const result = chooseTicket(get().career, id, choice, SIM_CATALOG);
+        if (result.error) return;
+        set({ career: result.state });
+        emitGame(result.events);
+      },
+      chooseBuild: (choice) => {
+        const id = get().taskJobId;
+        if (!id) return;
+        const result = chooseBuild(get().career, id, choice, SIM_CATALOG);
+        if (result.error) return;
+        set({ career: result.state });
+        emitGame(result.events);
+      },
+      beginTaskTest: () => {
+        const id = get().taskJobId;
+        if (!id) return;
+        const result = beginTest(get().career, id);
+        if (result.error) return;
+        set({ career: result.state });
+        emitGame(result.events);
+      },
+      catchTaskBug: () => {
+        const id = get().taskJobId;
+        if (!id) return;
+        const result = catchBug(get().career, id, SIM_CATALOG);
+        if (result.error) return;
+        set({ career: result.state });
+        emitGame(result.events);
+      },
+      finishTaskTest: () => {
+        const id = get().taskJobId;
+        if (!id) return;
+        const result = finishTest(get().career, id, SIM_CATALOG);
+        if (result.error) return;
+        set({ career: result.state });
+        emitGame(result.events);
+      },
+      retryTaskRun: () => {
+        const id = get().taskJobId;
+        if (!id) return;
+        const result = retryTask(get().career, id, SIM_CATALOG);
+        if (result.error) {
+          playCueKey("locked");
           return;
         }
         set({ career: result.state });

@@ -211,6 +211,19 @@ export function cueKeysForGameEvent(
       }
       return [];
     }
+    case "taskFailed":
+      return ["jobFailed"];
+    case "bugEscaped":
+      return ["locked"];
+    case "randomEventFired":
+      return ["toast"];
+    case "taskStarted":
+    case "ticketChosen":
+    case "buildChoice":
+    case "bugCaught":
+    case "taskSucceeded":
+    case "taskRetried":
+      return [];
     default:
       return [];
   }

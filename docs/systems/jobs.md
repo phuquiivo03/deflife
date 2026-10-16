@@ -12,17 +12,9 @@ The sample is a day-seeded shuffle of **freelance** templates only. The same day
 
 ## Nhận
 
-v1 skips `active`. One click moves `offered` to `completed`:
+Nhận opens the CRT task run (`docs/systems/task-run.md`) instead of paying immediately. The job becomes `active`, energy drops by the template cost, and `task_run` stores the step. Money, XP, reputation, and `freelance_completed` land only when the test step catches every bug. A final fail pays nothing and lowers reputation. `bugs` on a finished job is how many bugs escaped (0 on success).
 
-- money, reputation, and `freelance_completed` increase
-- energy decreases by the template `energy` cost
-- XP uses the job multiplier
-- `accepted_day` and `finished_day` are today
-- `progress_hours` and `bugs` stay 0
-- `deadline_day` is `offered_day + deadline_days` (stored, not enforced)
-- `hours_required` and `pay` are copied from the template
-
-A locked card shows `icon_task_locked` and the missing lines (skill level, uy tín, năng lượng, freelance count). Its button shakes on click and does not grant the reward.
+A locked card shows `icon_task_locked` and the missing lines (skill level, uy tín, năng lượng, freelance count). Its button shakes on click and does not grant the reward. An `active` card stays on the board as Tiếp tục.
 
 ## Milestones
 
@@ -30,9 +22,9 @@ A locked card shows `icon_task_locked` and the missing lines (skill level, uy t�
 
 ## Save
 
-`devlife:v1` version 3. The career document uses the table names in [`docs/db/schema.sql`](../db/schema.sql). `StorageAdapter` (`load` / `save` / `remove`) is what Zustand persist calls. v1 implements `LocalStorageAdapter`.
+`devlife:v1` version 5. The career document uses the table names in [`docs/db/schema.sql`](../db/schema.sql). `StorageAdapter` (`load` / `save` / `remove`) is what Zustand persist calls. v1 implements `LocalStorageAdapter`.
 
-Versions before 3 keep `stage`, loadouts, `showCharacter`, and the clock (`totalMinutes` from version 2, or 08:00 day 1 from version 1) and receive a fresh career. Version 3 keeps skills, jobs, unlocks, and the event log.
+Versions before 3 keep `stage`, loadouts, `showCharacter`, and the clock (`totalMinutes` from version 2, or 08:00 day 1 from version 1) and receive a fresh career. Version 3 keeps skills, jobs, unlocks, and the event log. Version 4 adds course history. Version 5 adds `player_jobs.task_run` (null on older jobs).
 
 `players.energy` is a temporary column until the stats system replaces `src/game/vitals`. Child rows in the save omit `player_id` because the document is already one player; the SQL tables include `player_id` so a later database can store many players. The local row id is `local`.
 

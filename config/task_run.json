@@ -1,0 +1,200 @@
+{
+  "ticket_sec": 5,
+  "build_sec": 15,
+  "test_sec": 10,
+  "choice_at": 0.4,
+  "ask_extra_sec": 5,
+  "careful_extra_sec": 4,
+  "rushed_extra_sec": -4,
+  "retry_energy": 6,
+  "max_retries": 1,
+  "fail_reputation": 1,
+  "event_chance": 0.65,
+  "bugs": {
+    "base": 2,
+    "per_difficulty": 1,
+    "skill_step": 3,
+    "wrong_ticket": 1,
+    "ask_ticket": 0,
+    "correct_ticket": 0,
+    "careful": -1,
+    "rushed": 1,
+    "min": 1,
+    "max": 4
+  },
+  "events": [
+    {
+      "id": "scope",
+      "name": "Khách đổi yêu cầu",
+      "log": "[warn] khách đổi yêu cầu: \"thêm chữ đang nhập nhanh nữa nha\"",
+      "bug_delta": 1,
+      "time_delta_sec": 2
+    },
+    {
+      "id": "offline",
+      "name": "Mất mạng",
+      "log": "[warn] mất mạng giữa chừng — chờ tí rồi làm tiếp",
+      "bug_delta": 0,
+      "time_delta_sec": 3
+    },
+    {
+      "id": "womm",
+      "name": "works on my machine",
+      "log": "[warn] works on my machine — máy em chạy, máy khách thì chưa",
+      "bug_delta": 1,
+      "time_delta_sec": 0
+    }
+  ],
+  "build_logs": [
+    "> next build",
+    "✓ đọc src/LoginButton.tsx",
+    "✓ đọc src/styles/theme.css",
+    "> gom 42 tệp giao diện",
+    "✓ nén hình ảnh logo-may.png",
+    "> kiểm tra kiểu dữ liệu"
+  ],
+  "test_code": [
+    "export function loginButton() {",
+    "  const { busy, setBusy } = useState(false)",
+    "  return (",
+    "    <button className=\"btn btn-blue\"",
+    "      onClick={() => login()}>",
+    "      Đăng nhập nhanh",
+    "    </button>",
+    "  )",
+    "}",
+    "// test: nút có màu xanh dương"
+  ],
+  "glossary": {
+    "ticket": "Phiếu yêu cầu của khách: họ muốn mình làm gì.",
+    "build": "Đóng gói sản phẩm để giao cho khách.",
+    "test": "Tự kiểm tra lỗi trước khi giao.",
+    "bug": "Lỗi khiến sản phẩm chạy sai.",
+    "prod": "Bản khách đang dùng thật.",
+    "frontend": "Phần giao diện người dùng thấy trên trình duyệt.",
+    "backend": "Phần máy chủ xử lý dữ liệu, khách không nhìn thấy.",
+    "database": "Nơi lưu dữ liệu, như một tủ hồ sơ.",
+    "devops": "Cách đưa sản phẩm lên máy cho khách dùng.",
+    "soft": "Kỹ năng nói chuyện, viết cho rõ, làm việc với người.",
+    "deadline": "Hạn chót phải giao cho khách.",
+    "nút": "Nút bấm trên trang.",
+    "retry": "Làm lại bước kiểm tra, tốn thêm năng lượng."
+  },
+  "tickets": [
+    {
+      "id": "cafe-button",
+      "skill_id": "frontend",
+      "title": "TICKET-042 · Quán cà phê Mây",
+      "quote": "Nút đăng nhập phải màu xanh, nhìn cho tin tưởng nha em.",
+      "difficulty": 1,
+      "difficulty_label": "dễ",
+      "prompt": "Em hiểu yêu cầu thế nào?",
+      "choices": [
+        {
+          "id": "correct",
+          "label": "Đổi nút sang xanh dương theo logo quán an toàn"
+        },
+        {
+          "id": "wrong",
+          "label": "Đổi sang xanh lá + thêm hiệu ứng khi rê chuột làm dư, tốn giờ"
+        },
+        {
+          "id": "ask",
+          "label": "Hỏi lại khách: \"xanh\" là xanh nào? chậm 5s, chắc ăn"
+        }
+      ]
+    },
+    {
+      "id": "api-list",
+      "skill_id": "backend",
+      "title": "TICKET-108 · Danh sách đơn",
+      "quote": "Cho anh API lấy đơn, nhanh thôi, đừng trả thừa.",
+      "difficulty": 2,
+      "difficulty_label": "vừa",
+      "prompt": "Em hiểu yêu cầu thế nào?",
+      "choices": [
+        {
+          "id": "correct",
+          "label": "Trả danh sách đơn đúng các cột khách đang hiện"
+        },
+        {
+          "id": "wrong",
+          "label": "Trả cả mật khẩu và ghi chú nội bộ cho tiện"
+        },
+        {
+          "id": "ask",
+          "label": "Hỏi lại khách cần những cột nào. Chậm hơn, khỏi làm thừa"
+        }
+      ]
+    },
+    {
+      "id": "sql-week",
+      "skill_id": "database",
+      "title": "TICKET-077 · Báo cáo tuần",
+      "quote": "Lấy doanh thu tuần này giúp, đừng lẫn tuần trước.",
+      "difficulty": 2,
+      "difficulty_label": "vừa",
+      "prompt": "Em hiểu yêu cầu thế nào?",
+      "choices": [
+        {
+          "id": "correct",
+          "label": "Lọc đúng 7 ngày gần nhất, cộng doanh thu"
+        },
+        {
+          "id": "wrong",
+          "label": "Lấy mọi đơn từ trước tới giờ cho số cho to"
+        },
+        {
+          "id": "ask",
+          "label": "Hỏi tuần tính từ thứ hai hay 7 ngày lùi. Chậm, nhưng đúng"
+        }
+      ]
+    },
+    {
+      "id": "ship-page",
+      "skill_id": "devops",
+      "title": "TICKET-015 · Đưa trang lên",
+      "quote": "Đưa bản mới lên prod giúp, đừng đụng bản đang chạy.",
+      "difficulty": 2,
+      "difficulty_label": "vừa",
+      "prompt": "Em hiểu yêu cầu thế nào?",
+      "choices": [
+        {
+          "id": "correct",
+          "label": "Đưa bản mới lên prod sau khi giữ bản cũ để quay lại"
+        },
+        {
+          "id": "wrong",
+          "label": "Xoá bản đang chạy rồi mới đưa lên, cho sạch"
+        },
+        {
+          "id": "ask",
+          "label": "Hỏi khách có được gián đoạn vài phút không. Chậm, an toàn"
+        }
+      ]
+    },
+    {
+      "id": "readme-plain",
+      "skill_id": "soft",
+      "title": "TICKET-003 · Giấy hướng dẫn",
+      "quote": "Viết README cho người không rành máy vẫn mở được.",
+      "difficulty": 1,
+      "difficulty_label": "dễ",
+      "prompt": "Em hiểu yêu cầu thế nào?",
+      "choices": [
+        {
+          "id": "correct",
+          "label": "Viết từng bước bấm, ít chữ chuyên môn"
+        },
+        {
+          "id": "wrong",
+          "label": "Dán nguyên nhật ký lệnh, ai cần thì tự hiểu"
+        },
+        {
+          "id": "ask",
+          "label": "Hỏi khách ai sẽ đọc. Chậm hơn, khỏi viết lạc"
+        }
+      ]
+    }
+  ]
+}

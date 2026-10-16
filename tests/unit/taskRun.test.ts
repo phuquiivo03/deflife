@@ -1,0 +1,213 @@
+import { describe, expect, it } from "vitest";
+import { SIM_CATALOG } from "@/game/career/content";
+import { defaultCareer, ensureTodayBoard } from "@/game/career/actions";
+import { jobEligibility, skillNameMap } from "@/game/jobs/logic";
+import {
+  beginTest,
+  catchBug,
+  chooseBuild,
+  chooseTicket,
+  finishTest,
+  retryTask,
+  startTask,
+} from "@/game/task-run/apply";
+import { TASK_RUN } from "@/game/task-run/content";
+import { bugCount, rollTaskEvent } from "@/game/task-run/formula";
+import { canRetry, isCleared } from "@/game/task-run/machine";
+
+const formula = TASK_RUN.bugs;
+
+describe("bug formula", () => {
+  it("stays inside the configured min and max", () => {
+    const low = bugCount({
+      skillLevel: 10,
+      difficulty: 1,
+      ticket: "correct",
+      build: "careful",
+      eventBugDelta: 0,
+      formula,
+    });
+    const high = bugCount({
+      skillLevel: 1,
+      difficulty: 3,
+      ticket: "wrong",
+      build: "rushed",
+      eventBugDelta: 4,
+      formula,
+    });
+    expect(low).toBe(formula.min);
+    expect(high).toBe(formula.max);
+  });
+
+  it("raises the count for a wrong ticket and a rushed build", () => {
+    const careful = bugCount({
+      skillLevel: 1,
+      difficulty: 1,
+      ticket: "correct",
+      build: "careful",
+      eventBugDelta: 0,
+      formula,
+    });
+    const wrongRush = bugCount({
+      skillLevel: 1,
+      difficulty: 1,
+      ticket: "wrong",
+      build: "rushed",
+      eventBugDelta: 0,
+      formula,
+    });
+    expect(wrongRush).toBeGreaterThan(careful);
+  });
+
+  it("treats asking the client as safe", () => {
+    const asked = bugCount({
+      skillLevel: 1,
+      difficulty: 1,
+      ticket: "ask",
+      build: "careful",
+      eventBugDelta: 0,
+      formula,
+    });
+    const correct = bugCount({
+      skillLevel: 1,
+      difficulty: 1,
+      ticket: "correct",
+      build: "careful",
+      eventBugDelta: 0,
+      formula,
+    });
+    expect(asked).toBe(correct);
+  });
+
+  it("drops bugs as the skill level rises", () => {
+    const junior = bugCount({
+      skillLevel: 1,
+      difficulty: 2,
+      ticket: "correct",
+      build: "rushed",
+      eventBugDelta: 0,
+      formula,
+    });
+    const senior = bugCount({
+      skillLevel: 1 + formula.skill_step,
+      difficulty: 2,
+      ticket: "correct",
+      build: "rushed",
+      eventBugDelta: 0,
+      formula,
+    });
+    expect(senior).toBeLessThan(junior);
+  });
+});
+
+describe("task run state machine", () => {
+  function openJob() {
+    const start = defaultCareer(1, 480, "student", SIM_CATALOG);
+    const board = ensureTodayBoard(start, 1, SIM_CATALOG);
+    const names = skillNameMap(SIM_CATALOG.skills);
+    const job = board.state.player_jobs.find((row) => {
+      const template = SIM_CATALOG.jobTemplates.find((item) => item.id === row.template_id);
+      if (!template || row.status !== "offered") return false;
+      return jobEligibility(
+        start.players,
+        start.player_skills,
+        template,
+        SIM_CATALOG.jobTemplateRequirements.filter((req) => req.template_id === template.id),
+        names,
+      ).ok;
+    });
+    if (!job) throw new Error("no open job");
+    return { state: board.state, job };
+  }
+
+  it("does not pay until the bugs are caught", () => {
+    const { state, job } = openJob();
+    const started = startTask(state, job.id, SIM_CATALOG);
+    expect(started.error).toBeNull();
+    expect(started.state.players.money).toBe(state.players.money);
+    expect(started.state.player_jobs.find((row) => row.id === job.id)?.status).toBe("active");
+    expect(started.events.map((event) => event.type)).toEqual([
+      "taskStarted",
+      "jobAccepted",
+      "energyChanged",
+    ]);
+  });
+
+  it("fails when a bug escapes, allows one retry, then drops reputation", () => {
+    const { state, job } = openJob();
+    const started = startTask(state, job.id, SIM_CATALOG);
+    const ticket = chooseTicket(started.state, job.id, "wrong", SIM_CATALOG);
+    const built = chooseBuild(ticket.state, job.id, "rushed", SIM_CATALOG);
+    const testing = beginTest(built.state, job.id);
+    const run = testing.state.player_jobs.find((row) => row.id === job.id)?.task_run;
+    expect(run?.bugs_total).toBeGreaterThan(0);
+    expect(isCleared(run!)).toBe(false);
+
+    const first = finishTest(testing.state, job.id, SIM_CATALOG);
+    const afterFirst = first.state.player_jobs.find((row) => row.id === job.id);
+    expect(afterFirst?.status).toBe("active");
+    expect(afterFirst?.task_run && canRetry(afterFirst.task_run, TASK_RUN.max_retries)).toBe(true);
+    expect(first.state.players.money).toBe(started.state.players.money);
+    expect(first.state.players.reputation).toBe(0);
+    expect(first.events.some((event) => event.type === "bugEscaped")).toBe(true);
+
+    const again = retryTask(first.state, job.id, SIM_CATALOG);
+    expect(again.error).toBeNull();
+    expect(again.state.players.energy).toBe(first.state.players.energy - TASK_RUN.retry_energy);
+    expect(again.events.some((event) => event.type === "taskRetried")).toBe(true);
+
+    const withRep = {
+      ...again.state,
+      players: { ...again.state.players, reputation: 4 },
+    };
+    const second = finishTest(withRep, job.id, SIM_CATALOG);
+    const failed = second.state.player_jobs.find((row) => row.id === job.id);
+    expect(failed?.status).toBe("failed");
+    expect(second.state.players.money).toBe(started.state.players.money);
+    expect(second.state.players.reputation).toBe(4 - TASK_RUN.fail_reputation);
+    expect(second.events).toContainEqual(
+      expect.objectContaining({
+        type: "taskFailed",
+        final: true,
+        reputationDelta: -TASK_RUN.fail_reputation,
+      }),
+    );
+
+    const blocked = retryTask(second.state, job.id, SIM_CATALOG);
+    expect(blocked.error).toBe("Hết lượt làm lại");
+  });
+
+  it("pays, grants job XP, and emits success when every bug is caught", () => {
+    const { state, job } = openJob();
+    const template = SIM_CATALOG.jobTemplates.find((row) => row.id === job.template_id)!;
+    let cursor = startTask(
+      { ...state, players: { ...state.players, freelance_completed: 9, reputation: 2 } },
+      job.id,
+      SIM_CATALOG,
+    );
+    cursor = chooseTicket(cursor.state, job.id, "correct", SIM_CATALOG);
+    cursor = chooseBuild(cursor.state, job.id, "careful", SIM_CATALOG);
+    cursor = beginTest(cursor.state, job.id);
+    const total = cursor.state.player_jobs.find((row) => row.id === job.id)?.task_run?.bugs_total ?? 0;
+    for (let i = 0; i < total; i++) {
+      const step = catchBug(cursor.state, job.id, SIM_CATALOG);
+      cursor = { ...cursor, state: step.state, events: [...cursor.events, ...step.events] };
+    }
+    const done = cursor.state.player_jobs.find((row) => row.id === job.id);
+    expect(done?.status).toBe("completed");
+    expect(done?.bugs).toBe(0);
+    expect(cursor.state.players.money).toBe(state.players.money + template.pay);
+    expect(cursor.state.players.freelance_completed).toBe(10);
+    expect(cursor.state.players.reputation).toBe(2 + template.reputation_gain);
+    expect(cursor.events.some((event) => event.type === "taskSucceeded")).toBe(true);
+    expect(cursor.events.some((event) => event.type === "moneyChanged")).toBe(true);
+    expect(cursor.state.player_unlocks.map((row) => row.milestone_id)).toContain("freelance-10");
+  });
+
+  it("rolls the same event for the same seed", () => {
+    const once = rollTaskEvent(42, 1, TASK_RUN.events);
+    const twice = rollTaskEvent(42, 1, TASK_RUN.events);
+    expect(once?.id).toBe(twice?.id);
+    expect(rollTaskEvent(42, 0, TASK_RUN.events)).toBeNull();
+  });
+});

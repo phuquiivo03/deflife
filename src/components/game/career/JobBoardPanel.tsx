@@ -17,6 +17,7 @@ export function JobBoardPanel({ iconFiles }: { iconFiles: readonly string[] }) {
   const skills = useGameStore((s) => s.career.player_skills);
   const day = useGameStore((s) => snapshot(s.totalMinutes).day);
   const acceptJob = useGameStore((s) => s.acceptJob);
+  const openTask = useGameStore((s) => s.openTask);
   const board = visibleBoardJobs(jobs, day);
 
   if (board.length === 0) {
@@ -35,6 +36,7 @@ export function JobBoardPanel({ iconFiles }: { iconFiles: readonly string[] }) {
         const reqs = jobRequirementsFor(template.id, SIM_CATALOG.jobTemplateRequirements);
         const check = jobEligibility(player, skills, template, reqs, names);
         const done = job.status === "completed";
+        const active = job.status === "active";
         const xp = SIM_CATALOG.jobTemplateXp
           .filter((row) => row.template_id === template.id)
           .reduce((sum, row) => sum + row.xp, 0);
@@ -42,7 +44,7 @@ export function JobBoardPanel({ iconFiles }: { iconFiles: readonly string[] }) {
           <li
             key={job.id}
             data-testid={`job-card-${job.template_id}`}
-            data-state={done ? "done" : check.ok ? "open" : "locked"}
+            data-state={done ? "done" : active ? "active" : check.ok ? "open" : "locked"}
             className={
               done
                 ? "card-done flex items-center gap-3 rounded-[var(--radius-panel)] border border-[var(--panel-border)] bg-white/40 p-2"
@@ -51,7 +53,7 @@ export function JobBoardPanel({ iconFiles }: { iconFiles: readonly string[] }) {
             style={done ? undefined : { animationDelay: `${index * 90}ms` }}
           >
             <PixelIcon
-              name={done ? "task_done" : check.ok ? "job_freelance" : "task_locked"}
+              name={done ? "task_done" : active || check.ok ? "job_freelance" : "task_locked"}
               size={44}
               alt=""
               files={iconFiles}
@@ -82,15 +84,15 @@ export function JobBoardPanel({ iconFiles }: { iconFiles: readonly string[] }) {
             </div>
             {done ? (
               <PixelIcon name="task_done" size={22} alt="Xong" files={iconFiles} />
-            ) : check.ok ? (
+            ) : active || check.ok ? (
               <Button
                 type="button"
                 size="sm"
                 showArrow={false}
                 data-testid={`job-accept-${job.template_id}`}
-                onClick={() => acceptJob(job.id)}
+                onClick={() => (active ? openTask(job.id) : acceptJob(job.id))}
               >
-                Nhận
+                {active ? "Tiếp tục" : "Nhận"}
               </Button>
             ) : (
               <BlockedButton

@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
+import { JetBrains_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
+
+const terminalFont = JetBrains_Mono({
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "700"],
+  variable: "--font-terminal",
+  display: "swap",
+});
 
 const galmuri7 = localFont({
   src: "./fonts/Galmuri7.woff2",
@@ -66,7 +74,7 @@ export default function RootLayout({
   return (
     <html
       lang="vi"
-      className={`${galmuri7.variable} ${galmuri9.variable} ${galmuri11.variable}`}
+      className={`${galmuri7.variable} ${galmuri9.variable} ${galmuri11.variable} ${terminalFont.variable}`}
     >
       <body className="devlife-page-bg font-galmuri-9 text-galmuri-body antialiased">
         {children}

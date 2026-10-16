@@ -1,6 +1,6 @@
 # CRT Terminal UI — design doc
 
-**Status:** Draft (design only — no implementation in this milestone)  
+**Status:** Task-run overlay uses these tokens (`docs/systems/task-run.md`). The rest of this doc is still the broader terminal plan.  
 **Audience:** Engineers implementing the in-game “desk PC” interface and anyone extending sim UI (notifications, player stats, tasks).  
 **Last updated:** 2026-10-13
 

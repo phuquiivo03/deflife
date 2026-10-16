@@ -48,6 +48,55 @@ export type GameEvent =
       type: "energyChanged";
       delta: number;
       energy: number;
+    }
+  | {
+      type: "taskStarted";
+      jobId: string;
+      templateId: string;
+    }
+  | {
+      type: "ticketChosen";
+      jobId: string;
+      choice: "correct" | "wrong" | "ask";
+    }
+  | {
+      type: "buildChoice";
+      jobId: string;
+      choice: "careful" | "rushed";
+    }
+  | {
+      type: "randomEventFired";
+      jobId: string;
+      eventId: string;
+    }
+  | {
+      type: "bugCaught";
+      jobId: string;
+      caught: number;
+      total: number;
+    }
+  | {
+      type: "bugEscaped";
+      jobId: string;
+      escaped: number;
+    }
+  | {
+      type: "taskSucceeded";
+      jobId: string;
+      templateId: string;
+      pay: number;
+    }
+  | {
+      type: "taskFailed";
+      jobId: string;
+      templateId: string;
+      final: boolean;
+      reputationDelta: number;
+    }
+  | {
+      type: "taskRetried";
+      jobId: string;
+      energy: number;
     };
 
 export type GameEventType = GameEvent["type"];

@@ -129,6 +129,25 @@ export type PlayerStudyCompletion = {
   completed_day: number;
 };
 
+export type TaskTicketChoice = "correct" | "wrong" | "ask";
+export type TaskBuildChoice = "careful" | "rushed";
+export type TaskStep = "ticket" | "build" | "test" | "result";
+export type TaskOutcome = "success" | "fail";
+
+/** CRT task snapshot. Null while the job is only an offer. */
+export type TaskRun = {
+  step: TaskStep;
+  seed: number;
+  ticket: TaskTicketChoice | null;
+  build: TaskBuildChoice | null;
+  event_id: string | null;
+  bugs_total: number;
+  bugs_caught: number;
+  retries: number;
+  outcome: TaskOutcome | null;
+  time_bonus_sec: number;
+};
+
 export type PlayerJob = {
   id: string;
   template_id: string;
@@ -143,6 +162,7 @@ export type PlayerJob = {
   deadline_day: number | null;
   finished_day: number | null;
   missed_days: number;
+  task_run: TaskRun | null;
 };
 
 export type PlayerUnlock = {
