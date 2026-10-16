@@ -27,7 +27,7 @@ Utility class: `devlife-page-bg` on `html`/`body` (gradient + grid in **one** `b
 
 ## Layout (desktop)
 
-On `lg` and up, the three columns are one centered group (`max-w-[1080px]`), not stretched to the viewport. Side columns are **260px**. The center column holds the capped room and the HUD and stays within **520px**. A **20px** gap separates the columns. Leftover width on both sides is only the page gradient. The columns are top-aligned and share one row height, so the side panels match the center column. Below `lg`, the stack is unchanged.
+On `lg` and up, the three columns are one centered group (`max-w-[1200px]`), not stretched to the viewport. Side columns are **320px**. The center column holds the capped room and the HUD and stays within **520px**. A **20px** gap separates the columns. Leftover width on both sides is only the page gradient. The columns are top-aligned and share one row height, so the side panels match the center column. At 1366px the group still fits with those widths and the same gap. Below `lg`, the stack is unchanged.
 
 | Column | Content |
 |--------|---------|

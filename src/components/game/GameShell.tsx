@@ -179,7 +179,7 @@ export function GameShell({ iconFiles = [] }: { iconFiles?: readonly string[] })
       </header>
 
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto lg:items-center lg:justify-[safe_center] lg:px-4 lg:py-6">
-      <div className="relative flex min-h-0 w-full flex-1 flex-col lg:grid lg:w-full lg:max-w-[1080px] lg:flex-none lg:grid-cols-[260px_minmax(0,1fr)_260px] lg:items-stretch lg:gap-5">
+      <div className="relative flex min-h-0 w-full flex-1 flex-col lg:grid lg:w-full lg:max-w-[1200px] lg:flex-none lg:grid-cols-[320px_minmax(0,1fr)_320px] lg:items-stretch lg:gap-5">
         <aside className="order-2 flex min-h-0 flex-col p-3 lg:order-1 lg:h-full lg:p-0">
           <PanelChamferFrame>
             <NotificationsPanel />
