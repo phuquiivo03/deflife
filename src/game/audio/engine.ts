@@ -135,13 +135,6 @@ export type AudioEngine = {
    * When set, the engine records the time until `source.start`.
    */
   playKey(key: CueKey, gestureAt?: number): void;
-  /**
-   * Loop one SFX through the SFX bus until `stopLoop`.
-   * A missing manifest id or sprite slice stops any current loop and stays silent.
-   * The same id already looping is left running.
-   */
-  startLoop(key: CueKey): void;
-  stopLoop(): void;
   applyTimePlan(plan: TimeAudioPlan): void;
   dispose(): void;
   /** Currently looping bed, if any. */
@@ -155,14 +148,6 @@ type LiveBed = {
   url: string;
   source: BufferSourceLike;
   fade: GainNodeLike;
-};
-
-type LiveLoop = {
-  id: string;
-  volume: number;
-  source: BufferSourceLike | null;
-  trim: GainNodeLike | null;
-  element: SfxElementLike | null;
 };
 
 function defaultFetch(input: string): Promise<AudioResponseLike> {
@@ -254,8 +239,6 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
   let loadingUrl: string | null = null;
   let fadeToken = 0;
   let queued: { key: CueKey; gestureAt?: number } | null = null;
-  let pendingLoop: CueKey | null = null;
-  let liveLoop: LiveLoop | null = null;
   let keepAlive: KeepAlive | null = null;
   let resuming = false;
   const decoded = new Map<string, AudioBufferLike>();
@@ -358,116 +341,11 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
   }
 
   function flushQueued() {
-    if (queued && unlocked && (sfxRoute === "element" || sfxBuffer)) {
-      const pending = queued;
-      queued = null;
-      playResolved(pending.key, pending.gestureAt);
-    }
-    if (pendingLoop && unlocked && (sfxRoute === "element" || (sfxBuffer && sprite && ctx))) {
-      const key = pendingLoop;
-      pendingLoop = null;
-      startLoopCue(key);
-    }
-  }
-
-  function stopLiveLoop() {
-    const live = liveLoop;
-    liveLoop = null;
-    if (!live) return;
-    try {
-      live.source?.stop();
-    } catch {
-      /* ignore */
-    }
-    try {
-      live.source?.disconnect();
-    } catch {
-      /* ignore */
-    }
-    try {
-      live.trim?.disconnect();
-    } catch {
-      /* ignore */
-    }
-    if (live.element) {
-      try {
-        live.element.pause();
-        live.element.loop = false;
-      } catch {
-        /* ignore */
-      }
-    }
-  }
-
-  function beginLoopElement(cue: AudioCue) {
-    const urls = cueUrls(cue);
-    if (!urls.length) return;
-    const el = (options.createSfxElement ?? createFileAudioElement)() as SfxElementLike | null;
-    if (!el) return;
-    el.src = urls[0] ?? "";
-    el.loop = true;
-    el.preload = "auto";
-    el.playsInline = true;
-    el.volume = busGain(settings.sfx, cue.volume, settings.muted);
-    liveLoop = { id: cue.id, volume: cue.volume, source: null, trim: null, element: el };
-    try {
-      const played = el.play();
-      if (played && typeof played.catch === "function") void played.catch(() => {});
-    } catch {
-      /* ignore */
-    }
-  }
-
-  function beginLoop(cue: AudioCue) {
-    stopLiveLoop();
-    if (sfxRoute === "element" || !ctx || !sfxBuffer || !sprite) {
-      if (sfxRoute === "element") beginLoopElement(cue);
-      return;
-    }
-    const slice = spriteSlice(sprite, playbackFormat, cue.id);
-    const bus = busFor(cue);
-    if (!slice || !bus) return;
-    const source = ctx.createBufferSource();
-    const trim = ctx.createGain();
-    trim.gain.value = cue.volume;
-    source.buffer = sfxBuffer;
-    source.loop = true;
-    source.loopStart = slice.offset;
-    source.loopEnd = slice.offset + slice.duration;
-    source.connect(trim);
-    trim.connect(bus);
-    try {
-      source.start(ctx.currentTime, slice.offset);
-    } catch {
-      return;
-    }
-    liveLoop = { id: cue.id, volume: cue.volume, source, trim, element: null };
-  }
-
-  function startLoopCue(key: CueKey) {
-    const cue = cueForKey(key);
-    if (!cue || cue.type === "bgm") {
-      pendingLoop = null;
-      stopLiveLoop();
-      return;
-    }
-    if (liveLoop?.id === cue.id) {
-      pendingLoop = null;
-      return;
-    }
-    const spriteReady = sfxRoute === "element" || Boolean(sfxBuffer && sprite && ctx);
-    if (!unlocked || !spriteReady) {
-      pendingLoop = key;
-      stopLiveLoop();
-      return;
-    }
-    pendingLoop = null;
-    beginLoop(cue);
-  }
-
-  function stopLoopCue() {
-    pendingLoop = null;
-    stopLiveLoop();
+    if (!queued || !unlocked) return;
+    if (sfxRoute !== "element" && !sfxBuffer) return;
+    const pending = queued;
+    queued = null;
+    playResolved(pending.key, pending.gestureAt);
   }
 
   function playElement(cue: AudioCue, gestureAt?: number) {
@@ -801,9 +679,6 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
       if (bedElement && bedCue) {
         bedElement.volume = busGain(settings.music, bedCue.volume, settings.muted);
       }
-      if (liveLoop?.element) {
-        liveLoop.element.volume = busGain(settings.sfx, liveLoop.volume, settings.muted);
-      }
     },
     notePhase(next: PhaseId) {
       phase = next;
@@ -869,20 +744,6 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
         /* ignore */
       }
     },
-    startLoop(key: CueKey) {
-      try {
-        startLoopCue(key);
-      } catch {
-        /* ignore */
-      }
-    },
-    stopLoop() {
-      try {
-        stopLoopCue();
-      } catch {
-        /* ignore */
-      }
-    },
     applyTimePlan(plan: TimeAudioPlan) {
       try {
         if (plan.bgmPhase) {
@@ -902,7 +763,6 @@ export function createAudioEngine(options: AudioEngineOptions): AudioEngine {
       fadeToken += 1;
       bedJob += 1;
       unlocked = false;
-      stopLoopCue();
       loadingUrl = null;
       if (bed) stopBed(bed);
       bed = null;

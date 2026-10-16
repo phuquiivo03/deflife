@@ -25,9 +25,7 @@ Emitted on `gameBus` and stored in `player_events`:
 
 `taskStarted`, `ticketChosen`, `buildChoice`, `randomEventFired`, `bugCaught`, `bugEscaped`, `taskSucceeded`, `taskFailed`, `taskRetried`.
 
-Success also emits the existing `jobCompleted`, `moneyChanged`, and `skillXpGained` events so the current audio map plays `sfx_money_gain` and `sfx_job_complete`. `taskFailed` plays `sfx_job_failed`. `bugEscaped` plays `sfx_ui_locked_denied`. `randomEventFired` plays `sfx_ui_toast`.
-
-The build bar loops `sfx_typing_loop` (`typingLoop`). Choosing `./lam-au` switches to `sfx_typing_loop_fast`. `./lam-ky` keeps the normal loop. The loop stops when the bar finishes, the terminal closes (Esc), or the overlay unmounts. Both ids are mapped and stay silent until the files land in the manifest.
+Success also emits the existing `jobCompleted`, `moneyChanged`, and `skillXpGained` events so the current audio map plays `sfx_money_gain` and `sfx_job_complete`. `taskFailed` plays `sfx_job_failed`. `bugEscaped` plays `sfx_ui_locked_denied`. `randomEventFired` plays `sfx_ui_toast`. No new manifest ids.
 
 ## Save
 
