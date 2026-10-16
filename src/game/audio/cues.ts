@@ -51,7 +51,9 @@ export type CueKey =
   | "locked"
   | "toast"
   | "energyLow"
-  | "energyRestored";
+  | "energyRestored"
+  | "typingLoop"
+  | "typingLoopFast";
 
 export const CUE_KEYS = [
   "phaseMorning",
@@ -81,6 +83,8 @@ export const CUE_KEYS = [
   "toast",
   "energyLow",
   "energyRestored",
+  "typingLoop",
+  "typingLoopFast",
 ] as const satisfies readonly CueKey[];
 
 /**
@@ -116,6 +120,8 @@ export const CUE_IDS: Record<CueKey, readonly string[]> = {
   toast: ["sfx_ui_toast"],
   energyLow: ["sfx_energy_low"],
   energyRestored: ["sfx_energy_restored"],
+  typingLoop: ["sfx_typing_loop"],
+  typingLoopFast: ["sfx_typing_loop_fast"],
 };
 
 /** Play the low-energy sting only when energy crosses down through this point. */
@@ -227,6 +233,11 @@ export function cueKeysForGameEvent(
     default:
       return [];
   }
+}
+
+/** Normal typing while the build bar runs. `./lam-au` switches to the fast loop. */
+export function typingLoopKey(build: "careful" | "rushed" | null): CueKey {
+  return build === "rushed" ? "typingLoopFast" : "typingLoop";
 }
 
 export function resolveCueKey(

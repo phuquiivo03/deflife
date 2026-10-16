@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { playCueKey } from "@/game/audio/client";
+import { playCueKey, startLoopKey, stopLoopKey } from "@/game/audio/client";
+import { typingLoopKey } from "@/game/audio/cues";
 import { SIM_CATALOG } from "@/game/career/content";
 import { formatVnd } from "@/lib/format-currency";
 import { TASK_RUN, taskDurationSec } from "@/game/task-run/content";
@@ -51,6 +52,7 @@ export function TaskRunOverlay() {
     window.addEventListener("keydown", onKey);
     return () => {
       window.removeEventListener("keydown", onKey);
+      stopLoopKey();
       playCueKey("panelClose");
     };
   }, [jobId, closeTask]);
@@ -186,6 +188,23 @@ function BuildStep({ run }: { run: TaskRun }) {
   );
 
   useEffect(() => {
+    const sync = () => {
+      if (document.hidden) {
+        stopLoopKey();
+        return;
+      }
+      startLoopKey(typingLoopKey(run.build));
+    };
+    sync();
+    document.addEventListener("visibilitychange", sync);
+    return () => document.removeEventListener("visibilitychange", sync);
+  }, [run.build]);
+
+  useEffect(() => {
+    return () => stopLoopKey();
+  }, []);
+
+  useEffect(() => {
     if (run.build) return;
     let elapsed = 0;
     const stopAt = preChoice * TASK_RUN.choice_at;
@@ -213,6 +232,7 @@ function BuildStep({ run }: { run: TaskRun }) {
       setLogCount(TASK_RUN.build_logs.length);
       if (t >= 1) {
         window.clearInterval(id);
+        stopLoopKey();
         begin();
       }
     }, 100);

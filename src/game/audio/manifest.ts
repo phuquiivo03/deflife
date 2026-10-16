@@ -12,6 +12,8 @@ export type AudioCue = {
   category: AudioCategory;
   loop: boolean;
   volume: number;
+  /** Seconds of leading mp3 encoder silence. Ogg loops ignore this. */
+  mp3LeadSeconds?: number;
 };
 
 export function clamp01(value: number): number {
@@ -58,11 +60,16 @@ function asCue(row: unknown): AudioCue | null {
     typeof record.loop === "boolean" ? record.loop : type === "bgm";
   const volume =
     typeof record.volume === "number" ? clamp01(record.volume) : 1;
+  const lead = record.mp3LeadSeconds;
+  const mp3LeadSeconds =
+    typeof lead === "number" && Number.isFinite(lead) && lead > 0 ? lead : undefined;
   const category = cueCategory(
     typeof record.category === "string" ? record.category : undefined,
     type,
   );
-  return { id, file, mp3, type, category, loop, volume };
+  const cue: AudioCue = { id, file, mp3, type, category, loop, volume };
+  if (mp3LeadSeconds !== undefined) cue.mp3LeadSeconds = mp3LeadSeconds;
+  return cue;
 }
 
 function cueCategory(value: string | undefined, type: AudioCueType): AudioCategory {
@@ -101,6 +108,16 @@ export function cueUrls(cue: Pick<AudioCue, "file" | "mp3" | "type">): string[] 
   if (cue.type === "bgm") return [ogg];
   const mp3 = cue.mp3 ? publicAudioUrl(cue.mp3) : "";
   return mp3 ? [ogg, mp3] : [ogg];
+}
+
+/**
+ * Leading silence to skip when looping an mp3. Ogg is gapless, so the lead is 0.
+ * `loopStart` / `loopEnd` use this so iOS keeps the seam on the audio, not the padding.
+ */
+export function loopLeadSeconds(format: "ogg" | "mp3", lead: number | undefined): number {
+  if (format !== "mp3") return 0;
+  if (typeof lead !== "number" || !Number.isFinite(lead) || lead <= 0) return 0;
+  return lead;
 }
 
 /** Ogg when the browser can play it. Mp3 otherwise — callers skip encoder padding. */
