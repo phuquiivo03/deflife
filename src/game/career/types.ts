@@ -158,9 +158,16 @@ export type LifeState = {
   homeDays: number;
   /** Waking slots since the last meal. Eating sets this back to 0. */
   slotsSinceMeal: number;
+  /** Waking slots since the last job-notice attempt. A new offer waits for `job_notice_every_slots`. */
+  jobNoticeSlots: number;
 };
 
 export type NoticeAction = "payRent" | "viewJobs" | "openStore" | "eat" | "sleep";
+
+/** Job-board buttons. Dev B maps these labels in the notice panel. */
+export type JobNoticeAction = "acceptJob" | "dismissNotice" | "openJobs";
+
+export type StoredNoticeAction = NoticeAction | JobNoticeAction;
 
 export type NoticeSeverity = "info" | "warn" | "urgent";
 
@@ -171,7 +178,15 @@ export type LifeNotice = {
   severity: NoticeSeverity;
   icon: string;
   text: string;
-  action: NoticeAction | null;
+  /** First action. Older panels read this single id. */
+  action: StoredNoticeAction | null;
+  /**
+   * Ordered buttons. A job offer is `["acceptJob", "dismissNotice"]`.
+   * Absent on a notice built before v17; migration fills it from `action`.
+   */
+  actions?: StoredNoticeAction[];
+  /** Job this row acts on. Null for rent, store, and other rows. */
+  jobId?: string | null;
   read: boolean;
   /**
    * Specific cue for this row. When set, it replaces the severity ping.

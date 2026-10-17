@@ -35,4 +35,24 @@ The clock sits on the first line, in the muted color, inside the same clamp.
 | `eat` | Ăn | `icon_action_eat` (rice bowl) |
 | `sleep` | Ngủ | `icon_action_sleep` (bed) |
 
-A click calls `runNoticeAction` with the action id. `payRent` pays outstanding rent. `eat` opens the Ăn uống modal, the same shape as `openStore`, but those hunger rows are not drawn in this list. `sleep` calls the HUD sleep control and stays on the low Sức khỏe row. Any other id logs a warning and does nothing. A label with no glyph uses the outline text button and the same click. The list region is `overflow-y: auto` inside the desktop panel cap (see the layout section of [DESIGN_SYSTEM.md](../design/DESIGN_SYSTEM.md)).
+A click calls `runNoticeAction(action, notice.id)`. `payRent` pays outstanding rent. `eat` opens the Ăn uống modal, the same shape as `openStore`, but those hunger rows are not drawn in this list. `sleep` calls the HUD sleep control and stays on the low Sức khỏe row. `acceptJob` accepts that row's job. `dismissNotice` closes that row. `openJobs` opens the job board and, when the row's job is already accepted, the terminal. Any other id logs `Unknown notice action "…"` and does nothing.
+
+A notice may carry several buttons. The persisted shape after version 17 is:
+
+```ts
+{
+  id: string
+  day: number
+  minute: number
+  severity: "info" | "warn" | "urgent"
+  icon: string
+  text: string
+  action: StoredNoticeAction | null // actions[0], kept for a panel that reads one id
+  actions: StoredNoticeAction[] // ordered buttons. A job offer is ["acceptJob", "dismissNotice"]
+  jobId: string | null
+  read: boolean
+  cue: string | null
+}
+```
+
+`StoredNoticeAction` is `payRent`, `viewJobs`, `openStore`, `eat`, `sleep`, `acceptJob`, `dismissNotice`, and `openJobs`. Labels for the job ids are **Nhận**, **Bỏ qua**, and **Làm**. Add them to `NOTICE_ACTION_LABELS` (no glyph yet: the text button is enough). Render one button per `actions` entry and pass `notice.id` as the second argument. The panel file stays Dev B's. A label with no glyph uses the outline text button and the same click. The list region is `overflow-y: auto` inside the desktop panel cap (see the layout section of [DESIGN_SYSTEM.md](../design/DESIGN_SYSTEM.md)).

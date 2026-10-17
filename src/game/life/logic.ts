@@ -56,6 +56,7 @@ export function defaultLife(day: number): LifeState {
     suppressEndOfDayUntil: null,
     homeDays: 0,
     slotsSinceMeal: 0,
+    jobNoticeSlots: 0,
   };
 }
 

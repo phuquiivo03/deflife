@@ -78,6 +78,7 @@ import type { LifeStep } from "../life/events";
 import { dialogCueKey, noticeCueKey, pickMomentCue, playLifeSound } from "../life/sounds";
 import { pinItem, roomOwned } from "../life/furniture";
 import { buyShopItem } from "../life/store-buy";
+import { acceptJobFromNotice, dismissNoticeById, tickJobOffers } from "../jobs/offers";
 
 let clockSkip = false;
 let handlingHospital = false;
@@ -210,7 +211,7 @@ type GameState = {
   readNotice: (id: string) => void;
   readAllNotices: () => void;
   dismissDiary: () => void;
-  runNoticeAction: (action: string) => void;
+  runNoticeAction: (action: string, noticeId?: string) => void;
   setStoreOpen: (open: boolean) => void;
   setFoodOpen: (open: boolean) => void;
   buyStoreItem: (id: string) => void;
@@ -389,7 +390,8 @@ export const useGameStore = create<GameState>()(
         if (snap.minute !== 0 || hour % 2 !== 0) return;
         if (hour === 6) {
           const morning = resolveMorning(get().career, snap.day);
-          const surface = syncLifeSurfaceState(morning.state, snap.day, snap.minuteOfDay, get().taskJobId != null);
+          const offered = tickJobOffers(morning.state, snap.day, snap.minuteOfDay);
+          const surface = syncLifeSurfaceState(offered, snap.day, snap.minuteOfDay, get().taskJobId != null);
           commitLife({
             state: surface.state,
             events: [...morning.events, ...surface.events],
@@ -401,8 +403,9 @@ export const useGameStore = create<GameState>()(
           return;
         }
         const crossed = crossWakingSlot(get().career, snap.minuteOfDay);
+        const offered = tickJobOffers(crossed.state, snap.day, snap.minuteOfDay);
         let rolled = {
-          state: crossed.state,
+          state: offered,
           events: [] as GameEvent[],
           skipDays: 0,
           skipMinutes: 0,
@@ -499,7 +502,7 @@ export const useGameStore = create<GameState>()(
       readNotice: (id) => set({ career: markNoticeRead(get().career, id) }),
       readAllNotices: () => set({ career: markAllNoticesRead(get().career) }),
       dismissDiary: () => set({ career: dismissDiary(get().career) }),
-      runNoticeAction: (action) => {
+      runNoticeAction: (action, noticeId) => {
         if (action === "payRent") {
           commitLife(payOutstandingRent(get().career));
           get().syncLifeSurface();
@@ -507,6 +510,17 @@ export const useGameStore = create<GameState>()(
         }
         if (action === "viewJobs") {
           set({ careerPanel: "jobs" });
+          return;
+        }
+        if (action === "openJobs") {
+          const notice = noticeId
+            ? get().career.feed?.notices.find((row) => row.id === noticeId)
+            : undefined;
+          set({ careerPanel: "jobs" });
+          const jobId = notice?.jobId;
+          if (jobId && get().career.player_jobs.some((job) => job.id === jobId && job.status === "active")) {
+            get().openTask(jobId);
+          }
           return;
         }
         if (action === "openStore") {
@@ -519,6 +533,14 @@ export const useGameStore = create<GameState>()(
         }
         if (action === "sleep") {
           get().sleep();
+          return;
+        }
+        if (action === "acceptJob") {
+          set({ career: acceptJobFromNotice(get().career, noticeId) });
+          return;
+        }
+        if (action === "dismissNotice") {
+          set({ career: dismissNoticeById(get().career, noticeId) });
           return;
         }
         console.warn(`Unknown notice action "${action}"`);
