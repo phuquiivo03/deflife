@@ -55,6 +55,11 @@ describe("job management board", () => {
     const board = readFileSync(join(process.cwd(), "src/components/game/career/JobManageBoard.tsx"), "utf8");
     const chrome = readFileSync(join(process.cwd(), "src/components/game/career/CareerChrome.tsx"), "utf8");
     expect(board).toContain('title="Quản lý job"');
+    expect(board).toContain(">Job<");
+    expect(board).toContain(">Tiền<");
+    expect(board).toContain(">Độ khó<");
+    expect(board).toContain(">Deadline<");
+    expect(board).toContain("text-[var(--accent-coral)]");
     expect(board).toContain("PixelButton");
     expect(board).toContain("openTask(job.id)");
     expect(board).toContain("Chưa nhận job nào.");

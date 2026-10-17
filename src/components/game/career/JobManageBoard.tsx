@@ -15,6 +15,12 @@ function difficultyLabel(tier: number): string {
   return "Khó";
 }
 
+function deadlineLabel(daysLeft: number | null): string {
+  if (daysLeft == null) return "—";
+  if (daysLeft === 1) return "còn 1 ngày";
+  return `còn ${daysLeft} ngày`;
+}
+
 export function JobManageBoard({
   open,
   onOpenChange,
@@ -29,53 +35,73 @@ export function JobManageBoard({
   const accepted = acceptedJobs(jobs);
 
   return (
-    <Modal open={open} onOpenChange={onOpenChange} title="Quản lý job" testId="job-manage" closeLabel="Đóng">
+    <Modal
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Quản lý job"
+      testId="job-manage"
+      closeLabel="Đóng"
+      maxWidthPx={640}
+    >
       {accepted.length === 0 ? (
         <p className="font-galmuri-9 text-galmuri-body text-[var(--muted-foreground)]">Chưa nhận job nào.</p>
       ) : (
-        <ul className="flex flex-col gap-2">
-          {accepted.map((job) => {
-            const template = SIM_CATALOG.jobTemplates.find((row) => row.id === job.template_id);
-            const daysLeft = daysUntilDeadline(job.deadline_day, day);
-            const urgent = deadlineIsUrgent(daysLeft, LIFE.job_remind_days);
-            const leftLabel = daysLeft == null ? "—" : daysLeft === 1 ? "còn 1 ngày" : `còn ${daysLeft} ngày`;
-            return (
-              <li
-                key={job.id}
-                data-testid={`job-row-${job.id}`}
-                className="flex items-center gap-3 rounded-[var(--radius-panel)] border border-[var(--panel-border)] bg-white/50 p-2"
-              >
-                <div className="min-w-0 flex-1">
-                  <p className="font-galmuri-9 text-galmuri-body text-[var(--foreground)]">
+        <table className="w-full border-collapse text-left" data-testid="job-table">
+          <thead>
+            <tr className="font-galmuri-7 text-galmuri-small text-[var(--muted-foreground)]">
+              <th className="pb-2 pr-3 font-normal">Job</th>
+              <th className="pb-2 pr-3 font-normal">Tiền</th>
+              <th className="pb-2 pr-3 font-normal">Độ khó</th>
+              <th className="pb-2 pr-3 font-normal">Deadline</th>
+              <th className="pb-2 font-normal" aria-label="Làm" />
+            </tr>
+          </thead>
+          <tbody>
+            {accepted.map((job) => {
+              const template = SIM_CATALOG.jobTemplates.find((row) => row.id === job.template_id);
+              const daysLeft = daysUntilDeadline(job.deadline_day, day);
+              const urgent = deadlineIsUrgent(daysLeft, LIFE.job_remind_days);
+              return (
+                <tr
+                  key={job.id}
+                  data-testid={`job-row-${job.id}`}
+                  className="border-t border-[var(--panel-border)]"
+                >
+                  <td className="py-2 pr-3 font-galmuri-9 text-galmuri-body text-[var(--foreground)]">
                     {template?.name ?? job.template_id}
-                  </p>
-                  <p className="font-galmuri-7 text-galmuri-small text-[var(--muted-foreground)]">
-                    {formatVnd(job.pay)} · {difficultyLabel(template?.tier ?? 1)}
-                  </p>
-                  <p
+                  </td>
+                  <td className="whitespace-nowrap py-2 pr-3 font-galmuri-7 text-galmuri-small text-[var(--foreground)]">
+                    {formatVnd(job.pay)}
+                  </td>
+                  <td className="whitespace-nowrap py-2 pr-3 font-galmuri-7 text-galmuri-small text-[var(--foreground)]">
+                    {difficultyLabel(template?.tier ?? 1)}
+                  </td>
+                  <td
                     data-testid={`job-deadline-${job.id}`}
                     data-urgent={urgent ? "1" : "0"}
                     className={
                       urgent
-                        ? "font-galmuri-7 text-galmuri-small text-[var(--accent-coral)]"
-                        : "font-galmuri-7 text-galmuri-small text-[var(--muted-foreground)]"
+                        ? "whitespace-nowrap py-2 pr-3 font-galmuri-7 text-galmuri-small text-[var(--accent-coral)]"
+                        : "whitespace-nowrap py-2 pr-3 font-galmuri-7 text-galmuri-small text-[var(--foreground)]"
                     }
                   >
-                    {leftLabel}
-                  </p>
-                </div>
-                <PixelButton
-                  type="button"
-                  variant="secondary"
-                  data-testid={`job-do-${job.id}`}
-                  onClick={() => (job.task_run ? openTask(job.id) : acceptJob(job.id))}
-                >
-                  Làm
-                </PixelButton>
-              </li>
-            );
-          })}
-        </ul>
+                    {deadlineLabel(daysLeft)}
+                  </td>
+                  <td className="py-2 text-right">
+                    <PixelButton
+                      type="button"
+                      variant="secondary"
+                      data-testid={`job-do-${job.id}`}
+                      onClick={() => (job.task_run ? openTask(job.id) : acceptJob(job.id))}
+                    >
+                      Làm
+                    </PixelButton>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       )}
     </Modal>
   );
