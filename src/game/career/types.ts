@@ -187,7 +187,25 @@ export type LifeSnapshot = {
   energy: number;
 };
 
-export type LifeDiary = LifeSnapshot & { line: string; pin: string };
+/** Money tagged since the morning snapshot. Spent fields are positive amounts. */
+export type DiaryPurse = {
+  earned: number;
+  food: number;
+  rent: number;
+  shop: number;
+  other: number;
+};
+
+export type LifeDiary = LifeSnapshot & {
+  line: string;
+  pin: string;
+  earned: number;
+  spent: number;
+  food: number;
+  rent: number;
+  shop: number;
+  remaining: number;
+};
 
 /** Owned store items and the one pinned target. A pre-store save owns nothing. */
 export type ShopState = {
@@ -211,6 +229,8 @@ export type LifeFeed = {
   hackathonResolved: boolean;
   snapshot: LifeSnapshot;
   diary: LifeDiary | null;
+  /** Spends and income since `snapshot`, cleared when the next morning is captured. */
+  purse: DiaryPurse;
   bannerDay: number | null;
   landlordTold: number;
   sickOpen: boolean;

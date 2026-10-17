@@ -15,6 +15,7 @@ import {
   selectBoardTemplates,
   skillNameMap,
 } from "../jobs/logic";
+import { notePurse } from "../life/purse";
 import { applyMoney, clampEnergy } from "../vitals/logic";
 import { LIFE } from "../life/content";
 import { defaultFeed } from "../life/events";
@@ -293,7 +294,7 @@ export function applyStudy(
     energy: -activity.energy,
     health: force && tired ? LIFE.force_health : 0,
   });
-  let next = markWorked(spent.state);
+  let next = notePurse(markWorked(spent.state), -activity.price, "other");
   const events: GameEvent[] = [...spent.events];
 
   const grants = catalog.studyActivityXp.filter((row) => row.activity_id === activity.id);
@@ -359,9 +360,10 @@ export function grantRawXp(
 export function changeMoney(state: CareerState, delta: number): ActionResult {
   const money = applyMoney(state.players.money, delta);
   if (money === state.players.money) return ok(state, []);
+  const applied = money - state.players.money;
   return ok(
-    { ...state, players: { ...state.players, money } },
-    [{ type: "moneyChanged", delta: money - state.players.money, money }],
+    notePurse({ ...state, players: { ...state.players, money } }, applied, applied > 0 ? "earn" : "other"),
+    [{ type: "moneyChanged", delta: applied, money }],
   );
 }
 

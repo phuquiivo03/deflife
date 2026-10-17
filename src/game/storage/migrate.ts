@@ -28,6 +28,7 @@ import { normalizeShop } from "../life/furniture";
 import { defaultLife } from "../life/logic";
 import { isTraitId, MIGRATION_TRAIT, rollTrait } from "../life/traits";
 import { defaultFeed } from "../life/events";
+import { emptyPurse } from "../life/purse";
 import type { LifeDiary, LifeFeed, LifeNotice, LifeSnapshot, NoticeAction, NoticeSeverity } from "../career/types";
 
 export type PersistedSave = {
@@ -304,7 +305,8 @@ function normalizeFeed(
     hackathonStart: value.hackathonStart == null ? null : num(value.hackathonStart),
     hackathonResolved: value.hackathonResolved === true,
     snapshot,
-    diary: normalizeDiary(value.diary),
+    diary: normalizeDiary(value.diary, vitals.money),
+    purse: normalizePurse(value.purse),
     bannerDay: value.bannerDay == null ? null : num(value.bannerDay),
     landlordTold: num(value.landlordTold),
     sickOpen: value.sickOpen === true,
@@ -329,17 +331,36 @@ function normalizeSnapshot(value: Record<string, unknown>, fresh: LifeSnapshot):
   };
 }
 
-function normalizeDiary(value: unknown): LifeDiary | null {
+function normalizePurse(value: unknown) {
+  const fresh = emptyPurse();
+  if (!isRecord(value)) return fresh;
+  return {
+    earned: Math.max(0, signed(value.earned)),
+    food: Math.max(0, signed(value.food)),
+    rent: Math.max(0, signed(value.rent)),
+    shop: Math.max(0, signed(value.shop)),
+    other: Math.max(0, signed(value.other)),
+  };
+}
+
+function normalizeDiary(value: unknown, remainingFallback: number): LifeDiary | null {
   if (!isRecord(value)) return null;
+  const money = signed(value.money);
   return {
     day: num(value.day, 1),
-    money: signed(value.money),
+    money,
     xp: signed(value.xp),
     health: Number(value.health) || 0,
     mood: Number(value.mood) || 0,
     energy: Number(value.energy) || 0,
     line: typeof value.line === "string" ? value.line : "",
     pin: typeof value.pin === "string" ? value.pin : "Chưa ghim món.",
+    earned: value.earned == null ? Math.max(0, money) : Math.max(0, signed(value.earned)),
+    spent: value.spent == null ? Math.max(0, -money) : Math.max(0, signed(value.spent)),
+    food: Math.max(0, signed(value.food)),
+    rent: Math.max(0, signed(value.rent)),
+    shop: Math.max(0, signed(value.shop)),
+    remaining: value.remaining == null ? remainingFallback : signed(value.remaining),
   };
 }
 
@@ -402,8 +423,8 @@ function strOrNull(value: unknown): string | null {
  * counts start at 0. Version 12 rolls one trait when the save is not already
  * marked `traitRolled`. A version 11 trait other than Cẩn thận is kept. A
  * version 11 Cẩn thận is rolled once and then marked. Version 13 marks
- * `introSeen` so an older save does not open the creation popup. Money,
- * skills, and progress are kept. See docs/systems/save.md.
+ * `introSeen` so an older save does not open the creation popup. Version 14
+ * starts `feed.purse` empty. Money, skills, and progress are kept. See docs/systems/save.md.
  */
 export function migrateSave(
   persisted: unknown,
@@ -459,6 +480,9 @@ export function migrateSave(
       ...career,
       players: { ...career.players, introSeen: true },
     };
+  }
+  if (version < 14) {
+    career = { ...career, feed: { ...career.feed, purse: emptyPurse() } };
   }
 
   return {

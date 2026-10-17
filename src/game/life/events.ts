@@ -4,6 +4,7 @@ import type { GameEvent } from "../events/types";
 import { addSkillXp, skillXpEvents, xpToNextLevel } from "../knowledge/logic";
 import type { SimCatalog } from "../career/types";
 import { pinProgressLine, pinReady } from "./furniture";
+import { diaryBooks, emptyPurse, notePurse } from "./purse";
 import { applyEventStats, calendar, holidayOn, isDeployFriday, lifeOf, monthKey, scaleXpForMood, slotIndexFromWake, stageBill } from "./logic";
 import { LIFE } from "./content";
 import { LIFE_EVENTS, lifeEventById, type LifeChoice, type LifeEventDef } from "./events-content";
@@ -36,6 +37,7 @@ export function defaultFeed(snapshot: LifeFeed["snapshot"]): LifeFeed {
     hackathonResolved: false,
     snapshot,
     diary: null,
+    purse: emptyPurse(),
     bannerDay: null,
     landlordTold: 0,
     sickOpen: false,
@@ -211,9 +213,10 @@ function applyPayRent(state: CareerState): CareerState | null {
   const rent = stageBill(LIFE.rent, state.players.stage);
   if (state.players.money < rent) return null;
   const paid = applyEventStats(state, { money: -rent });
-  return withFeed(
+  return notePurse(
     { ...paid.state, life: { ...lifeOf(paid.state), paidRentKey: key, rentDebtDays: 0 } },
-    feedOf(paid.state),
+    -rent,
+    "rent",
   );
 }
 
@@ -244,7 +247,7 @@ function applyChoiceEffects(
     health: choice.health,
     mood: choice.mood,
   });
-  next = stats.state;
+  next = money !== 0 ? notePurse(stats.state, money, money > 0 ? "earn" : "other") : stats.state;
   events.push(...stats.events);
   skipDays = Math.max(skipDays, stats.skipDays);
 
@@ -440,7 +443,7 @@ export function resolveHackathon(
   const events: GameEvent[] = [];
   if (won) {
     const paid = applyEventStats(next, { money: LIFE_EVENTS.hackathon_prize });
-    next = paid.state;
+    next = notePurse(paid.state, LIFE_EVENTS.hackathon_prize, "earn");
     events.push(...paid.events);
     const skillId = highestSkill(next);
     const current = next.player_skills.find((row) => row.skill_id === skillId) ?? {
@@ -643,15 +646,22 @@ export function openDiary(state: CareerState, catalog: SimCatalog): CareerState 
   const feed = feedOf(state);
   const xp = totalSkillXp(state, catalog);
   const line = LIFE_EVENTS.diary_lines[(state.players.game_day - 1) % LIFE_EVENTS.diary_lines.length] ?? "";
+  const books = diaryBooks(feed.snapshot.money, state.players.money, feed.purse);
   const diary: LifeDiary = {
     day: state.players.game_day,
-    money: state.players.money - feed.snapshot.money,
+    money: books.money,
     xp: xp - feed.snapshot.xp,
     health: state.players.health - feed.snapshot.health,
     mood: state.players.mood - feed.snapshot.mood,
     energy: state.players.energy - feed.snapshot.energy,
     line,
     pin: pinProgressLine(state),
+    earned: books.earned,
+    spent: books.spent,
+    food: books.food,
+    rent: books.rent,
+    shop: books.shop,
+    remaining: books.remaining,
   };
   return withFeed(state, { ...feed, diary });
 }
@@ -668,6 +678,7 @@ export function captureSnapshot(state: CareerState, catalog: SimCatalog): Career
       mood: state.players.mood,
       energy: state.players.energy,
     },
+    purse: emptyPurse(),
   });
 }
 

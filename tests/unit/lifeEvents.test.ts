@@ -26,8 +26,10 @@ import {
   slotCanRoll,
   syncLifeSurface,
   withFeed,
+  captureSnapshot,
 } from "@/game/life/events";
-import { monthKey } from "@/game/life/logic";
+import { eatMeal, monthKey, settleCalendarDay } from "@/game/life/logic";
+import { buyShopItem } from "@/game/life/store-buy";
 import { migrateSave } from "@/game/storage/migrate";
 
 const ART = join(process.cwd(), "public", "ui", "m5");
@@ -250,8 +252,30 @@ describe("life events", () => {
     };
     const diary = openDiary(poorer, SIM_CATALOG);
     expect(diary.feed.diary?.money).toBe(-8_000);
+    expect(diary.feed.diary?.earned).toBe(0);
+    expect(diary.feed.diary?.spent).toBe(8_000);
+    expect(diary.feed.diary?.remaining).toBe(poorer.players.money);
     expect(diary.feed.diary?.health).toBe(-3);
     expect(diary.feed.diary?.line).toBe(LIFE_EVENTS.diary_lines[0]);
+
+    const eaten = eatMeal(start(), "noodles").state;
+    const afterFood = openDiary(eaten, SIM_CATALOG).feed.diary;
+    expect(afterFood).toMatchObject({ food: 8_000, rent: 0, shop: 0, earned: 0, spent: 8_000, remaining: 3_000_000 - 8_000 });
+    const cleared = openDiary(captureSnapshot(eaten, SIM_CATALOG), SIM_CATALOG).feed.diary;
+    expect(cleared).toMatchObject({ food: 0, spent: 0, earned: 0, remaining: eaten.players.money });
+
+    const planted = buyShopItem(start(), "plant").state;
+    expect(openDiary(planted, SIM_CATALOG).feed.diary).toMatchObject({ shop: 150_000, food: 0, rent: 0, spent: 150_000 });
+
+    const billed = settleCalendarDay(start(), 1, "student").state;
+    expect(openDiary(billed, SIM_CATALOG).feed.diary).toMatchObject({
+      rent: 2_800_000,
+      food: 0,
+      shop: 0,
+      earned: 0,
+      spent: 2_800_000,
+      remaining: 200_000,
+    });
 
     const sick = { ...start(), players: { ...start().players, health: 20 } };
     const noted = syncLifeSurface(sick, 1, 8 * 60, false);
@@ -276,6 +300,24 @@ describe("life events", () => {
     expect(saved.career.feed.notices).toEqual([]);
     expect(saved.career.feed.pendingId).toBeNull();
     expect(saved.career.players.money).toBe(42);
+    expect(saved.career.feed.purse).toEqual({ earned: 0, food: 0, rent: 0, shop: 0, other: 0 });
+
+    const kept = migrateSave(
+      {
+        stage: "student",
+        totalMinutes: 480,
+        career: {
+          players: { money: 77, trait: "frugal", traitRolled: true, introSeen: true },
+          player_skills: [{ skill_id: "frontend", level: 4, xp: 12 }],
+          feed: { purse: { earned: 9, food: 1, rent: 2, shop: 3, other: 4 } },
+        },
+      },
+      13,
+    );
+    expect(kept.career.players.money).toBe(77);
+    expect(kept.career.players.trait).toBe("frugal");
+    expect(kept.career.player_skills.find((skill) => skill.skill_id === "frontend")).toMatchObject({ level: 4, xp: 12 });
+    expect(kept.career.feed.purse).toEqual({ earned: 0, food: 0, rent: 0, shop: 0, other: 0 });
   });
 });
 
@@ -311,6 +353,8 @@ describe("life event art", () => {
       ["ui_banner_v2_x2.png", 480, 80],
       ["fx_confetti.png", 64, 16],
       ["fx_confetti_x2.png", 128, 32],
+      ["ui_window_notepad.png", 48, 40],
+      ["ui_window_notepad_x2.png", 96, 80],
     ] as const) {
       const buf = readFileSync(join(polish, name));
       expect(buf.readUInt32BE(16)).toBe(w);

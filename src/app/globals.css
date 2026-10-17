@@ -573,11 +573,22 @@ body {
   image-rendering: pixelated;
 }
 
-.life-diary {
+.life-notepad {
   border-style: solid;
-  border-width: 8px;
-  border-image: url("/ui/m5/ui_diary_page.png") 4 fill;
+  border-width: 16px;
+  border-image: url("/ui/m5_1/ui_window_notepad_x2.png") 16 fill;
   image-rendering: pixelated;
+}
+
+.life-notepad-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0;
+  margin: -4px -4px 0;
+  background: #4a3f8c;
+  color: #fff;
 }
 
 .life-bubble {
