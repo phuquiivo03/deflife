@@ -61,3 +61,7 @@ The HUD **Cửa hàng** control is `StoreButton` (`src/components/game/StoreButt
 It sits on the HUD icon bar immediately before **Đi ngủ**. The gap is `HUD_ICON_GAP_PX` (8). The tooltip is the shared tooltip with the text “Cửa hàng”, and the button keeps that `aria-label`.
 
 The list opens in the shared modal (`src/components/ui/modal.tsx`). The existing store cards, prices, and buy/pin actions are unchanged. Closing is Escape, a backdrop click, or **Đóng**. The notice action “Mở store” still sets `storeOpen`. The Thông báo panel no longer embeds the list.
+
+## Notice actions
+
+Pay rent, view job, and open store in the notice list use the same `PixelButton` variant `icon`. Glyphs are `icon_action_pay_rent`, `icon_action_view_job`, and `icon_action_open_store` (16×16 native, drawn in the 16px center of the 2× icon face). The tooltip and `aria-label` keep “Trả trọ”, “Xem job”, and “Mở store”. `icon_action_eat` and `icon_action_sleep` sit in the same map. Sizes and the text-button fallback are in `src/components/game/notifications.config.ts`.
