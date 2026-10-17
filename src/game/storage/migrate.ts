@@ -26,7 +26,7 @@ import { clampEnergy } from "../vitals/logic";
 import { LIFE } from "../life/content";
 import { normalizeShop } from "../life/furniture";
 import { defaultLife } from "../life/logic";
-import { isTraitId, MIGRATION_TRAIT } from "../life/traits";
+import { isTraitId, MIGRATION_TRAIT, rollTrait } from "../life/traits";
 import { defaultFeed } from "../life/events";
 import type { LifeDiary, LifeFeed, LifeNotice, LifeSnapshot, NoticeAction, NoticeSeverity } from "../career/types";
 
@@ -236,6 +236,7 @@ export function careerFromUnknown(
       reputation: num(players.reputation, fresh.players.reputation),
       freelance_completed: num(players.freelance_completed),
       trait: isTraitId(players.trait) ? players.trait : MIGRATION_TRAIT,
+      traitRolled: players.traitRolled === true,
     },
     player_skills: normalizeSkills(value.player_skills),
     player_study_completions: normalizeCompletions(value.player_study_completions),
@@ -396,11 +397,17 @@ function strOrNull(value: unknown): string | null {
  * event feed; normalize adds an empty one. Versions before 8 have no store,
  * so they own nothing and wake in the student room. Junior and senior rooms
  * are bought in the store. Versions before 9 have notices without `cue`;
- * those cues stay null. Versions before 11 have no trait, so they become
- * Cẩn thận and home-day counts start at 0. Money, skills, and progress are
- * kept. See docs/systems/save.md.
+ * those cues stay null. Versions before 11 have no rolled trait, so home-day
+ * counts start at 0. Version 12 rolls one trait when the save is not already
+ * marked `traitRolled`. A version 11 trait other than Cẩn thận is kept. A
+ * version 11 Cẩn thận is rolled once and then marked. Money, skills, and
+ * progress are kept. See docs/systems/save.md.
  */
-export function migrateSave(persisted: unknown, version: number): PersistedSave {
+export function migrateSave(
+  persisted: unknown,
+  version: number,
+  random: () => number = Math.random,
+): PersistedSave {
   const prev = isRecord(persisted) ? persisted : {};
   let stage = isStage(prev.stage) ? prev.stage : "student";
   if (version < 8 && stage !== "student") stage = "student";
@@ -432,11 +439,17 @@ export function migrateSave(persisted: unknown, version: number): PersistedSave 
       },
     };
   }
-  if (version < 11) {
+  if (version < 12) {
+    const rawCareer = isRecord(prev.career) ? prev.career : {};
+    const rawPlayers = isRecord(rawCareer.players) ? rawCareer.players : {};
+    const storedTrait = isTraitId(rawPlayers.trait) ? rawPlayers.trait : null;
+    const alreadyRolled = rawPlayers.traitRolled === true && storedTrait != null;
+    const keptV11 = version >= 11 && storedTrait != null && storedTrait !== MIGRATION_TRAIT;
+    const trait = alreadyRolled || keptV11 ? (storedTrait ?? career.players.trait) : rollTrait(random);
     career = {
       ...career,
-      players: { ...career.players, trait: MIGRATION_TRAIT },
-      life: { ...career.life, homeDays: 0 },
+      players: { ...career.players, trait, traitRolled: true },
+      life: version < 11 ? { ...career.life, homeDays: 0 } : career.life,
     };
   }
 

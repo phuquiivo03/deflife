@@ -99,7 +99,7 @@ describe("store catalog", () => {
   it("applies daily mood and health, sleep energy, job energy, and work XP", () => {
     const planted = buyShopItem(start, "plant").state;
     const day = applyLifeDayStart(planted, 2, "student", { resolveMorning: false });
-    expect(day.state.players.mood).toBe(71);
+    expect(day.state.players.mood).toBeCloseTo(74.6, 5);
     const mattress = { ...start, shop: { owned: ["mattress"], pin: null } };
     const healed = applyLifeDayStart(mattress, 2, "student", { resolveMorning: false });
     expect(healed.state.players.health).toBe(66);
@@ -272,11 +272,13 @@ describe("store catalog", () => {
         },
       },
       8,
+      () => 0,
     );
     expect(saved.stage).toBe("junior");
     expect(saved.totalMinutes).toBe(20_000);
     expect(saved.career.players.money).toBe(2_850_000);
-    expect(saved.career.players.trait).toBe("careful");
+    expect(saved.career.players.trait).toBe("night_owl");
+    expect(saved.career.players.traitRolled).toBe(true);
     expect(saved.career.life.homeDays).toBe(0);
     expect(saved.career.players.energy).toBe(40);
     expect(saved.career.players.freelance_completed).toBe(2);

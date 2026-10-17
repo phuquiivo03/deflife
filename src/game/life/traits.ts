@@ -29,6 +29,7 @@ export type TraitDef = {
 
 type TraitConfig = {
   migration_trait: TraitId;
+  extrovertHomePenalty: boolean;
   night_from_minute: number;
   night_until_minute: number;
   traits: TraitDef[];
@@ -54,7 +55,7 @@ export function traitDef(id: TraitId): TraitDef {
   return BY_ID.get(id) ?? BY_ID.get(MIGRATION_TRAIT)!;
 }
 
-/** One trait for a new character. Existing saves use `MIGRATION_TRAIT` instead of a fresh roll. */
+/** One trait for a new character, or the single migration roll. */
 export function rollTrait(random: () => number = Math.random): TraitId {
   const index = Math.min(TRAIT_IDS.length - 1, Math.max(0, Math.floor(random() * TRAIT_IDS.length)));
   return TRAIT_IDS[index] ?? MIGRATION_TRAIT;
@@ -98,10 +99,27 @@ export function traitDecay(state: CareerState): number {
   return trait.id === "diligent" && trait.mood_decay != null ? trait.mood_decay : LIFE.trait_decay;
 }
 
+/** Home-day mood. `extrovertHomePenalty` turns the Hướng ngoại cost on or off. */
+export function extrovertHomeMood(enabled: boolean, trait: TraitId, homeDays: number): number {
+  if (!enabled || trait !== "extrovert") return 0;
+  const def = traitDef("extrovert");
+  if (def.home_days == null || def.home_mood == null) return 0;
+  return homeDays >= def.home_days ? def.home_mood : 0;
+}
+
 export function traitHomeMood(state: CareerState, homeDays: number): number {
-  const trait = traitDef(traitOf(state));
-  if (trait.id !== "extrovert" || trait.home_days == null || trait.home_mood == null) return 0;
-  return homeDays >= trait.home_days ? trait.home_mood : 0;
+  return extrovertHomeMood(TRAITS.extrovertHomePenalty, traitOf(state), homeDays);
+}
+
+/** Character card uses the 32×32 sheet so the pixels stay 1:1. */
+export function traitIconSrc(icon: M5AssetKey): string {
+  return `/ui/m5/${icon.replace(/\.png$/, "_x2.png")}`;
+}
+
+/** Bonus line. The home penalty stays off the card while that flag is false. */
+export function traitDetail(trait: TraitDef): string {
+  if (trait.id === "extrovert" && !TRAITS.extrovertHomePenalty) return trait.bonus;
+  return `${trait.bonus} · ${trait.penalty}`;
 }
 
 export function foodPrice(price: number, state: CareerState): number {
@@ -111,7 +129,7 @@ export function foodPrice(price: number, state: CareerState): number {
   return Math.max(0, Math.round(price * trait.food_multiplier));
 }
 
-/** Positive mood from a store purchase. Purchases grant none today, so this stays 0. */
+/** Positive mood from a store purchase. Tiết kiệm halves it. */
 export function scaleShoppingMood(mood: number, state: CareerState): number {
   if (!(mood > 0)) return mood;
   const trait = traitDef(traitOf(state));

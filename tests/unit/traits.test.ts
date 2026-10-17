@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { SIM_CATALOG } from "@/game/career/content";
 import { applyStudy, defaultCareer, ensureTodayBoard } from "@/game/career/actions";
@@ -15,8 +17,10 @@ import {
   eatMeal,
   jobPay,
   resolveMorning,
+  scaleXpForMood,
 } from "@/game/life/logic";
 import {
+  extrovertHomeMood,
   foodPrice,
   isNightOwlHour,
   jobTimeScale,
@@ -25,6 +29,9 @@ import {
   scaleTraitPay,
   scaleTraitXp,
   traitBugCount,
+  traitDef,
+  traitDetail,
+  traitIconSrc,
 } from "@/game/life/traits";
 import { migrateSave } from "@/game/storage/migrate";
 import { chooseBuild, chooseTicket, startTask } from "@/game/task-run/apply";
@@ -74,7 +81,7 @@ describe("personality", () => {
     expect(crossWakingSlot(career("careful"), 10 * 60).state.players.mood).toBe(69);
   });
 
-  it("boosts soft XP and freelance pay for Hướng ngoại, and costs mood after two home days", () => {
+  it("boosts soft XP and freelance pay for Hướng ngoại, and leaves the home penalty off", () => {
     const extro = career("extrovert");
     const plain = career("careful");
     expect(skillXp(applyStudy(extro, "comms", SIM_CATALOG).state, "soft")).toBe(87);
@@ -82,6 +89,7 @@ describe("personality", () => {
     expect(skillXp(applyStudy(extro, "html", SIM_CATALOG).state, "frontend")).toBe(80);
     expect(scaleTraitPay(jobPay(100_000, 1, 0), extro)).toBe(92_400);
     expect(scaleTraitPay(jobPay(100_000, 1, 0), plain)).toBe(88_000);
+    expect(traitDetail(traitDef("extrovert"))).toBe(traitDef("extrovert").bonus);
 
     const home = (trait: "extrovert" | "careful") => {
       const first = applyLifeDayStart(career(trait), 2, "student", { resolveMorning: false });
@@ -89,7 +97,10 @@ describe("personality", () => {
     };
     const stayed = home("extrovert");
     expect(stayed.state.life.homeDays).toBe(2);
-    expect(stayed.state.players.mood).toBeCloseTo(home("careful").state.players.mood - 5, 5);
+    expect(stayed.state.players.mood).toBeCloseTo(home("careful").state.players.mood, 5);
+    expect(extrovertHomeMood(false, "extrovert", 2)).toBe(0);
+    expect(extrovertHomeMood(true, "extrovert", 2)).toBe(-5);
+    expect(extrovertHomeMood(true, "extrovert", 1)).toBe(0);
     const out = {
       ...extro,
       life: { ...extro.life, funSlotsToday: 2 },
@@ -105,12 +116,30 @@ describe("personality", () => {
     expect(eatMeal(frugal, "noodles").state.players.money).toBe(3_000_000 - 6_400);
     expect(eatMeal(plain, "noodles").state.players.money).toBe(3_000_000 - 8_000);
     expect(eatMeal(frugal, "noodles").state.players.health).toBe(67);
+    expect(scaleShoppingMood(4, frugal)).toBe(2);
     expect(scaleShoppingMood(10, frugal)).toBe(5);
     expect(scaleShoppingMood(-4, frugal)).toBe(-4);
-    expect(scaleShoppingMood(10, plain)).toBe(10);
-    const bought = buyShopItem(frugal, "plant");
+    expect(scaleShoppingMood(4, plain)).toBe(4);
+    const bought = buyShopItem(plain, "plant");
     expect(bought.error).toBeNull();
-    expect(bought.state.players.mood).toBe(frugal.players.mood);
+    expect(bought.state.players.mood).toBe(74);
+    const frugalBuy = buyShopItem(frugal, "plant");
+    expect(frugalBuy.state.players.mood).toBe(72);
+    const again = buyShopItem(frugalBuy.state, "fan");
+    expect(again.state.players.mood).toBeCloseTo(73.2, 5);
+    const juniorReady = (state: ReturnType<typeof career>) => ({
+      ...state,
+      players: { ...state.players, money: 30_000_000, reputation: 30 },
+      player_skills: state.player_skills.map((skill, index) => (index === 0 ? { ...skill, level: 3 } : skill)),
+    });
+    const room = buyShopItem(juniorReady(plain), "room_junior");
+    expect(room.error).toBeNull();
+    expect(room.state.players.mood).toBe(80);
+    const frugalRoom = buyShopItem(juniorReady(frugal), "room_junior");
+    expect(frugalRoom.state.players.mood).toBe(75);
+    const blocked = buyShopItem(plain, "room_junior");
+    expect(blocked.error).not.toBeNull();
+    expect(blocked.state.players.mood).toBe(plain.players.mood);
   });
 
   it("removes one bug for Cẩn thận without passing the formula floor, and lengthens the job", () => {
@@ -161,13 +190,14 @@ describe("personality", () => {
     expect(carefulTotal).toBe(Math.max(TASK_RUN.bugs.min, owlTotal - 1));
   });
 
-  it("holds Lạc quan mood at 20 outside events and trims study XP", () => {
+  it("holds Lạc quan mood at 20 for every source and trims study XP", () => {
     const optimist = {
       ...career("optimist"),
       players: { ...career("optimist").players, mood: 30 },
     };
     expect(applyActionStats(optimist, { mood: -25 }).state.players.mood).toBe(20);
-    expect(applyEventStats(optimist, { mood: -25 }).state.players.mood).toBe(5);
+    expect(applyEventStats(optimist, { mood: -25 }).state.players.mood).toBe(20);
+    expect(scaleXpForMood(10, 20)).toBe(7);
     expect(skillXp(applyStudy(career("optimist"), "html", SIM_CATALOG).state, "frontend")).toBe(76);
   });
 
@@ -182,7 +212,7 @@ describe("personality", () => {
     expect(owl.state.players.money).toBe(plain.state.players.money);
   });
 
-  it("keeps a pre-trait save's money, skills, shop, and room, and defaults the trait", () => {
+  it("rolls one trait for an old save, keeps a real v11 trait, and never rolls again", () => {
     const saved = migrateSave(
       {
         stage: "junior",
@@ -216,10 +246,12 @@ describe("personality", () => {
         },
       },
       9,
+      () => 0,
     );
     expect(saved.stage).toBe("junior");
     expect(saved.career.players.money).toBe(123_456);
-    expect(saved.career.players.trait).toBe("careful");
+    expect(saved.career.players.trait).toBe("night_owl");
+    expect(saved.career.players.traitRolled).toBe(true);
     expect(saved.career.players.freelance_completed).toBe(2);
     expect(saved.career.player_skills.find((row) => row.skill_id === "frontend")).toEqual({
       skill_id: "frontend",
@@ -233,10 +265,12 @@ describe("personality", () => {
     const student = migrateSave(
       { stage: "junior", totalMinutes: 480, career: { players: { money: 50 } } },
       7,
+      () => 0.999,
     );
     expect(student.stage).toBe("student");
     expect(student.career.players.money).toBe(50);
-    expect(student.career.players.trait).toBe("careful");
+    expect(student.career.players.trait).toBe("optimist");
+    expect(student.career.players.traitRolled).toBe(true);
     expect(student.career.shop.owned).toEqual([]);
 
     const kept = migrateSave(
@@ -246,9 +280,54 @@ describe("personality", () => {
         career: { players: { money: 9, trait: "night_owl" }, life: { homeDays: 3 } },
       },
       11,
+      () => 0.999,
     );
     expect(kept.career.players.trait).toBe("night_owl");
+    expect(kept.career.players.traitRolled).toBe(true);
     expect(kept.career.players.money).toBe(9);
     expect(kept.career.life.homeDays).toBe(3);
+
+    const rerolled = migrateSave(
+      {
+        stage: "student",
+        totalMinutes: 480,
+        career: { players: { money: 9, trait: "careful" }, life: { homeDays: 3 } },
+      },
+      11,
+      () => 0,
+    );
+    expect(rerolled.career.players.trait).toBe("night_owl");
+    expect(rerolled.career.players.traitRolled).toBe(true);
+    expect(rerolled.career.life.homeDays).toBe(3);
+    const again = migrateSave(rerolled, 12, () => 0.999);
+    expect(again.career.players.trait).toBe("night_owl");
+    expect(again.career.players.traitRolled).toBe(true);
+
+    const marked = migrateSave(
+      {
+        stage: "student",
+        totalMinutes: 480,
+        career: { players: { money: 9, trait: "careful", traitRolled: true } },
+      },
+      11,
+      () => 0,
+    );
+    expect(marked.career.players.trait).toBe("careful");
+    expect(marked.career.players.traitRolled).toBe(true);
+  });
+
+  it("uses the approved trait sheets at 16 and 32", () => {
+    const art = join(process.cwd(), "public", "ui", "m5");
+    for (const id of TRAIT_IDS) {
+      const native = readFileSync(join(art, `icon_trait_${id}.png`));
+      const doubled = readFileSync(join(art, `icon_trait_${id}_x2.png`));
+      expect(native.readUInt32BE(16)).toBe(16);
+      expect(native.readUInt32BE(20)).toBe(16);
+      expect(doubled.readUInt32BE(16)).toBe(32);
+      expect(doubled.readUInt32BE(20)).toBe(32);
+      expect(native.length).toBeGreaterThan(200);
+      expect(doubled.length).toBeGreaterThan(200);
+    }
+    expect(traitIconSrc("icon_trait_frugal.png")).toBe("/ui/m5/icon_trait_frugal_x2.png");
   });
 });

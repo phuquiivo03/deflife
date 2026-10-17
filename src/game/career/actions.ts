@@ -103,6 +103,7 @@ export function defaultCareer(
       reputation: config.starting_reputation,
       freelance_completed: 0,
       trait,
+      traitRolled: true,
     },
     player_skills: SKILL_IDS.map((skill_id) => ({ skill_id, level: 1, xp: 0 })),
     player_study_completions: [],
