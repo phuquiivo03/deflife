@@ -1,7 +1,5 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element -- hunger and food icons stay pixelated */
-
 import { SIM_CATALOG } from "@/game/career/content";
 import { overallRankBracket, skillProgressList, type SkillProgress } from "@/game/knowledge/logic";
 import { freelanceGoal } from "@/game/jobs/logic";
