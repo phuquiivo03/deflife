@@ -1,0 +1,75 @@
+.pixelButton {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0 var(--btn-pad-x);
+  min-height: var(--btn-min-height);
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--btn-slice-width);
+  background: transparent;
+  color: var(--btn-ink);
+  font-weight: 400;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  image-rendering: pixelated;
+  border-image-source: var(--btn-img);
+  border-image-slice: var(--btn-slice);
+  border-image-width: var(--btn-slice-width);
+  border-image-repeat: stretch;
+}
+
+.pixelButton:hover:not(:disabled) {
+  border-image-source: var(--btn-img-hover);
+}
+
+/*
+ * The pressed sheet already draws the face lower. Move only the direct
+ * children (label and icon) by --btn-press, the same distance. Do not
+ * translate this box — that would drop the face a second time.
+ */
+.pixelButton:active:not(:disabled) {
+  border-image-source: var(--btn-img-pressed);
+}
+
+.pixelButton:active:not(:disabled) > * {
+  transform: translateY(var(--btn-press));
+}
+
+.pixelButton:focus-visible {
+  outline: var(--btn-focus) solid var(--ring);
+  outline-offset: var(--btn-focus);
+}
+
+.pixelButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.icon {
+  width: var(--btn-icon-size);
+  height: var(--btn-icon-size);
+  min-width: var(--btn-icon-size);
+  min-height: var(--btn-icon-size);
+  padding: 0;
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--btn-gap);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixelButton,
+  .pixelButton > * {
+    transition: none;
+  }
+}

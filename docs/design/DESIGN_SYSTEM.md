@@ -77,6 +77,12 @@ User-facing copy: **Vietnamese**; tech terms stay English (Frontend, Backend, Ju
 
 ---
 
+## Pixel buttons
+
+New chrome uses `PixelButton` from `@/components/ui/button` (`primary`, `secondary`, `danger`, and square `icon`). Skins are the `ui_btn_*` 9-slices in `public/ui/m5_1/` (`normal` / `hover` / `pressed`, native and `_x2`). Insets come from `slices.json`. The pressed face is already 2 native pixels lower; the label drops that same distance with the face. The older `Button` styles stay as they are. Details: [buttons.md](../systems/buttons.md).
+
+---
+
 ## Pixel art
 
 Room canvas, UI icons, avatars: `image-rendering: pixelated` (`.pixelated`). Do not blur or round canvas pixels.
