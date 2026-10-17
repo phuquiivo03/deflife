@@ -385,7 +385,9 @@ function strOrNull(value: unknown): string | null {
  * before 5 have no task_run; normalize stores null. Versions before 6 have no
  * health, mood, or life counters; those gain the defaults. Versions before 7
  * have no event feed; normalize adds an empty one. Versions before 8 have no
- * store, so they own nothing and wake in the student room.
+ * store, so they own nothing and wake in the student room. Versions before 9
+ * have notices without `cue`; those cues stay null. Money, skills, and
+ * progress are kept. See docs/systems/save.md.
  */
 export function migrateSave(persisted: unknown, version: number): PersistedSave {
   const prev = isRecord(persisted) ? persisted : {};
@@ -409,6 +411,15 @@ export function migrateSave(persisted: unknown, version: number): PersistedSave 
       : defaultCareer(snap.day, snap.minuteOfDay, stage, SIM_CATALOG);
   if (version < 4) {
     career = { ...career, player_study_completions: [] };
+  }
+  if (version < 9) {
+    career = {
+      ...career,
+      feed: {
+        ...career.feed,
+        notices: career.feed.notices.map((notice) => ({ ...notice, cue: null })),
+      },
+    };
   }
 
   return {
