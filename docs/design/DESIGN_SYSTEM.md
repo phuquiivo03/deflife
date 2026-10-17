@@ -189,7 +189,7 @@ Chrome hints use `src/components/ui/tooltip.tsx`. Numbers live in `src/component
 | `enterMs` | 120 | Fade and 4px slide. `prefers-reduced-motion` skips it |
 | `disableHoverableContent` | true | Leaving the trigger closes the tip. The tip has no controls |
 
-Hover opens the tip after `openDelayMs`. Keyboard focus opens it immediately and sets `aria-describedby` on the trigger while the tip is open. A coarse pointer opens it on tap; a tap outside, or Escape, closes it. The character-card trait row uses this for the bonus line. The HUD shop and sleep icons use it for “Cửa hàng” and “Đi ngủ”. Notice actions show those words on the button and use the same string for `aria-label` and the tip: “Trả trọ”, “Xem job”, “Mở store”, “Ăn”, and “Ngủ”.
+Hover opens the tip after `openDelayMs`. Keyboard focus opens it immediately and sets `aria-describedby` on the trigger while the tip is open. A coarse pointer opens it on tap; a tap outside, or Escape, closes it. The character-card trait row uses this for the bonus line. The HUD shop and sleep icons use it for “Cửa hàng” and “Đi ngủ”. The rice bowl under the room uses it for “Ăn · ” plus the hunger level (“No”, “Hơi đói”, “Đói”), and that same string is the button `aria-label`. Notice actions show those words on the button and use the same string for `aria-label` and the tip: “Trả trọ”, “Xem job”, “Mở store”, “Ăn”, and “Ngủ”.
 
 ## Modal
 
@@ -212,3 +212,5 @@ The shell traps focus, closes on Escape and a backdrop click, and sets `aria-mod
 ## Motion & a11y
 
 Respect `prefers-reduced-motion`. Keep tap targets ≥ 44px on mobile where practical.
+
+The rice-bowl icon under the room pulses with opacity and brightness when the player is Hơi đói (slow, faint) or Đói (faster, stronger). No stays still. Reduced motion holds a static tint instead of the pulse. Timings are `HUNGER_BOWL_BLINK` in `src/components/game/food-dock.config.ts`.

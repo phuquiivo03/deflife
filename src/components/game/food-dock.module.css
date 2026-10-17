@@ -1,0 +1,31 @@
+/*
+ * Pulse on the rice-bowl icon. Durations and the opacity / brightness
+ * floors come from food-dock.config.ts as custom properties.
+ * The icon does not translate or scale.
+ */
+.bowlBlink {
+  animation-name: food-bowl-pulse;
+  animation-duration: var(--hunger-blink-ms);
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+@keyframes food-bowl-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: var(--hunger-min-opacity);
+    filter: brightness(var(--hunger-min-brightness));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bowlBlink {
+    animation: none;
+    opacity: var(--hunger-still-opacity);
+    filter: brightness(var(--hunger-still-brightness));
+  }
+}

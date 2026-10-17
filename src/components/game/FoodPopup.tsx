@@ -4,28 +4,27 @@
 
 import { PixelButton } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { LIFE } from "@/game/life/content";
 import { m51AssetPath } from "@/game/life/assets";
-import {
-  actionEatArtFile,
-  foodArtFile,
-  foodDockMetrics,
-  foodDockStyle,
-  hungerArtFile,
-} from "@/game/life/m51-art";
+import { actionEatArtFile, foodArtFile, foodDockMetrics, foodDockStyle } from "@/game/life/m51-art";
 import { hungerLabel, hungerLevel } from "@/game/life/hunger";
 import { lifeOf, mealBlocked } from "@/game/life/logic";
 import { foodPrice } from "@/game/life/traits";
 import { useGameStore } from "@/game/state/store";
+import { cn } from "@/lib/utils";
 import { formatVnd } from "@/lib/format-currency";
+import { foodHungerTip, hungerBowlBlinkStyle } from "./food-dock.config";
+import styles from "./food-dock.module.css";
 
 export function HungerDock() {
-  const career = useGameStore((s) => s.career);
+  const slots = useGameStore((s) => lifeOf(s.career).slotsSinceMeal);
   const open = useGameStore((s) => s.foodOpen);
   const setOpen = useGameStore((s) => s.setFoodOpen);
-  const slots = lifeOf(career).slotsSinceMeal;
   const hunger = hungerLevel(slots);
   const dock = foodDockMetrics();
+  const tip = foodHungerTip(hunger);
+  const blinking = hunger !== "full";
 
   return (
     <>
@@ -36,23 +35,34 @@ export function HungerDock() {
         data-slots={slots}
       >
         <div className="food-anchor relative" style={foodDockStyle()}>
-          <button type="button" className="food-bowl" aria-label="Ăn uống" data-testid="food-open" onClick={() => setOpen(true)}>
-            <img
-              src={m51AssetPath(foodArtFile())}
-              width={dock.foodPx}
-              height={dock.foodPx}
-              alt=""
-              className="pixel-img"
-            />
-          </button>
-          <img
-            src={m51AssetPath(hungerArtFile(hunger))}
-            width={dock.hungerPx}
-            height={dock.hungerPx}
-            alt=""
-            className={hunger === "hungry" ? "hunger-badge pixel-img hunger-blink" : "hunger-badge pixel-img"}
-            data-testid="hunger-icon"
-          />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-flex">
+                <button
+                  type="button"
+                  className="food-bowl"
+                  aria-label={tip}
+                  data-testid="food-open"
+                  onClick={() => setOpen(true)}
+                >
+                  <img
+                    src={m51AssetPath(foodArtFile())}
+                    width={dock.foodPx}
+                    height={dock.foodPx}
+                    alt=""
+                    draggable={false}
+                    data-testid="food-bowl-icon"
+                    data-hunger-blink={hunger}
+                    className={cn("pixel-img", blinking && styles.bowlBlink)}
+                    style={hungerBowlBlinkStyle(hunger)}
+                  />
+                </button>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="top" data-testid="food-tooltip">
+              {tip}
+            </TooltipContent>
+          </Tooltip>
         </div>
         <span className="font-galmuri-7 text-galmuri-small text-[var(--foreground)]" data-testid="hunger-label">
           {hungerLabel(hunger)}
