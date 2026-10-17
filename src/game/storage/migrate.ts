@@ -378,21 +378,37 @@ function strOrNull(value: unknown): string | null {
   return typeof value === "string" && value.length > 0 ? value : null;
 }
 
+const LIVED_ROOMS: Record<StageId, readonly string[]> = {
+  student: [],
+  junior: ["room_junior"],
+  senior: ["room_junior", "room_senior"],
+};
+
+function withLivedRooms(career: CareerState, stage: StageId): CareerState {
+  const rooms = LIVED_ROOMS[stage];
+  if (rooms.length === 0) return career;
+  const owned = [...rooms];
+  for (const id of career.shop.owned) {
+    if (!owned.includes(id)) owned.push(id);
+  }
+  return { ...career, shop: { owned, pin: career.shop.pin } };
+}
+
 /**
- * Persist version 5. Versions before 3 keep the room and the clock, and gain
- * a fresh career document. Version 3 keeps the career tables. Versions before
- * 4 have no course history, so every course is still uncompleted. Versions
- * before 5 have no task_run; normalize stores null. Versions before 6 have no
- * health, mood, or life counters; those gain the defaults. Versions before 7
- * have no event feed; normalize adds an empty one. Versions before 8 have no
- * store, so they own nothing and wake in the student room. Versions before 9
- * have notices without `cue`; those cues stay null. Money, skills, and
- * progress are kept. See docs/systems/save.md.
+ * Versions before 3 keep the room and the clock, and gain a fresh career
+ * document. Version 3 keeps the career tables. Versions before 4 have no
+ * course history, so every course is still uncompleted. Versions before 5
+ * have no task_run; normalize stores null. Versions before 6 have no health,
+ * mood, or life counters; those gain the defaults. Versions before 7 have no
+ * event feed; normalize adds an empty one. Versions before 8 have no store.
+ * A junior save owns the junior room. A senior save owns the junior and senior
+ * rooms. Student saves own no room item. Versions before 9 have notices
+ * without `cue`; those cues stay null. Saves already at v8 or v9 keep the shop
+ * they have. Money, skills, and progress are kept. See docs/systems/save.md.
  */
 export function migrateSave(persisted: unknown, version: number): PersistedSave {
   const prev = isRecord(persisted) ? persisted : {};
-  let stage = isStage(prev.stage) ? prev.stage : "student";
-  if (version < 8 && stage !== "student") stage = "student";
+  const stage = isStage(prev.stage) ? prev.stage : "student";
   const loadouts = isRecord(prev.loadouts)
     ? {
         student: isRecord(prev.loadouts.student)
@@ -412,6 +428,7 @@ export function migrateSave(persisted: unknown, version: number): PersistedSave 
   if (version < 4) {
     career = { ...career, player_study_completions: [] };
   }
+  if (version < 8) career = withLivedRooms(career, stage);
   if (version < 9) {
     career = {
       ...career,
