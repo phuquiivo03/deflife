@@ -6,8 +6,14 @@
  * does not change the sticky cap (`headerPx`, `marginYPx`, `stickyTopPx`).
  */
 
-/** CSS cap for the room slot. The status bar uses the same width. Do not grow it to fill the column. */
+/** CSS cap for the room slot. Do not grow it to fill the column. */
 export const ROOM_VIEWPORT_W = 480;
+
+/**
+ * Center column cap from the design system. The HUD card and the room
+ * status bar share it. The room slot stays at `ROOM_VIEWPORT_W`.
+ */
+export const CENTER_COLUMN_MAX_PX = 520;
 
 export const SHELL_LAYOUT = {
   /**
@@ -51,11 +57,12 @@ export function shellPanelVars(layout = SHELL_LAYOUT): Record<`--${string}`, str
 
 /**
  * Bar directly above the room canvas: Tiền, Ngày/giờ, and Cửa hàng.
- * Width matches the room slot. The shop button pins to the trailing edge.
+ * Width follows the center column so Tiền, the clock, and the shop button
+ * stay on one line there. The shop button pins to the trailing edge.
  */
 export const ROOM_STATUS_BAR = {
-  /** Same cap as `ROOM_VIEWPORT_W`. */
-  maxWidthPx: ROOM_VIEWPORT_W,
+  /** Same cap as the center column and the HUD card. */
+  maxWidthPx: CENTER_COLUMN_MAX_PX,
   /** Space between this bar and the room frame. */
   gapBelowPx: 8,
   padXPx: 12,

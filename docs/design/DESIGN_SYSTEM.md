@@ -51,11 +51,11 @@ On `lg` the shell is `h-screen` and the region under the header is what scrolls.
 
 ### Room status bar
 
-A lavender card sits in the center column, directly above the room frame, and scrolls with that column. It does not change the sticky side panels. Width is `ROOM_VIEWPORT_W` from `src/components/game/shell-layout.config.ts` (`ROOM_STATUS_BAR`). Below `lg` it is `width: 100%` up to that cap, same as the room slot.
+A lavender card sits in the center column, directly above the room frame, and scrolls with that column. It does not change the sticky side panels. Its cap is `CENTER_COLUMN_MAX_PX` (520), the same cap as the HUD card, from `src/components/game/shell-layout.config.ts` (`ROOM_STATUS_BAR`). That width keeps Tiền, Ngày/giờ, and Cửa hàng on one line in the desktop column. The room slot stays at `ROOM_VIEWPORT_W` (480) and stays centered under the bar. Below `lg`, and whenever the column is narrower than the row, the bar is `width: 100%` up to that cap and wraps; Cửa hàng stays at the trailing edge.
 
 | Key | Default | Meaning |
 |-----|---------|---------|
-| `maxWidthPx` | 480 | Same cap as the room slot |
+| `maxWidthPx` | 520 | Center-column cap, shared with the HUD card |
 | `gapBelowPx` | 8 | Space between the bar and the room frame |
 | `padXPx` | 12 | Horizontal padding |
 | `padYPx` | 6 | Vertical padding |
@@ -65,7 +65,7 @@ A lavender card sits in the center column, directly above the room frame, and sc
 | `iconPx` | 22 | Savings icon and the phase icon |
 | `separator` | ` · ` | Between day, weekday, and clock |
 
-Left to right: the savings icon and the VND amount (`hud-money`), the phase icon and `Ngày N · weekday · HH:MM phase` (`game-clock`, for example `Ngày 1 · T2 · 08:12 Sáng`), then **Cửa hàng** (`icon_btn_store`, tooltip “Cửa hàng”) pinned to the end. Fast-forward still flashes the clock cluster. Galmuri7 at 16px, so Tiền and Ngày/giờ share one line with the shop button at the room width.
+Left to right: the savings icon and the VND amount (`hud-money`), the phase icon and `Ngày N · weekday · HH:MM phase` (`game-clock`, for example `Ngày 1 · T2 · 08:12 Sáng`), then **Cửa hàng** (`icon_btn_store`, tooltip “Cửa hàng”) pinned to the end. Fast-forward still flashes the clock cluster. Galmuri7 at 16px, so Tiền and Ngày/giờ share one line with the shop button in the desktop column.
 
 ---
 
@@ -162,7 +162,7 @@ Use `PixelAvatar` + `resolveAvatarAsset()` with the same integer-scale rule.
 
 ## Room viewport
 
-`ROOM_VIEWPORT_W` in `shell-layout.config.ts` (read by `GameShell`, 480px) caps CSS size; renderer still uses integer device-pixel scale internally. **Do not increase** to fill the center column without owner approval. The room status bar uses that same cap.
+`ROOM_VIEWPORT_W` in `shell-layout.config.ts` (read by `GameShell`, 480px) caps CSS size; renderer still uses integer device-pixel scale internally. **Do not increase** to fill the center column without owner approval. The room status bar uses the center-column cap (`CENTER_COLUMN_MAX_PX`, 520) so its row fits above that room.
 
 ### Chamfered game frame
 

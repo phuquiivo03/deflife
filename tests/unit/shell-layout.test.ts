@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { MODAL } from "@/components/ui/modal.config";
 import {
+  CENTER_COLUMN_MAX_PX,
   ROOM_STATUS_BAR,
   ROOM_VIEWPORT_W,
   SHELL_LAYOUT,
@@ -63,11 +64,13 @@ describe("desktop side panels", () => {
 
   it("sizes the room status bar from the room cap and keeps it out of the sticky rules", () => {
     expect(ROOM_VIEWPORT_W).toBe(480);
-    expect(ROOM_STATUS_BAR.maxWidthPx).toBe(ROOM_VIEWPORT_W);
+    expect(CENTER_COLUMN_MAX_PX).toBe(520);
+    expect(ROOM_STATUS_BAR.maxWidthPx).toBe(CENTER_COLUMN_MAX_PX);
+    expect(ROOM_STATUS_BAR.maxWidthPx).toBeGreaterThan(ROOM_VIEWPORT_W);
     expect(ROOM_STATUS_BAR.separator).toBe(" · ");
     expect(roomStatusClockLabel(1, "T2", "08:12", "Sáng")).toBe("Ngày 1 · T2 · 08:12 Sáng");
     const vars = roomStatusBarVars();
-    expect(vars["--room-status-max"]).toBe("480px");
+    expect(vars["--room-status-max"]).toBe("520px");
     expect(vars["--room-status-gap"]).toBe(`${ROOM_STATUS_BAR.gapBelowPx}px`);
     expect(vars["--room-status-cluster"]).toBe(`${ROOM_STATUS_BAR.clusterGapPx}px`);
     const css = readFileSync(
