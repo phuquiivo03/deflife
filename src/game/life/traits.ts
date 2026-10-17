@@ -30,6 +30,8 @@ export type TraitDef = {
 type TraitConfig = {
   migration_trait: TraitId;
   extrovertHomePenalty: boolean;
+  intro_spin_ms: number;
+  intro_flash_ms: number;
   night_from_minute: number;
   night_until_minute: number;
   traits: TraitDef[];
@@ -53,6 +55,24 @@ export function traitOf(state: CareerState): TraitId {
 
 export function traitDef(id: TraitId): TraitDef {
   return BY_ID.get(id) ?? BY_ID.get(MIGRATION_TRAIT)!;
+}
+
+export const INTRO_SPIN_MS = traitsConfig.intro_spin_ms;
+export const INTRO_FLASH_MS = traitsConfig.intro_flash_ms;
+
+/** Two passes over the icons, then the rolled trait. */
+export function introIndex(
+  elapsed: number,
+  spinMs: number,
+  targetIndex: number,
+  count = TRAIT_IDS.length,
+): { index: number; stopped: boolean } {
+  const safeCount = Math.max(1, count);
+  const target = ((targetIndex % safeCount) + safeCount) % safeCount;
+  if (!(spinMs > 0) || elapsed >= spinMs) return { index: target, stopped: true };
+  const cycles = safeCount * 2;
+  const ticks = Math.min(cycles - 1, Math.floor((elapsed / spinMs) * cycles));
+  return { index: ticks % safeCount, stopped: false };
 }
 
 /** One trait for a new character, or the single migration roll. */

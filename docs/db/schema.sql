@@ -89,7 +89,8 @@ CREATE TABLE players (
   reputation integer NOT NULL CHECK (reputation >= 0),
   freelance_completed integer NOT NULL CHECK (freelance_completed >= 0),
   trait text NOT NULL CHECK (trait IN ('night_owl', 'diligent', 'extrovert', 'frugal', 'careful', 'optimist')),
-  trait_rolled boolean NOT NULL
+  trait_rolled boolean NOT NULL,
+  intro_seen boolean NOT NULL
 );
 
 CREATE TABLE player_skills (

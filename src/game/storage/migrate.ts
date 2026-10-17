@@ -237,6 +237,7 @@ export function careerFromUnknown(
       freelance_completed: num(players.freelance_completed),
       trait: isTraitId(players.trait) ? players.trait : MIGRATION_TRAIT,
       traitRolled: players.traitRolled === true,
+      introSeen: players.introSeen === true,
     },
     player_skills: normalizeSkills(value.player_skills),
     player_study_completions: normalizeCompletions(value.player_study_completions),
@@ -400,8 +401,9 @@ function strOrNull(value: unknown): string | null {
  * those cues stay null. Versions before 11 have no rolled trait, so home-day
  * counts start at 0. Version 12 rolls one trait when the save is not already
  * marked `traitRolled`. A version 11 trait other than Cẩn thận is kept. A
- * version 11 Cẩn thận is rolled once and then marked. Money, skills, and
- * progress are kept. See docs/systems/save.md.
+ * version 11 Cẩn thận is rolled once and then marked. Version 13 marks
+ * `introSeen` so an older save does not open the creation popup. Money,
+ * skills, and progress are kept. See docs/systems/save.md.
  */
 export function migrateSave(
   persisted: unknown,
@@ -450,6 +452,12 @@ export function migrateSave(
       ...career,
       players: { ...career.players, trait, traitRolled: true },
       life: version < 11 ? { ...career.life, homeDays: 0 } : career.life,
+    };
+  }
+  if (version < 13) {
+    career = {
+      ...career,
+      players: { ...career.players, introSeen: true },
     };
   }
 
