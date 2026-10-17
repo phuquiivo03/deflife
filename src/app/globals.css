@@ -548,21 +548,53 @@ body {
 }
 
 .life-notepad {
-  border-style: solid;
-  border-width: 16px;
-  border-image: url("/ui/m5_1/ui_window_notepad_x2.png") 16 fill;
+  position: relative;
   image-rendering: pixelated;
 }
 
 .life-notepad-title {
+  position: absolute;
+  top: calc(var(--notepad-top) * -1);
+  right: 0;
+  left: 0;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  justify-content: flex-end;
-  gap: 0;
-  margin: -4px -4px 0;
-  background: #4a3f8c;
+  height: var(--notepad-top);
+  margin: 0;
+  padding-left: 8px;
+  overflow: hidden;
   color: #fff;
+  line-height: 1;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  background: transparent;
+  pointer-events: none;
+}
+
+.life-notepad-chrome {
+  position: absolute;
+  top: calc(var(--notepad-top) * -1);
+  right: calc(var(--notepad-right) * -1);
+  z-index: 1;
+  display: flex;
+  width: var(--notepad-right);
+  height: var(--notepad-top);
+}
+
+.life-notepad-chrome button {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.life-notepad-chrome button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: -2px;
 }
 
 .life-bubble {
@@ -600,37 +632,61 @@ body {
 @keyframes life-banner-spark {
   0%,
   49% {
-    background-color: #e0a020;
+    filter:
+      drop-shadow(2px 0 0 #e0a020)
+      drop-shadow(-2px 0 0 #e0a020)
+      drop-shadow(0 2px 0 #e0a020)
+      drop-shadow(0 -2px 0 #e0a020);
   }
   50%,
   100% {
-    background-color: #fff6c8;
+    filter:
+      drop-shadow(2px 0 0 #fff6c8)
+      drop-shadow(-2px 0 0 #fff6c8)
+      drop-shadow(0 2px 0 #fff6c8)
+      drop-shadow(0 -2px 0 #fff6c8);
   }
 }
 
 .life-banner-sparkle {
-  background-color: #e0a020;
-  padding: 2px;
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter:
+    drop-shadow(2px 0 0 #e0a020)
+    drop-shadow(-2px 0 0 #e0a020)
+    drop-shadow(0 2px 0 #e0a020)
+    drop-shadow(0 -2px 0 #e0a020);
   animation-name: life-banner-spark;
   animation-timing-function: steps(2, end);
   animation-iteration-count: infinite;
 }
 
 .life-banner-plate {
+  position: relative;
+  flex-shrink: 0;
+  width: var(--banner-w);
+  height: var(--banner-h);
+}
+
+.life-banner-label {
+  position: absolute;
+  top: var(--banner-text-y);
+  left: var(--banner-text-x);
   display: flex;
-  min-height: 80px;
   align-items: center;
   justify-content: center;
-  border-style: solid;
-  border-width: 8px;
-  border-image: url("/ui/m5_1/ui_banner_v2_x2.png") 8 fill;
-  image-rendering: pixelated;
+  width: var(--banner-text-w);
+  height: var(--banner-text-h);
+  margin: 0;
+  color: #fff;
+  line-height: 1;
 }
 
 .life-confetti-field {
   position: absolute;
   inset: 0 0 auto;
-  height: 160px;
+  height: 240px;
   pointer-events: none;
 }
 
@@ -639,7 +695,7 @@ body {
     transform: translateY(-16px);
   }
   100% {
-    transform: translateY(140px);
+    transform: translateY(180px);
     opacity: 0;
   }
 }
@@ -649,23 +705,56 @@ body {
     background-position: 0 0;
   }
   to {
-    background-position: -128px 0;
+    background-position: var(--confetti-end) 0;
   }
 }
 
 .life-confetti-piece {
   position: absolute;
-  top: 0;
   z-index: 2;
-  width: 32px;
-  height: 32px;
-  background-image: url("/ui/m5_1/fx_confetti_x2.png");
+  width: var(--confetti-frame);
+  height: var(--confetti-frame);
+  background-image: var(--confetti-img);
   background-repeat: no-repeat;
-  background-size: 128px 32px;
+  background-size: var(--confetti-sheet) var(--confetti-frame);
   image-rendering: pixelated;
   animation-name: life-confetti-fall, life-confetti-sheet;
-  animation-timing-function: steps(5, end), steps(4, end);
-  animation-fill-mode: forwards;
+  animation-duration: var(--confetti-duration), var(--confetti-duration);
+  animation-timing-function: var(--confetti-timing);
+  animation-iteration-count: 1, 1;
+  animation-fill-mode: forwards, forwards;
+}
+
+.food-bowl {
+  display: block;
+  width: var(--food-px);
+  height: var(--food-px);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  line-height: 0;
+  cursor: pointer;
+}
+
+.food-bowl img {
+  display: block;
+  width: var(--food-px);
+  height: var(--food-px);
+}
+
+.food-bowl:focus-visible {
+  outline: 2px solid var(--accent-violet);
+  outline-offset: 2px;
+}
+
+.hunger-badge {
+  position: absolute;
+  top: var(--hunger-y);
+  left: var(--hunger-x);
+  width: var(--hunger-px);
+  height: var(--hunger-px);
+  pointer-events: none;
 }
 
 @keyframes intro-flash {

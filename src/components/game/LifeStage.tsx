@@ -5,7 +5,15 @@
 import { useEffect, useState } from "react";
 import { LIFE_EVENTS, lifeEventById } from "@/game/life/events-content";
 import { diaryWhen } from "@/game/life/events";
-import { m5AssetPath, type M5AssetKey } from "@/game/life/assets";
+import { m5AssetPath, m51AssetPath, type M5AssetKey } from "@/game/life/assets";
+import {
+  CONFETTI_PIECES,
+  bannerArtFile,
+  bannerMetrics,
+  bannerPlateStyle,
+  confettiFieldStyle,
+  notepadFrameStyle,
+} from "@/game/life/m51-art";
 import type { LifeDiary } from "@/game/career/types";
 import { useGameStore } from "@/game/state/store";
 import { Button } from "@/components/ui/button";
@@ -15,17 +23,6 @@ import { formatVnd } from "@/lib/format-currency";
 function art(key: string): string {
   return m5AssetPath(key as M5AssetKey);
 }
-
-const CONFETTI = [
-  { left: "8%", delay: "0ms" },
-  { left: "18%", delay: "-120ms" },
-  { left: "30%", delay: "-40ms" },
-  { left: "42%", delay: "-200ms" },
-  { left: "54%", delay: "-80ms" },
-  { left: "66%", delay: "-160ms" },
-  { left: "76%", delay: "-20ms" },
-  { left: "88%", delay: "-240ms" },
-] as const;
 
 export function LifeStage() {
   const pendingId = useGameStore((s) => s.career.feed?.pendingId ?? null);
@@ -49,6 +46,7 @@ export function LifeStage() {
 
   const event = pendingId ? lifeEventById(pendingId) : null;
   const showBanner = banner != null && banner.until > now;
+  const bannerBox = bannerMetrics();
 
   return (
     <>
@@ -57,28 +55,37 @@ export function LifeStage() {
         <div className="pointer-events-none fixed inset-0 z-30 overflow-hidden" data-testid="life-banner">
           <div className="life-banner-dim absolute inset-0" data-testid="life-banner-dim" />
           <div
-            className="life-banner relative z-10 mx-auto mt-16 w-[min(1200px,calc(100%-1.5rem))]"
+            className="life-banner relative z-10 mx-auto mt-16 flex w-[min(1200px,calc(100%-1.5rem))] justify-center"
             style={{ animationDuration: `${LIFE_EVENTS.banner_enter_ms}ms` }}
           >
-            <div
-              className="life-banner-sparkle"
-              style={{ animationDuration: `${LIFE_EVENTS.banner_spark_ms}ms` }}
-            >
-              <div className="life-banner-plate" data-testid="life-banner-plate">
-                <p className="px-3 text-center font-galmuri-11 text-galmuri-title text-white" data-testid="life-banner-label">
-                  {banner.label}
-                </p>
-              </div>
+            <div className="life-banner-plate" data-testid="life-banner-plate" style={bannerPlateStyle()}>
+              <img
+                src={m51AssetPath(bannerArtFile())}
+                width={bannerBox.widthPx}
+                height={bannerBox.heightPx}
+                alt=""
+                className="life-banner-sparkle pixel-img"
+                style={{ animationDuration: `${LIFE_EVENTS.banner_spark_ms}ms` }}
+                data-testid="life-banner-art"
+              />
+              <p className="life-banner-label font-galmuri-11 text-galmuri-title" data-testid="life-banner-label">
+                {banner.label}
+              </p>
             </div>
-            <div className="life-confetti-field" data-testid="life-confetti">
-              {CONFETTI.map((piece) => (
+            <div
+              className="life-confetti-field"
+              data-testid="life-confetti"
+              data-count={CONFETTI_PIECES.length}
+              style={confettiFieldStyle()}
+            >
+              {CONFETTI_PIECES.map((piece) => (
                 <span
-                  key={piece.left}
+                  key={piece.id}
                   className="life-confetti-piece"
                   style={{
                     left: piece.left,
-                    animationDuration: `${LIFE_EVENTS.banner_confetti_ms}ms`,
-                    animationDelay: `${piece.delay}, ${piece.delay}`,
+                    top: piece.topPx,
+                    animationDelay: `${piece.delayMs}ms, ${piece.delayMs}ms`,
                   }}
                 />
               ))}
@@ -121,32 +128,16 @@ export function LifeStage() {
       ) : null}
       {diary ? (
         <div className="absolute inset-0 z-40 flex items-center justify-center p-3" data-testid="life-diary">
-          <div className="life-notepad w-full max-w-sm p-3">
-            <div className="life-notepad-title font-galmuri-7 text-galmuri-small">
-              <p className="w-full" data-testid="diary-title">
-                nhat_ky_ngay_{diary.day}.txt
-              </p>
-              <div className="flex shrink-0">
-                <Button type="button" size="icon" variant="ghost" className="min-h-11 min-w-11 text-white" aria-label="Thu nhỏ" data-testid="diary-min">
-                  _
-                </Button>
-                <Button type="button" size="icon" variant="ghost" className="min-h-11 min-w-11 text-white" aria-label="Phóng to" data-testid="diary-max">
-                  □
-                </Button>
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="ghost"
-                  className="min-h-11 min-w-11 text-white"
-                  aria-label="Đóng"
-                  data-testid="life-diary-close"
-                  onClick={dismissDiary}
-                >
-                  x
-                </Button>
-              </div>
+          <div className="life-notepad w-full" style={notepadFrameStyle()}>
+            <p className="life-notepad-title font-galmuri-7 text-galmuri-small" data-testid="diary-title">
+              nhat_ky_ngay_{diary.day}.txt
+            </p>
+            <div className="life-notepad-chrome">
+              <button type="button" aria-label="Thu nhỏ" data-testid="diary-min" />
+              <button type="button" aria-label="Phóng to" data-testid="diary-max" />
+              <button type="button" aria-label="Đóng" data-testid="life-diary-close" onClick={dismissDiary} />
             </div>
-            <ul className="mt-2 space-y-1 font-galmuri-7 text-galmuri-small text-[var(--foreground)]">
+            <ul className="space-y-1 p-3 font-galmuri-7 text-galmuri-small text-[var(--foreground)]">
               <li data-testid="diary-when">{diaryWhen(diary)}</li>
               <li data-testid="diary-earned" className="text-[var(--accent-mint)]">
                 Kiếm được +{formatVnd(diary.earned)}
@@ -162,7 +153,7 @@ export function LifeStage() {
               </li>
               <li data-testid="diary-pin">{diary.pin || "Chưa ghim món."}</li>
             </ul>
-            <p className="mt-2 font-galmuri-7 text-galmuri-small text-[var(--foreground)]">{diary.line}</p>
+            <p className="px-3 pb-3 font-galmuri-7 text-galmuri-small text-[var(--foreground)]">{diary.line}</p>
           </div>
         </div>
       ) : null}

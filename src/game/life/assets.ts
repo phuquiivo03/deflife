@@ -64,7 +64,7 @@ export function m5AssetPath(key: M5AssetKey): string {
   return `/ui/m5/${key}`;
 }
 
-/** M5.1 placeholders. Art replaces these files under the same names. */
+/** M5.1 sheets in `public/ui/m5_1/`. Final art uses these same names. */
 export function m51AssetPath(file: string): string {
   return `/ui/m5_1/${file}`;
 }
