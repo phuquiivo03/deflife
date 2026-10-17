@@ -57,6 +57,7 @@ import {
   captureSnapshot,
   chooseLifeEvent,
   dismissDiary,
+  feedOf,
   flushDeferred,
   forceSmallEvent,
   markAllNoticesRead,
@@ -72,12 +73,33 @@ import {
   syncLifeSurface as syncLifeSurfaceState,
 } from "../life/events";
 import type { LifeStep } from "../life/events";
+import { dialogCueKey, noticeCueKey } from "../life/sounds";
 
 let clockSkip = false;
 let handlingHospital = false;
 
+function playLifeTransition(previous: CareerState, result: LifeStep) {
+  const before = feedOf(previous);
+  const after = feedOf(result.state);
+  const seen = new Set(before.notices.map((notice) => notice.id));
+  let playedKnock = false;
+  for (const notice of after.notices) {
+    if (seen.has(notice.id)) continue;
+    const key = noticeCueKey(notice);
+    if (key === "landlordKnock") playedKnock = true;
+    playCueKey(key);
+  }
+  if (after.pendingId && after.pendingId !== before.pendingId) {
+    const key = dialogCueKey(after.pendingId);
+    if (!(key === "landlordKnock" && playedKnock)) playCueKey(key);
+  } else if (result.bubble) {
+    playCueKey("eventOpen");
+  }
+}
+
 function commitLife(result: LifeStep) {
   const current = useGameStore.getState();
+  playLifeTransition(current.career, result);
   const warns = current.taskJobId ? result.warns : [];
   useGameStore.setState({
     career: result.state,
@@ -327,6 +349,7 @@ export const useGameStore = create<GameState>()(
       },
       onWake: (fromTotalMinutes) => {
         const diary = openDiary(get().career, SIM_CATALOG);
+        playCueKey("diaryFlip");
         const result = applyWake(diary, hoursUntilWake(snapshot(fromTotalMinutes).minuteOfDay));
         const snapped = captureSnapshot(result.state, SIM_CATALOG);
         set({ career: snapped });

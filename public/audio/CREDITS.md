@@ -15,3 +15,15 @@ No attribution required. Tools used (not part of the output): Python, NumPy, Sci
 License: provided by Quí (síp), approved for use.
 
 These two cues stay out of the SFX sprite. The ogg files loop directly. The mp3 files are the iOS fallback; playback skips the leading LAME delay (1105 samples at 44.1 kHz).
+
+## M5 life sim (procedural, CC0)
+
+Nine more cues, approved for the life sim, use the same synthesis as batch 1 (square, triangle, noise, peak −3 dB). They are one-shots in the SFX sprite.
+
+- `sfx_notif_info`, `sfx_notif_warn`, `sfx_notif_urgent` — a new Thông báo row, by severity
+- `sfx_event_open` — the important-day banner, and a choice or buff event opening
+- `sfx_landlord_knock` — the day-7 landlord story
+- `sfx_salary` — payday
+- `sfx_diary_flip` — the sleep diary
+- `sfx_sick_cough` — health dropping under 30
+- `sfx_store_buy` — in the pack for the store phase; nothing plays it yet

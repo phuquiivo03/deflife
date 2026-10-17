@@ -1,6 +1,6 @@
 # Life sim (M5)
 
-Time slots, vitals, bills, small events, and the Thông báo panel. The spec is [docs/specs/M5_life_sim.md](../specs/M5_life_sim.md). The store and personality are later phases. Sound keys in `src/game/life/sounds.ts` still no-op. The important-day banner asks for `sfx_event_open`; that id is not in the audio pack, so the call stays silent. Phase 2 art (portraits, notice icons, emotes, dialog, diary, banner, speech bubble, unread badge) is the native PNG in `public/ui/m5/`. Store and trait files there are still placeholders.
+Time slots, vitals, bills, small events, and the Thông báo panel. The spec is [docs/specs/M5_life_sim.md](../specs/M5_life_sim.md). The store and personality are later phases. Phase 2 art (portraits, notice icons, emotes, dialog, diary, banner, speech bubble, unread badge) is the native PNG in `public/ui/m5/`. Store and trait files there are still placeholders. The life-sim one-shots are in the SFX sprite. A new notice plays its severity cue. Salary, the sick threshold, and the day-7 landlord knock use their own cues. The important-day banner and an opening event play `sfx_event_open`. Sleep plays `sfx_diary_flip`. `sfx_store_buy` is in the pack and stays silent until the store can sell something.
 
 Numbers live in [config/life_sim.json](../../config/life_sim.json). Starting money stays in `config/game_config.json` (`3000000`).
 
@@ -40,7 +40,7 @@ Choice copy is the one-line spec text. Đồ án is student only. Prod, họp, h
 
 ## Thông báo and UX
 
-The left column is the notice list, newest first. Unread rows show `ui_badge_unread.png`. Empty copy is “Chưa có thông báo.” Warn and urgent lines also print `> WARN:` in the task terminal. Stat changes float on the HUD bars. Health under 30, mood under 15, and energy under 15 blink, and the room shows cough, cloud, or sweat. A holiday banner uses `ui_banner.png` for 2 seconds. Sleep opens the diary against the morning snapshot, then the snapshot is recaptured.
+The left column is the notice list, newest first. Unread rows show `ui_badge_unread.png`. Empty copy is “Chưa có thông báo.” A new row plays `sfx_notif_info`, `sfx_notif_warn`, or `sfx_notif_urgent`. Payday plays `sfx_salary`. Health under 30 plays `sfx_sick_cough` once. The day-7 landlord plays `sfx_landlord_knock`. Warn and urgent lines also print `> WARN:` in the task terminal. Stat changes float on the HUD bars. Health under 30, mood under 15, and energy under 15 blink, and the room shows cough, cloud, or sweat. A holiday banner uses `ui_banner.png` for 2 seconds and plays `sfx_event_open`. Opening a choice or a buff plays that same sting. Sleep opens the diary (`sfx_diary_flip`) against the morning snapshot, then the snapshot is recaptured.
 
 ## Save
 

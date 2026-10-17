@@ -151,10 +151,12 @@ describe("life money", () => {
     expect(junior.state.players.money).toBe(3_000_000 + 15_000_000);
   });
 
-  it("uses the pay formula and does not play life sounds", () => {
+  it("uses the pay formula and wires life sounds except the store purchase", () => {
     expect(jobPay(100_000, 1, 0)).toBe(88_000);
     expect(jobPay(100_000, 2, 250)).toBe(Math.round(100_000 * 1.2 * 1.8));
-    for (const key of LIFE_SOUND_KEYS) expect(playLifeSound(key)).toBe(false);
+    for (const key of LIFE_SOUND_KEYS) {
+      expect(playLifeSound(key)).toBe(key !== "sfx_store_buy");
+    }
   });
 
   it("keeps v5 money and adds default vitals", () => {
@@ -183,7 +185,9 @@ describe("life placeholders", () => {
     }
     const offsets = JSON.parse(readFileSync(join(process.cwd(), "public/audio/sprite/offsets.json"), "utf8"));
     const cues = Object.keys(offsets.ogg?.cues ?? offsets.cues ?? {});
-    for (const key of LIFE_SOUND_KEYS) expect(cues).not.toContain(key);
+    for (const key of LIFE_SOUND_KEYS) expect(cues).toContain(key);
+    expect(cues).not.toContain("sfx_typing_loop");
+    expect(cues).not.toContain("sfx_typing_loop_fast");
   });
 });
 

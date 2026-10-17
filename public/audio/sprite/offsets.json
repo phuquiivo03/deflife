@@ -121,6 +121,42 @@
       "sfx_day_summary": {
         "offset": 17.774406,
         "duration": 0.941875
+      },
+      "sfx_notif_info": {
+        "offset": 18.796281,
+        "duration": 0.517094
+      },
+      "sfx_notif_warn": {
+        "offset": 19.393375,
+        "duration": 0.406219
+      },
+      "sfx_notif_urgent": {
+        "offset": 19.879594,
+        "duration": 0.582031
+      },
+      "sfx_event_open": {
+        "offset": 20.541625,
+        "duration": 0.446656
+      },
+      "sfx_landlord_knock": {
+        "offset": 21.068281,
+        "duration": 1.08
+      },
+      "sfx_salary": {
+        "offset": 22.228281,
+        "duration": 1.4
+      },
+      "sfx_store_buy": {
+        "offset": 23.708281,
+        "duration": 0.717094
+      },
+      "sfx_diary_flip": {
+        "offset": 24.505375,
+        "duration": 0.378
+      },
+      "sfx_sick_cough": {
+        "offset": 24.963375,
+        "duration": 0.635875
       }
     }
   },
@@ -243,6 +279,42 @@
       "sfx_day_summary": {
         "offset": 17.808938,
         "duration": 0.941875
+      },
+      "sfx_notif_info": {
+        "offset": 18.830813,
+        "duration": 0.517094
+      },
+      "sfx_notif_warn": {
+        "offset": 19.427906,
+        "duration": 0.406219
+      },
+      "sfx_notif_urgent": {
+        "offset": 19.914125,
+        "duration": 0.582031
+      },
+      "sfx_event_open": {
+        "offset": 20.576156,
+        "duration": 0.446656
+      },
+      "sfx_landlord_knock": {
+        "offset": 21.102813,
+        "duration": 1.08
+      },
+      "sfx_salary": {
+        "offset": 22.262813,
+        "duration": 1.4
+      },
+      "sfx_store_buy": {
+        "offset": 23.742813,
+        "duration": 0.717094
+      },
+      "sfx_diary_flip": {
+        "offset": 24.539906,
+        "duration": 0.378
+      },
+      "sfx_sick_cough": {
+        "offset": 24.997906,
+        "duration": 0.635875
       }
     }
   },

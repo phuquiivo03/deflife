@@ -6,6 +6,7 @@ import { SIM_CATALOG } from "@/game/career/content";
 import type { PlayerJob } from "@/game/career/types";
 import { CUE_IDS } from "@/game/audio/cues";
 import { parseManifest, resolveCueId } from "@/game/audio/manifest";
+import { dialogCueKey, noticeCueKey } from "@/game/life/sounds";
 import { LIFE_EVENTS } from "@/game/life/events-content";
 import {
   bannerForDay,
@@ -287,9 +288,18 @@ describe("life event art", () => {
     expect(names).not.toContain("placement.json");
   });
 
-  it("points the holiday banner at sfx_event_open and leaves that id unwired", () => {
+  it("resolves the life cues and keeps the store purchase silent", () => {
     expect(CUE_IDS.eventOpen[0]).toBe("sfx_event_open");
     const cues = parseManifest(JSON.parse(readFileSync(join(process.cwd(), "public/audio/manifest.json"), "utf8")));
-    expect(resolveCueId(cues.map((cue) => cue.id), CUE_IDS.eventOpen)).toBeNull();
+    const ids = cues.map((cue) => cue.id);
+    expect(resolveCueId(ids, CUE_IDS.eventOpen)).toBe("sfx_event_open");
+    expect(resolveCueId(ids, CUE_IDS.storeBuy)).toBe("sfx_store_buy");
+    expect(noticeCueKey({ id: "salary-1-2", severity: "info" })).toBe("salary");
+    expect(noticeCueKey({ id: "sick-1", severity: "warn" })).toBe("sickCough");
+    expect(noticeCueKey({ id: "event-3-landlord_knock", severity: "urgent" })).toBe("landlordKnock");
+    expect(noticeCueKey({ id: "event-1-wifi_down", severity: "info" })).toBe("notifInfo");
+    expect(noticeCueKey({ id: "rent-late-1-2-3", severity: "warn" })).toBe("notifWarn");
+    expect(dialogCueKey("landlord_knock")).toBe("landlordKnock");
+    expect(dialogCueKey("wifi_down")).toBe("eventOpen");
   });
 });

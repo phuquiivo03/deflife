@@ -54,7 +54,15 @@ export type CueKey =
   | "energyRestored"
   | "typingLoop"
   | "typingLoopFast"
-  | "eventOpen";
+  | "eventOpen"
+  | "notifInfo"
+  | "notifWarn"
+  | "notifUrgent"
+  | "landlordKnock"
+  | "salary"
+  | "diaryFlip"
+  | "sickCough"
+  | "storeBuy";
 
 export const CUE_KEYS = [
   "phaseMorning",
@@ -87,6 +95,14 @@ export const CUE_KEYS = [
   "typingLoop",
   "typingLoopFast",
   "eventOpen",
+  "notifInfo",
+  "notifWarn",
+  "notifUrgent",
+  "landlordKnock",
+  "salary",
+  "diaryFlip",
+  "sickCough",
+  "storeBuy",
 ] as const satisfies readonly CueKey[];
 
 /**
@@ -124,8 +140,17 @@ export const CUE_IDS: Record<CueKey, readonly string[]> = {
   energyRestored: ["sfx_energy_restored"],
   typingLoop: ["sfx_typing_loop"],
   typingLoopFast: ["sfx_typing_loop_fast"],
-  /** Important-day banner. Missing from the pack, so the call stays silent. */
+  /** Important-day banner, and a choice or buff event opening. */
   eventOpen: ["sfx_event_open"],
+  notifInfo: ["sfx_notif_info"],
+  notifWarn: ["sfx_notif_warn"],
+  notifUrgent: ["sfx_notif_urgent"],
+  landlordKnock: ["sfx_landlord_knock"],
+  salary: ["sfx_salary"],
+  diaryFlip: ["sfx_diary_flip"],
+  sickCough: ["sfx_sick_cough"],
+  /** In the pack for the store phase. No caller until a purchase exists. */
+  storeBuy: ["sfx_store_buy"],
 };
 
 /** Play the low-energy sting only when energy crosses down through this point. */

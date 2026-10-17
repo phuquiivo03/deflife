@@ -399,6 +399,114 @@
       "loop": true,
       "volume": 0.5,
       "description": "Same theme, night: slower 68 BPM, triangle lead, softer drums, darker filter"
+    },
+    {
+      "id": "sfx_notif_info",
+      "type": "sfx",
+      "file": "ogg/sfx/sfx_notif_info.ogg",
+      "mp3": "mp3/sfx/sfx_notif_info.mp3",
+      "category": "notification",
+      "duration": 0.52,
+      "loop": false,
+      "volume": 0.7,
+      "license": "CC0-1.0",
+      "description": "Light single bell 'ting' (C7) with a soft triangle sparkle"
+    },
+    {
+      "id": "sfx_notif_warn",
+      "type": "sfx",
+      "file": "ogg/sfx/sfx_notif_warn.ogg",
+      "mp3": "mp3/sfx/sfx_notif_warn.mp3",
+      "category": "notification",
+      "duration": 0.409,
+      "loop": false,
+      "volume": 0.7,
+      "license": "CC0-1.0",
+      "description": "Two-note attention cue: E6 -> C6 square, a bit firmer than info"
+    },
+    {
+      "id": "sfx_notif_urgent",
+      "type": "sfx",
+      "file": "ogg/sfx/sfx_notif_urgent.ogg",
+      "mp3": "mp3/sfx/sfx_notif_urgent.mp3",
+      "category": "notification",
+      "duration": 0.585,
+      "loop": false,
+      "volume": 0.6,
+      "license": "CC0-1.0",
+      "description": "Quick pressing alarm: two bursts of three fast A6 square beeps"
+    },
+    {
+      "id": "sfx_event_open",
+      "type": "sfx",
+      "file": "ogg/sfx/sfx_event_open.ogg",
+      "mp3": "mp3/sfx/sfx_event_open.mp3",
+      "category": "life",
+      "duration": 0.45,
+      "loop": false,
+      "volume": 0.7,
+      "license": "CC0-1.0",
+      "description": "Dialog box sliding open: rising filtered whoosh + triangle slide, ends with a soft latch pop"
+    },
+    {
+      "id": "sfx_landlord_knock",
+      "type": "sfx",
+      "file": "ogg/sfx/sfx_landlord_knock.ogg",
+      "mp3": "mp3/sfx/sfx_landlord_knock.mp3",
+      "category": "life",
+      "duration": 1.08,
+      "loop": false,
+      "volume": 0.8,
+      "license": "CC0-1.0",
+      "description": "Wooden door knock 'coc coc ... coc coc coc' (landlord at the door)"
+    },
+    {
+      "id": "sfx_salary",
+      "type": "sfx",
+      "file": "ogg/sfx/sfx_salary.ogg",
+      "mp3": "mp3/sfx/sfx_salary.mp3",
+      "category": "life",
+      "duration": 1.4,
+      "loop": false,
+      "volume": 0.7,
+      "license": "CC0-1.0",
+      "description": "Payday: money_gain ka-ching (clunk + coin ting + jingle) then rising C-E-G-C fanfare, bell chord and bigger jingle"
+    },
+    {
+      "id": "sfx_store_buy",
+      "type": "sfx",
+      "file": "ogg/sfx/sfx_store_buy.ogg",
+      "mp3": "mp3/sfx/sfx_store_buy.mp3",
+      "category": "life",
+      "duration": 0.72,
+      "loop": false,
+      "volume": 0.7,
+      "license": "CC0-1.0",
+      "description": "Shop door 'ding-dong' (B6-G6) + small coin ting: item bought in the store"
+    },
+    {
+      "id": "sfx_diary_flip",
+      "type": "sfx",
+      "file": "ogg/sfx/sfx_diary_flip.ogg",
+      "mp3": "mp3/sfx/sfx_diary_flip.mp3",
+      "category": "life",
+      "duration": 0.381,
+      "loop": false,
+      "volume": 0.6,
+      "license": "CC0-1.0",
+      "description": "Paper page flip for the diary/recap page: swept fluttering noise + soft landing"
+    },
+    {
+      "id": "sfx_sick_cough",
+      "type": "sfx",
+      "file": "ogg/sfx/sfx_sick_cough.ogg",
+      "mp3": "mp3/sfx/sfx_sick_cough.mp3",
+      "category": "life",
+      "duration": 0.639,
+      "loop": false,
+      "volume": 0.6,
+      "license": "CC0-1.0",
+      "description": "Cute chibi double cough 'khụ khụ' with a tiny 'uu' sigh"
     }
   ]
 }
