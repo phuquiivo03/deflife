@@ -1,4 +1,4 @@
-/** Paths stay on the spec keys. Trait icons are the 16×16 placeholders for those keys. */
+/** Paths stay on the spec keys. Trait icons are the approved 16×16 sheets; the card draws the matching `_x2` file. */
 export const M5_ASSET_KEYS = [
   "ui_dialog_frame.png",
   "ui_diary_page.png",

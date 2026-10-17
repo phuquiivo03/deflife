@@ -6,9 +6,8 @@ import { freelanceGoal } from "@/game/jobs/logic";
 import { STUB_PLAYER } from "@/game/state/playerStats";
 import { useGameStore } from "@/game/state/store";
 import { LIFE } from "@/game/life/content";
-import { m5AssetPath } from "@/game/life/assets";
 import { calendar, lifeOf, mealBlocked, rentStatus } from "@/game/life/logic";
-import { foodPrice, traitDef, traitOf } from "@/game/life/traits";
+import { foodPrice, traitDef, traitDetail, traitIconSrc, traitOf } from "@/game/life/traits";
 import { snapshot } from "@/game/time";
 import { formatVnd } from "@/lib/format-currency";
 import { Button } from "@/components/ui/button";
@@ -66,7 +65,7 @@ export function PlayerInfoPanel({ iconFiles = [] }: { iconFiles?: readonly strin
         >
           {/* eslint-disable-next-line @next/next/no-img-element -- trait icons stay pixelated */}
           <img
-            src={m5AssetPath(trait.icon)}
+            src={traitIconSrc(trait.icon)}
             width={32}
             height={32}
             alt=""
@@ -75,7 +74,7 @@ export function PlayerInfoPanel({ iconFiles = [] }: { iconFiles?: readonly strin
           <span className="min-w-0 flex-1">
             <span className="block font-galmuri-9 text-galmuri-body text-[var(--foreground)]">{trait.name}</span>
             <span className="block font-galmuri-7 text-galmuri-small text-[var(--muted-foreground)]">
-              {trait.bonus} · {trait.penalty}
+              {traitDetail(trait)}
             </span>
           </span>
         </div>

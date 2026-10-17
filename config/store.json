@@ -2,6 +2,8 @@
   "black_friday_discount": 0.1,
   "ergo_energy": 0.9,
   "monitor_xp": 1.1,
+  "purchase_mood": 4,
+  "room_purchase_mood": 10,
   "items": [
     {
       "id": "room_junior",

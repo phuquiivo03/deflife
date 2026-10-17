@@ -88,7 +88,8 @@ CREATE TABLE players (
   mood double precision NOT NULL CHECK (mood BETWEEN 0 AND 100),
   reputation integer NOT NULL CHECK (reputation >= 0),
   freelance_completed integer NOT NULL CHECK (freelance_completed >= 0),
-  trait text NOT NULL CHECK (trait IN ('night_owl', 'diligent', 'extrovert', 'frugal', 'careful', 'optimist'))
+  trait text NOT NULL CHECK (trait IN ('night_owl', 'diligent', 'extrovert', 'frugal', 'careful', 'optimist')),
+  trait_rolled boolean NOT NULL
 );
 
 CREATE TABLE player_skills (

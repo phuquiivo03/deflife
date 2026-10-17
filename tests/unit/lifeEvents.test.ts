@@ -289,7 +289,15 @@ describe("life event art", () => {
     expect(pngSize("ui_store_card.png")).toMatchObject({ w: 96, h: 120 });
     expect(pngSize("item_mattress_student.png").bytes).toBeGreaterThan(200);
     const names = readdirSync(ART);
-    expect(names.some((name) => name.includes("_x2"))).toBe(false);
+    const doubled = names.filter((name) => name.includes("_x2"));
+    expect(doubled.toSorted()).toEqual([
+      "icon_trait_careful_x2.png",
+      "icon_trait_diligent_x2.png",
+      "icon_trait_extrovert_x2.png",
+      "icon_trait_frugal_x2.png",
+      "icon_trait_night_owl_x2.png",
+      "icon_trait_optimist_x2.png",
+    ]);
     expect(names).not.toContain("placement.json");
     expect(names).not.toContain("item_mattress.png");
   });

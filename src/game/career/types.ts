@@ -121,8 +121,10 @@ export type PlayerRow = {
   mood: number;
   reputation: number;
   freelance_completed: number;
-  /** One trait rolled at creation. Older saves receive the migration default. */
+  /** One trait rolled at creation or once during migration. */
   trait: TraitId;
+  /** Set when the trait was rolled. Later migrations must not roll again. */
+  traitRolled: boolean;
 };
 
 /** Counters for the life-sim day. */

@@ -180,15 +180,12 @@ function finish(
   next: Vitals,
   life: LifeState,
   events: GameEvent[],
-  personality = true,
 ): LifeResult {
   let energy = clampStat(next.energy);
   let health = clampStat(next.health);
   let mood = clampStat(next.mood);
-  if (personality) {
-    const floor = traitMoodFloor(state);
-    if (floor != null) mood = Math.max(mood, floor);
-  }
+  const floor = traitMoodFloor(state);
+  if (floor != null) mood = Math.max(mood, floor);
   let money = applyMoney(0, next.money);
   let skipDays = 0;
   let nextLife = life;
@@ -257,7 +254,6 @@ function applyDirect(
   state: CareerState,
   delta: Partial<Pick<Vitals, "energy" | "health" | "mood" | "money">>,
   life: LifeState = lifeOf(state),
-  personality = true,
 ): LifeResult {
   const before = vitalsOf(state);
   return finish(
@@ -271,7 +267,6 @@ function applyDirect(
     },
     life,
     [],
-    personality,
   );
 }
 
@@ -317,12 +312,12 @@ export function applyActionStats(
   );
 }
 
-/** Event effects add and clamp. They skip personality, furniture, diminishing, and streak. */
+/** Event effects add and clamp. They skip trait multipliers, furniture, diminishing, and streak. The Lạc quan floor still applies. */
 export function applyEventStats(
   state: CareerState,
   delta: { energy?: number; health?: number; mood?: number; money?: number },
 ): LifeResult {
-  return applyDirect(state, delta, lifeOf(state), false);
+  return applyDirect(state, delta, lifeOf(state));
 }
 
 export function markWorked(state: CareerState): CareerState {
