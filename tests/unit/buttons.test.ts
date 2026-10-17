@@ -15,6 +15,7 @@ import {
   buttonMetrics,
   pixelButtonStyle,
 } from "@/components/ui/button/config";
+import { m51AssetPath } from "@/game/life/assets";
 import sliceDoc from "../../public/ui/m5_1/slices.json";
 
 function readPng(file: string): PNG {
@@ -43,7 +44,7 @@ describe("pixel button assets", () => {
       for (const state of BUTTON_STATES) {
         for (const scale of BUTTON_SCALES) {
           const file = buttonAssetFile(variant, state, scale);
-          expect(buttonAssetPath(variant, state, scale)).toBe(`/ui/m5_1/${file}`);
+          expect(buttonAssetPath(variant, state, scale)).toBe(m51AssetPath(file));
           expect(existsSync(join(process.cwd(), "public/ui/m5_1", file))).toBe(true);
           const png = readPng(file);
           expect(png.width).toBe(24 * scale);
