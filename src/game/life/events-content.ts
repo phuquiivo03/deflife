@@ -47,6 +47,9 @@ export type LifeEventsConfig = {
   good_weight: number;
   bubble_ms: number;
   banner_ms: number;
+  banner_enter_ms: number;
+  banner_confetti_ms: number;
+  banner_spark_ms: number;
   soft_xp: number;
   hackathon_base: number;
   hackathon_per_level: number;
