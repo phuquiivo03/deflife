@@ -14,7 +14,9 @@ import { PixelIcon } from "./PixelIcon";
 import { formatVnd } from "@/lib/format-currency";
 import { PanelCard } from "@/components/ui/panel-card";
 import { StatBar } from "./StatBar";
+import { HUD_ICON_GAP_PX } from "./store-button.config";
 import { SleepButton } from "./SleepButton";
+import { StoreButton } from "./StoreButton";
 
 /** Native icon for the Kỹ năng button. Swap this name when a new file ships. */
 export const SKILL_MENU_ICON = "skills";
@@ -60,6 +62,7 @@ export function PlayerHudCard({ iconFiles = [] }: { iconFiles?: readonly string[
   const fastForward = useGameStore((s) => s.fastForward);
   const sleep = useGameStore((s) => s.sleep);
   const canSleep = useGameStore((s) => canSleepAt(s.totalMinutes));
+  const setStoreOpen = useGameStore((s) => s.setStoreOpen);
   const openCareerPanel = useGameStore((s) => s.openCareerPanel);
 
   const energyMax = SIM_CATALOG.config.energy_max;
@@ -124,7 +127,14 @@ export function PlayerHudCard({ iconFiles = [] }: { iconFiles?: readonly string[
           <span>{clockLabel}</span>
           <span>{phaseById(phaseId).label}</span>
         </span>
-        <SleepButton canSleep={canSleep} onSleep={sleep} />
+        <div
+          className="inline-flex items-center"
+          data-testid="hud-icon-bar"
+          style={{ marginLeft: "auto", gap: HUD_ICON_GAP_PX }}
+        >
+          <StoreButton onOpen={() => setStoreOpen(true)} />
+          <SleepButton canSleep={canSleep} onSleep={sleep} />
+        </div>
       </div>
       <div className="hud-actions mt-3">
         <div className="hud-actions-grid">

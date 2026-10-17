@@ -19,6 +19,7 @@ import { PanelChamferFrame } from "./PanelChamferFrame";
 import { RoomChamferFrame } from "./RoomChamferFrame";
 import { TimeDebugPanel } from "./TimeDebugPanel";
 import { CareerChrome } from "./career/CareerChrome";
+import { StoreModal } from "./StoreModal";
 import { useGameClock } from "./useGameClock";
 import { useGameAudio } from "./useGameAudio";
 import { Button } from "@/components/ui/button";
@@ -217,6 +218,7 @@ export function GameShell({ iconFiles = [] }: { iconFiles?: readonly string[] })
               <PlayerHudCard iconFiles={iconFiles} />
               {showTimeDebug ? <TimeDebugPanel /> : null}
               <CareerChrome iconFiles={iconFiles} showDebug={showTimeDebug} />
+              <StoreModal />
             </div>
           </div>
           <LifeStage />
