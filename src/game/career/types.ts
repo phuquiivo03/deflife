@@ -147,6 +147,55 @@ export type LifeState = {
   suppressEndOfDayUntil: number | null;
 };
 
+export type NoticeAction = "payRent" | "viewJobs" | "openStore";
+
+export type NoticeSeverity = "info" | "warn" | "urgent";
+
+export type LifeNotice = {
+  id: string;
+  day: number;
+  minute: number;
+  severity: NoticeSeverity;
+  icon: string;
+  text: string;
+  action: NoticeAction | null;
+  read: boolean;
+};
+
+export type LifeSnapshot = {
+  day: number;
+  money: number;
+  xp: number;
+  health: number;
+  mood: number;
+  energy: number;
+};
+
+export type LifeDiary = LifeSnapshot & { line: string };
+
+/** Random events, notices, and the sleep diary. P3 store pin is not here yet. */
+export type LifeFeed = {
+  pity: number;
+  pityCountedDay: number | null;
+  smallEventDay: number | null;
+  cooldowns: Record<string, number>;
+  flags: string[];
+  pendingId: string | null;
+  queuedStoryId: string | null;
+  deferredRoll: boolean;
+  notices: LifeNotice[];
+  nextBugDelta: number;
+  hackathonStart: number | null;
+  hackathonResolved: boolean;
+  snapshot: LifeSnapshot;
+  diary: LifeDiary | null;
+  bannerDay: number | null;
+  landlordTold: number;
+  sickOpen: boolean;
+  burnoutOpen: boolean;
+  storeAsked: boolean;
+};
+
 export type PlayerSkill = {
   skill_id: SkillId;
   level: number;
@@ -218,6 +267,7 @@ export type CareerState = {
   player_unlocks: PlayerUnlock[];
   player_events: PlayerEvent[];
   life: LifeState;
+  feed: LifeFeed;
 };
 
 export type SimCatalog = {

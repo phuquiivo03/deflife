@@ -1,19 +1,18 @@
-import type { ReactNode } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 export function PanelCard({
   className,
   children,
-}: {
-  className?: string;
-  children: React.ReactNode;
-}) {
+  ...rest
+}: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       className={cn(
         "rounded-panel border border-panel-border bg-panel shadow-panel",
         className,
       )}
+      {...rest}
     >
       {children}
     </div>

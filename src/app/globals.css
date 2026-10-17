@@ -531,6 +531,68 @@ body {
   }
 }
 
+.pixel-img {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.vital-floater {
+  position: absolute;
+  top: -14px;
+  left: 0;
+  z-index: 2;
+  pointer-events: none;
+  color: var(--accent-coral);
+}
+
+@keyframes stat-blink {
+  0%,
+  100% {
+    box-shadow: inset 0 0 0 1px transparent;
+  }
+  50% {
+    box-shadow: inset 0 0 0 2px var(--accent-coral);
+  }
+}
+
+.stat-blink {
+  animation: stat-blink 1s steps(2, end) infinite;
+}
+
+.life-dialog {
+  border-style: solid;
+  border-width: 8px;
+  border-image: url("/ui/m5/ui_dialog_frame.png") 4 fill;
+  image-rendering: pixelated;
+}
+
+.life-diary {
+  border-style: solid;
+  border-width: 8px;
+  border-image: url("/ui/m5/ui_diary_page.png") 4 fill;
+  image-rendering: pixelated;
+}
+
+.life-bubble {
+  border-style: solid;
+  border-width: 8px 8px 16px;
+  border-image: url("/ui/m5/ui_speech_bubble.png") 4 4 8 4 fill;
+  image-rendering: pixelated;
+}
+
+@keyframes life-banner-in {
+  from {
+    transform: translateY(-8px);
+  }
+  to {
+    transform: none;
+  }
+}
+
+.life-banner {
+  animation: life-banner-in 0.4s steps(4, end);
+}
+
 @keyframes ff-flash {
   0%,
   100% {
@@ -582,6 +644,15 @@ body {
   .terminal-cursor,
   .terminal-blip,
   .terminal-bug {
+    animation: none;
+  }
+
+  .stat-blink {
+    animation: none;
+    box-shadow: inset 0 0 0 2px var(--accent-coral);
+  }
+
+  .life-banner {
     animation: none;
   }
 }

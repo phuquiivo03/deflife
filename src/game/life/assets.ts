@@ -1,4 +1,4 @@
-/** Placeholder paths. Art swaps the file; the key stays. */
+/** Paths stay on the spec keys. Phase 2 files are final art; store and trait files stay placeholders. */
 export const M5_ASSET_KEYS = [
   "ui_dialog_frame.png",
   "ui_diary_page.png",

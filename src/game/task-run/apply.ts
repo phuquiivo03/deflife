@@ -7,6 +7,7 @@ import {
 } from "../jobs/logic";
 import { applyMoney } from "../vitals/logic";
 import { LIFE } from "../life/content";
+import { takePendingBugDelta } from "../life/events";
 import {
   applyActionStats,
   energyCost,
@@ -202,17 +203,18 @@ export function chooseBuild(
   const ticket = ticketForSkill(skillId, TASK_RUN.tickets);
   const skill = skillById(state.player_skills, skillId);
   const event = TASK_RUN.events.find((row) => row.id === found.run.event_id) ?? null;
+  const pendingBugs = takePendingBugDelta(state);
   const bugs = bugCount({
     skillLevel: skill.level,
     difficulty: ticket?.difficulty ?? 1,
     ticket: found.run.ticket,
     build: choice,
-    eventBugDelta: (event?.bug_delta ?? 0) + moodBugBonus(state.players.mood),
+    eventBugDelta: (event?.bug_delta ?? 0) + moodBugBonus(state.players.mood) + pendingBugs.delta,
     formula: TASK_RUN.bugs,
   });
   const timeDelta = choice === "careful" ? TASK_RUN.careful_extra_sec : TASK_RUN.rushed_extra_sec;
   const run = applyBuildChoice(found.run, choice, bugs, timeDelta);
-  return ok(patchJob(state, jobId, { ...found.job, bugs, task_run: run }), [
+  return ok(patchJob(pendingBugs.state, jobId, { ...found.job, bugs, task_run: run }), [
     { type: "buildChoice", jobId, choice },
   ]);
 }

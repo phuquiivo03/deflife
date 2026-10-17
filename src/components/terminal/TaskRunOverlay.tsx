@@ -22,6 +22,7 @@ export function TaskRunOverlay() {
   const jobId = useGameStore((s) => s.taskJobId);
   const job = useGameStore((s) => s.career.player_jobs.find((row) => row.id === jobId));
   const closeTask = useGameStore((s) => s.closeTask);
+  const terminalLines = useGameStore((s) => s.terminalLines);
   const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -85,6 +86,15 @@ export function TaskRunOverlay() {
           Task {template.name}
         </h2>
         <TerminalWindow status={status}>
+          {terminalLines.length > 0 ? (
+            <ul data-testid="terminal-warns">
+              {terminalLines.map((line) => (
+                <li key={line} className="terminal-sage">
+                  {line}
+                </li>
+              ))}
+            </ul>
+          ) : null}
           {job.task_run.step === "ticket" ? (
             <TicketStep
               title={ticket.title}

@@ -1,0 +1,328 @@
+{
+  "roll_p": 0.12,
+  "pity_step": 0.05,
+  "pity_cap": 3,
+  "cooldown_days": 5,
+  "good_mood_below": 30,
+  "good_weight": 1.5,
+  "bubble_ms": 3000,
+  "banner_ms": 2000,
+  "soft_xp": 12,
+  "hackathon_base": 0.1,
+  "hackathon_per_level": 0.03,
+  "hackathon_prize": 20000000,
+  "hackathon_xp": 200,
+  "notice_cap": 40,
+  "diary_lines": [
+    "Hôm nay cũng là một commit.",
+    "Bug thì nhiều, cơm thì ít.",
+    "Ngày mai sẽ ổn hơn. Có lẽ.",
+    "Nhớ uống nước, rồi mới debug.",
+    "Phòng vẫn đó. Người thì đã ngủ."
+  ],
+  "holiday_labels": {
+    "tet": "Tết",
+    "april_30": "30/4",
+    "may_day": "1/5",
+    "mid_autumn": "Trung thu",
+    "black_friday": "Black Friday"
+  },
+  "events": [
+    {
+      "id": "power_outage",
+      "stages": ["student", "junior", "senior"],
+      "phases": ["evening", "night"],
+      "weight": 1,
+      "good": false,
+      "kind": "choice",
+      "portrait": "portrait_roommate.png",
+      "icon": "icon_notif_power_outage.png",
+      "text": "Mất điện cả khu.",
+      "choices": [
+        { "id": "cafe", "text": "Ra quán cafe", "money": -45000 },
+        { "id": "sleep", "text": "Ngủ sớm", "energy": 20 }
+      ]
+    },
+    {
+      "id": "wifi_down",
+      "stages": ["student", "junior", "senior"],
+      "phases": ["morning", "noon", "evening", "night"],
+      "weight": 1,
+      "good": false,
+      "kind": "choice",
+      "portrait": "portrait_roommate.png",
+      "icon": "icon_notif_event.png",
+      "text": "Wifi trọ chết.",
+      "choices": [
+        { "id": "data", "text": "Bật 4G", "money": -30000 },
+        { "id": "docs", "text": "Đọc docs", "softXp": 12, "mood": -3 }
+      ]
+    },
+    {
+      "id": "flood",
+      "stages": ["student", "junior", "senior"],
+      "phases": ["morning", "noon", "evening", "night"],
+      "weight": 1,
+      "good": false,
+      "kind": "choice",
+      "portrait": null,
+      "icon": "icon_notif_rain.png",
+      "text": "Mưa ngập đường.",
+      "choices": [
+        { "id": "wade", "text": "Lội", "health": -6 },
+        { "id": "shelter", "text": "Ngồi quán", "money": -35000, "loseSlot": true }
+      ]
+    },
+    {
+      "id": "crush",
+      "stages": ["student", "junior", "senior"],
+      "phases": ["noon", "evening"],
+      "weight": 1,
+      "good": true,
+      "kind": "choice",
+      "portrait": "portrait_crush.png",
+      "icon": "icon_notif_event.png",
+      "text": "Crush rủ đi uống.",
+      "choices": [
+        { "id": "tea", "text": "Trà sữa", "money": -50000, "mood": 12, "loseSlot": true },
+        { "id": "busy", "text": "Bận", "mood": -6 }
+      ]
+    },
+    {
+      "id": "mom_call",
+      "stages": ["student", "junior", "senior"],
+      "phases": ["morning", "noon", "evening", "night"],
+      "weight": 1,
+      "good": true,
+      "kind": "choice",
+      "portrait": "portrait_mom.png",
+      "icon": "icon_notif_event.png",
+      "text": "Mẹ gọi.",
+      "choices": [
+        { "id": "listen", "text": "Nghe máy", "mood": 6, "loseSlot": true },
+        { "id": "meeting", "text": "Đang họp", "mood": -3 }
+      ]
+    },
+    {
+      "id": "stiff_client",
+      "stages": ["student", "junior", "senior"],
+      "phases": ["morning", "noon", "evening", "night"],
+      "weight": 1,
+      "good": false,
+      "kind": "choice",
+      "portrait": "portrait_client.png",
+      "icon": "icon_notif_money.png",
+      "text": "Khách quỵt tiền job.",
+      "choices": [
+        { "id": "claim", "text": "Đòi 50%", "recoverPayRatio": 0.5 },
+        { "id": "drop", "text": "Bỏ qua", "mood": -6 }
+      ]
+    },
+    {
+      "id": "scope_creep",
+      "stages": ["student", "junior", "senior"],
+      "phases": ["morning", "noon", "evening", "night"],
+      "weight": 1,
+      "good": false,
+      "kind": "choice",
+      "portrait": "portrait_client.png",
+      "icon": "icon_notif_job.png",
+      "text": "Khách nhờ sửa chút xíu.",
+      "choices": [
+        { "id": "free", "text": "Làm free", "reputation": 3, "energy": -10 },
+        { "id": "quote", "text": "Báo giá +30%", "quotePayRatio": 0.3, "reputation": -1 }
+      ]
+    },
+    {
+      "id": "stackoverflow",
+      "stages": ["student", "junior", "senior"],
+      "phases": ["morning", "noon", "evening", "night"],
+      "weight": 1,
+      "good": true,
+      "kind": "buff",
+      "portrait": null,
+      "icon": "icon_notif_event.png",
+      "text": "Stack Overflow có câu trả lời đúng.",
+      "choices": [{ "id": "apply", "text": "", "mood": 6, "bugDelta": -1 }]
+    },
+    {
+      "id": "noisy_laptop",
+      "stages": ["student", "junior", "senior"],
+      "phases": ["morning", "noon", "evening", "night"],
+      "weight": 1,
+      "good": false,
+      "kind": "choice",
+      "portrait": null,
+      "icon": "icon_notif_event.png",
+      "text": "Laptop kêu to.",
+      "choices": [
+        { "id": "clean", "text": "Vệ sinh", "money": -150000 },
+        { "id": "ignore", "text": "Kệ", "bugChance": 0.2 }
+      ]
+    },
+    {
+      "id": "karaoke",
+      "stages": ["student", "junior", "senior"],
+      "phases": ["evening", "night"],
+      "weight": 1,
+      "good": true,
+      "kind": "choice",
+      "portrait": "portrait_coworker.png",
+      "icon": "icon_notif_event.png",
+      "text": "Có người rủ karaoke.",
+      "choices": [
+        { "id": "sing", "text": "Hát", "mood": 6, "energy": -10 },
+        { "id": "headphones", "text": "Đeo tai nghe", "mood": -3 }
+      ]
+    },
+    {
+      "id": "team_project",
+      "stages": ["student"],
+      "phases": ["morning", "noon", "evening", "night"],
+      "weight": 1,
+      "good": false,
+      "kind": "choice",
+      "portrait": "portrait_roommate.png",
+      "icon": "icon_notif_event.png",
+      "text": "Nhóm đồ án rủ làm cùng.",
+      "flagAbsent": "teamProject",
+      "choices": [
+        { "id": "join", "text": "Tham gia", "setFlags": ["teamProject"] },
+        { "id": "skip", "text": "Từ chối" }
+      ]
+    },
+    {
+      "id": "hackathon",
+      "stages": ["student", "junior", "senior"],
+      "phases": ["morning", "noon", "evening", "night"],
+      "weight": 1,
+      "good": true,
+      "kind": "choice",
+      "portrait": "portrait_coworker.png",
+      "icon": "icon_notif_event.png",
+      "text": "Hackathon thứ Sáu, kết quả cuối tuần.",
+      "friday": true,
+      "choices": [
+        { "id": "join", "text": "Tham gia", "joinHackathon": true },
+        { "id": "skip", "text": "Bỏ qua" }
+      ]
+    },
+    {
+      "id": "prod_down",
+      "stages": ["junior", "senior"],
+      "phases": ["morning", "noon", "evening", "night"],
+      "weight": 1,
+      "good": false,
+      "kind": "choice",
+      "portrait": "portrait_boss.png",
+      "icon": "icon_notif_event.png",
+      "text": "Prod sập được 2 giờ.",
+      "choices": [
+        { "id": "fix", "text": "Fix", "health": -10, "reputation": 5 },
+        { "id": "sleep", "text": "Đi ngủ", "reputation": -5, "mood": 3 }
+      ]
+    },
+    {
+      "id": "useless_meeting",
+      "stages": ["junior", "senior"],
+      "phases": ["morning", "noon", "evening", "night"],
+      "weight": 1,
+      "good": false,
+      "kind": "choice",
+      "portrait": "portrait_boss.png",
+      "icon": "icon_notif_event.png",
+      "text": "Họp vô ích.",
+      "choices": [
+        { "id": "listen", "text": "Nghe", "loseSlot": true, "softXp": 12 },
+        { "id": "sneak", "text": "Lén code", "repChance": 0.3, "repChanceAmount": -3 }
+      ]
+    },
+    {
+      "id": "headhunter",
+      "stages": ["junior", "senior"],
+      "phases": ["morning", "noon", "evening", "night"],
+      "weight": 1,
+      "good": true,
+      "kind": "choice",
+      "portrait": "portrait_headhunter.png",
+      "icon": "icon_notif_job.png",
+      "text": "Headhunter nhắn tin.",
+      "flagAbsent": "offerChain",
+      "choices": [
+        { "id": "listen", "text": "Nghe", "setFlags": ["offerChain"] },
+        { "id": "later", "text": "Để sau" }
+      ]
+    },
+    {
+      "id": "coworker_tea",
+      "stages": ["junior", "senior"],
+      "phases": ["morning", "noon", "evening", "night"],
+      "weight": 1,
+      "good": true,
+      "kind": "buff",
+      "portrait": "portrait_coworker.png",
+      "icon": "icon_notif_event.png",
+      "text": "Đồng nghiệp bao trà sữa.",
+      "choices": [{ "id": "apply", "text": "", "mood": 6 }]
+    },
+    {
+      "id": "back_pain",
+      "stages": ["student", "junior", "senior"],
+      "phases": ["morning", "noon", "evening", "night"],
+      "weight": 1,
+      "good": false,
+      "kind": "choice",
+      "portrait": null,
+      "icon": "icon_notif_sick.png",
+      "text": "Đau lưng.",
+      "choices": [
+        { "id": "gym", "text": "Đi gym", "health": 6, "energy": -10 },
+        { "id": "panadol", "text": "Uống panadol", "health": -3 }
+      ]
+    },
+    {
+      "id": "found_cash",
+      "stages": ["student", "junior", "senior"],
+      "phases": ["morning", "noon", "evening", "night"],
+      "weight": 1,
+      "good": true,
+      "kind": "buff",
+      "portrait": null,
+      "icon": "icon_notif_money.png",
+      "text": "Nhặt được 50.000đ.",
+      "choices": [{ "id": "apply", "text": "", "money": 50000, "mood": 3 }]
+    }
+  ],
+  "stories": [
+    {
+      "id": "landlord_remind",
+      "stages": ["student", "junior", "senior"],
+      "phases": ["morning", "noon", "evening", "night"],
+      "weight": 1,
+      "good": false,
+      "kind": "choice",
+      "portrait": "portrait_landlord.png",
+      "icon": "icon_notif_rent.png",
+      "text": "Chủ trọ nhắc khéo tiền nhà.",
+      "choices": [
+        { "id": "pay", "text": "Trả trọ", "payRent": true },
+        { "id": "later", "text": "Để sau" }
+      ]
+    },
+    {
+      "id": "landlord_knock",
+      "stages": ["student", "junior", "senior"],
+      "phases": ["morning", "noon", "evening", "night"],
+      "weight": 1,
+      "good": false,
+      "kind": "choice",
+      "portrait": "portrait_landlord.png",
+      "icon": "icon_notif_rent.png",
+      "text": "Chủ trọ gõ cửa.",
+      "choices": [
+        { "id": "pay", "text": "Trả trọ", "payRent": true },
+        { "id": "later", "text": "Xin khất" }
+      ]
+    }
+  ]
+}

@@ -159,6 +159,47 @@ CREATE TABLE player_life (
   suppress_end_of_day_until integer
 );
 
+-- Roll state, diary, and the open dialog (M5 P2). Notices are player_notices.
+CREATE TABLE player_life_feed (
+  player_id text PRIMARY KEY REFERENCES players (id),
+  pity integer NOT NULL CHECK (pity >= 0 AND pity <= 3),
+  pity_counted_day integer,
+  small_event_day integer,
+  cooldowns jsonb NOT NULL,
+  flags jsonb NOT NULL,
+  pending_event_id text,
+  queued_story_id text,
+  deferred_roll boolean NOT NULL,
+  next_bug_delta integer NOT NULL,
+  hackathon_start_day integer,
+  hackathon_resolved boolean NOT NULL,
+  snapshot_day integer NOT NULL,
+  snapshot_money integer NOT NULL,
+  snapshot_xp integer NOT NULL,
+  snapshot_health double precision NOT NULL,
+  snapshot_mood double precision NOT NULL,
+  snapshot_energy double precision NOT NULL,
+  diary jsonb,
+  banner_day integer,
+  landlord_told integer NOT NULL CHECK (landlord_told >= 0),
+  sick_open boolean NOT NULL,
+  burnout_open boolean NOT NULL,
+  store_asked boolean NOT NULL
+);
+
+CREATE TABLE player_notices (
+  id text NOT NULL,
+  player_id text NOT NULL REFERENCES player_life_feed (player_id),
+  at_day integer NOT NULL CHECK (at_day >= 1),
+  at_minute integer NOT NULL CHECK (at_minute >= 0 AND at_minute < 1440),
+  severity text NOT NULL CHECK (severity IN ('info', 'warn', 'urgent')),
+  icon text NOT NULL,
+  body text NOT NULL,
+  action text CHECK (action IN ('payRent', 'viewJobs', 'openStore')),
+  read boolean NOT NULL,
+  PRIMARY KEY (player_id, id)
+);
+
 CREATE TABLE player_events (
   id text PRIMARY KEY,
   player_id text NOT NULL REFERENCES players (id),

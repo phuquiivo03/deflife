@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { SIM_CATALOG } from "@/game/career/content";
+import { gameBus } from "@/game/events/bus";
 import { VITAL_MAX } from "@/game/state/playerStats";
 import { calendar, holidayOn } from "@/game/life/logic";
 import { useGameStore, type CareerPanel } from "@/game/state/store";
@@ -61,6 +63,7 @@ export function PlayerHudCard({ iconFiles = [] }: { iconFiles?: readonly string[
   const openCareerPanel = useGameStore((s) => s.openCareerPanel);
 
   const energyMax = SIM_CATALOG.config.energy_max;
+  const floaters = useVitalFloaters();
 
   return (
     <PanelCard className="w-full max-w-[520px] p-3">
@@ -72,6 +75,8 @@ export function PlayerHudCard({ iconFiles = [] }: { iconFiles?: readonly string[
           max={VITAL_MAX}
           tone="coral"
           testId="hud-health"
+          alert={health < 30}
+          floater={floaters.health}
         />
         <HudVital
           icon="mood"
@@ -80,6 +85,8 @@ export function PlayerHudCard({ iconFiles = [] }: { iconFiles?: readonly string[
           max={VITAL_MAX}
           tone="mint"
           testId="hud-mood"
+          alert={mood < 15}
+          floater={floaters.mood}
         />
         <HudVital
           icon="energy"
@@ -88,6 +95,8 @@ export function PlayerHudCard({ iconFiles = [] }: { iconFiles?: readonly string[
           max={energyMax}
           tone="sky"
           testId="hud-energy"
+          alert={energy < 15}
+          floater={floaters.energy}
         />
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -146,6 +155,58 @@ export function PlayerHudCard({ iconFiles = [] }: { iconFiles?: readonly string[
   );
 }
 
+function useVitalFloaters(): { health: string | null; mood: string | null; energy: string | null } {
+  const [notes, setNotes] = useState<{ health: string | null; mood: string | null; energy: string | null }>({
+    health: null,
+    mood: null,
+    energy: null,
+  });
+
+  useEffect(() => {
+    let pending = { health: 0, mood: 0, energy: 0, count: 0 };
+    let timer = 0;
+    const flush = () => {
+      const count = pending.count;
+      const next = {
+        health: pending.health === 0 ? null : formatDelta(count > 3 ? pending.health : pending.health),
+        mood: pending.mood === 0 ? null : formatDelta(pending.mood),
+        energy: pending.energy === 0 ? null : formatDelta(pending.energy),
+      };
+      if (count > 3) {
+        const merged = pending.health + pending.mood + pending.energy;
+        setNotes({ health: formatDelta(merged), mood: null, energy: null });
+      } else {
+        setNotes(next);
+      }
+      pending = { health: 0, mood: 0, energy: 0, count: 0 };
+      window.setTimeout(() => setNotes({ health: null, mood: null, energy: null }), 1200);
+    };
+    const push = (key: "health" | "mood" | "energy", delta: number) => {
+      if (delta === 0) return;
+      pending[key] += delta;
+      pending.count += 1;
+      window.clearTimeout(timer);
+      timer = window.setTimeout(flush, 40);
+    };
+    const offs = [
+      gameBus.on("healthChanged", (event) => push("health", event.delta)),
+      gameBus.on("moodChanged", (event) => push("mood", event.delta)),
+      gameBus.on("energyChanged", (event) => push("energy", event.delta)),
+    ];
+    return () => {
+      window.clearTimeout(timer);
+      offs.forEach((off) => off());
+    };
+  }, []);
+
+  return notes;
+}
+
+function formatDelta(value: number): string {
+  const shown = Math.round(value);
+  return shown > 0 ? `+${shown}` : `${shown}`;
+}
+
 function HudVital({
   icon,
   label,
@@ -153,6 +214,8 @@ function HudVital({
   max,
   tone,
   testId,
+  alert = false,
+  floater = null,
 }: {
   icon: string;
   label: string;
@@ -160,10 +223,23 @@ function HudVital({
   max: number;
   tone: "coral" | "mint" | "sky";
   testId: string;
+  alert?: boolean;
+  floater?: string | null;
 }) {
   const shown = Math.round(value);
   return (
-    <div className="hud-vital min-w-0" data-testid={testId} data-value={shown} data-max={max}>
+    <div
+      className={alert ? "hud-vital stat-blink relative min-w-0" : "hud-vital relative min-w-0"}
+      data-testid={testId}
+      data-value={shown}
+      data-max={max}
+      data-alert={alert ? "1" : "0"}
+    >
+      {floater ? (
+        <span className="vital-floater font-galmuri-7 text-galmuri-small" data-testid={`${testId}-floater`}>
+          {floater}
+        </span>
+      ) : null}
       <div className="hud-vital-head mb-1">
         <PixelIcon name={icon} size={22} alt="" />
         <span className="flex min-w-0 flex-col font-galmuri-7 text-galmuri-small leading-tight">
