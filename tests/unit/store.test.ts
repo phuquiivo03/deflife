@@ -4,8 +4,7 @@ import { join } from "node:path";
 import { SIM_CATALOG } from "@/game/career/content";
 import { applyDayStarted, applyStudy, defaultCareer } from "@/game/career/actions";
 import { grantedXp } from "@/game/knowledge/logic";
-import { LIFE } from "@/game/life/content";
-import { applyLifeDayStart, applySleepRest, settleCalendarDay, stageBill } from "@/game/life/logic";
+import { applyLifeDayStart, applySleepRest } from "@/game/life/logic";
 import {
   blackFriday,
   buyBlock,
@@ -154,64 +153,31 @@ describe("store catalog", () => {
     expect(pinProgressLine(sale)).toBe("Máy lạnh 2%.");
   });
 
-  it("keeps a v7 junior save in the junior room with junior rent", () => {
-    const saved = migrateSave(
-      {
-        stage: "junior",
-        totalMinutes: 480,
-        career: {
-          players: { money: 42 },
-          player_skills: [{ skill_id: "frontend", level: 4, xp: 12 }],
+  it("wakes a pre-store junior or senior save in the student room", () => {
+    for (const stage of ["junior", "senior"] as const) {
+      const saved = migrateSave(
+        {
+          stage,
+          totalMinutes: 480,
+          career: {
+            players: { money: 42 },
+            player_skills: [{ skill_id: "frontend", level: 4, xp: 12 }],
+          },
         },
-      },
-      7,
-    );
-    expect(saved.stage).toBe("junior");
-    expect(saved.career.players.stage).toBe("junior");
-    expect(saved.career.players.money).toBe(42);
-    expect(saved.career.player_skills.find((row) => row.skill_id === "frontend")).toEqual({
-      skill_id: "frontend",
-      level: 4,
-      xp: 12,
-    });
-    expect(roomOwned(saved.career, "student")).toBe(true);
-    expect(roomOwned(saved.career, "junior")).toBe(true);
-    expect(roomOwned(saved.career, "senior")).toBe(false);
-    expect(saved.career.shop).toEqual({ owned: ["room_junior"], pin: null });
-    expect(stageBill(LIFE.rent, saved.stage)).toBe(LIFE.rent.junior);
-    const billed = settleCalendarDay(
-      { ...saved.career, players: { ...saved.career.players, money: 30_000_000 } },
-      29,
-      saved.stage,
-    );
-    expect(billed.state.players.money).toBe(30_000_000 - LIFE.rent.junior - LIFE.utilities.junior);
-  });
-
-  it("keeps a v7 senior save in the senior room with senior rent", () => {
-    const saved = migrateSave(
-      {
-        stage: "senior",
-        totalMinutes: 480,
-        career: { players: { money: 90_000 } },
-      },
-      7,
-    );
-    expect(saved.stage).toBe("senior");
-    expect(saved.career.players.stage).toBe("senior");
-    expect(saved.career.players.money).toBe(90_000);
-    expect(roomOwned(saved.career, "student")).toBe(true);
-    expect(roomOwned(saved.career, "junior")).toBe(true);
-    expect(roomOwned(saved.career, "senior")).toBe(true);
-    expect(saved.career.shop).toEqual({ owned: ["room_junior", "room_senior"], pin: null });
-    expect(stageBill(LIFE.rent, saved.stage)).toBe(LIFE.rent.senior);
-    expect(stageBill(LIFE.utilities, saved.stage)).toBe(LIFE.utilities.senior);
-    expect(stageBill(LIFE.salary, saved.stage)).toBe(LIFE.salary.senior);
-    const billed = settleCalendarDay(
-      { ...saved.career, players: { ...saved.career.players, money: 30_000_000 } },
-      29,
-      saved.stage,
-    );
-    expect(billed.state.players.money).toBe(30_000_000 - LIFE.rent.senior - LIFE.utilities.senior);
+        7,
+      );
+      expect(saved.stage).toBe("student");
+      expect(saved.career.players.stage).toBe("student");
+      expect(saved.career.players.money).toBe(42);
+      expect(saved.career.player_skills.find((row) => row.skill_id === "frontend")).toEqual({
+        skill_id: "frontend",
+        level: 4,
+        xp: 12,
+      });
+      expect(saved.career.shop).toEqual({ owned: [], pin: null });
+      expect(roomOwned(saved.career, "junior")).toBe(false);
+      expect(roomOwned(saved.career, "senior")).toBe(false);
+    }
   });
 
   it("leaves a v7 student save in the student room with nothing owned", () => {
@@ -227,16 +193,13 @@ describe("store catalog", () => {
       7,
     );
     expect(saved.stage).toBe("student");
-    expect(saved.career.players.stage).toBe("student");
     expect(saved.career.players.money).toBe(42);
     expect(saved.career.player_skills.find((row) => row.skill_id === "frontend")?.level).toBe(2);
     expect(saved.career.shop).toEqual({ owned: [], pin: null });
     expect(roomOwned(saved.career, "junior")).toBe(false);
-    expect(roomOwned(saved.career, "senior")).toBe(false);
-    expect(stageBill(LIFE.rent, saved.stage)).toBe(LIFE.rent.student);
   });
 
-  it("does not grant rooms to a save that already migrated to v8", () => {
+  it("keeps a room a version 8 save already bought", () => {
     const saved = migrateSave(
       {
         stage: "student",

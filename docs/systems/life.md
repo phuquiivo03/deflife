@@ -52,4 +52,4 @@ The left column is the notice list, newest first. Unread rows show `ui_badge_unr
 
 ## Save
 
-Persist version 10. A notice may carry `cue`; a save from version 8 keeps its money, skills, shop, and progress, and its notices get `cue` null. Older saves keep money and energy and gain health 70, mood 70, empty life counters, and an empty event feed. A pre-store junior or senior save stays in that room, owns that room and every lower room, and pays that stage's rent and bills. A pre-store student save still owns no room item. A save already migrated to version 8 or 9 is not granted rooms again. The standing migration rule is [docs/systems/save.md](save.md).
+Persist version 9. A notice may carry `cue`; a save from version 8 keeps its money, skills, shop, and progress, and its notices get `cue` null. Older saves keep money and energy and gain health 70, mood 70, empty life counters, and an empty event feed. A save from before the store owns nothing and wakes in the student room. Junior and senior rooms are bought in the store. The standing migration rule is [docs/systems/save.md](save.md).
