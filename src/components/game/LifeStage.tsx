@@ -3,14 +3,25 @@
 /* eslint-disable @next/next/no-img-element -- native pixel art stays unoptimized */
 
 import { useEffect, useState } from "react";
-import { lifeEventById } from "@/game/life/events-content";
-import { m5AssetPath, type M5AssetKey } from "@/game/life/assets";
+import { LIFE_EVENTS, lifeEventById } from "@/game/life/events-content";
+import { m51AssetPath, m5AssetPath, type M5AssetKey } from "@/game/life/assets";
 import { useGameStore } from "@/game/state/store";
 import { Button } from "@/components/ui/button";
 
 function art(key: string): string {
   return m5AssetPath(key as M5AssetKey);
 }
+
+const CONFETTI = [
+  { left: "8%", delay: "0ms" },
+  { left: "18%", delay: "-120ms" },
+  { left: "30%", delay: "-40ms" },
+  { left: "42%", delay: "-200ms" },
+  { left: "54%", delay: "-80ms" },
+  { left: "66%", delay: "-160ms" },
+  { left: "76%", delay: "-20ms" },
+  { left: "88%", delay: "-240ms" },
+] as const;
 
 export function LifeStage() {
   const pendingId = useGameStore((s) => s.career.feed?.pendingId ?? null);
@@ -38,13 +49,40 @@ export function LifeStage() {
   return (
     <>
       {showBanner ? (
-        <div className="life-banner pointer-events-none absolute inset-x-0 top-0 z-20 flex justify-center" data-testid="life-banner">
-          <div className="relative">
-            {/* Native 480×48 banner. Integer scale; narrower columns clip it. */}
-            <img src={art("ui_banner.png")} width={480} height={48} alt="" className="pixel-img max-w-full" />
-            <p className="absolute inset-0 flex items-center justify-center font-galmuri-9 text-galmuri-body text-white">
-              {banner.label}
-            </p>
+        <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden" data-testid="life-banner">
+          <div className="life-banner-dim absolute inset-0" data-testid="life-banner-dim" />
+          <div
+            className="life-banner relative z-10 mx-auto mt-6 w-[480px] max-w-full"
+            style={{ animationDuration: `${LIFE_EVENTS.banner_enter_ms}ms` }}
+          >
+            <div
+              className="life-banner-sparkle relative mx-auto w-max"
+              style={{ animationDuration: `${LIFE_EVENTS.banner_spark_ms}ms` }}
+            >
+              <img
+                src={m51AssetPath("ui_banner_v2_x2.png")}
+                width={480}
+                height={80}
+                alt=""
+                className="pixel-img"
+              />
+              <p className="absolute inset-0 flex items-center justify-center font-galmuri-11 text-galmuri-title text-white">
+                {banner.label}
+              </p>
+            </div>
+            <div className="life-confetti-field" data-testid="life-confetti">
+              {CONFETTI.map((piece) => (
+                <span
+                  key={piece.left}
+                  className="life-confetti-piece"
+                  style={{
+                    left: piece.left,
+                    animationDuration: `${LIFE_EVENTS.banner_confetti_ms}ms`,
+                    animationDelay: `${piece.delay}, ${piece.delay}`,
+                  }}
+                />
+              ))}
+            </div>
           </div>
         </div>
       ) : null}

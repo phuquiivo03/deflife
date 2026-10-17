@@ -63,3 +63,8 @@ export type M5AssetKey = (typeof M5_ASSET_KEYS)[number];
 export function m5AssetPath(key: M5AssetKey): string {
   return `/ui/m5/${key}`;
 }
+
+/** M5.1 placeholders. Art replaces these files under the same names. */
+export function m51AssetPath(file: string): string {
+  return `/ui/m5_1/${file}`;
+}

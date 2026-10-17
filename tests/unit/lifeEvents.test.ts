@@ -261,6 +261,10 @@ describe("life events", () => {
     const banner = bannerForDay(start(), 1);
     expect(banner.label).toBe("Tết");
     expect(bannerForDay(banner.state, 1).label).toBeNull();
+    expect(LIFE_EVENTS.banner_ms).toBe(3000);
+    expect(LIFE_EVENTS.banner_enter_ms).toBe(480);
+    expect(LIFE_EVENTS.banner_confetti_ms).toBe(1500);
+    expect(LIFE_EVENTS.banner_spark_ms).toBe(600);
   });
 
   it("gives a version 6 save an empty feed", () => {
@@ -300,6 +304,18 @@ describe("life event art", () => {
     ]);
     expect(names).not.toContain("placement.json");
     expect(names).not.toContain("item_mattress.png");
+
+    const polish = join(process.cwd(), "public", "ui", "m5_1");
+    for (const [name, w, h] of [
+      ["ui_banner_v2.png", 240, 40],
+      ["ui_banner_v2_x2.png", 480, 80],
+      ["fx_confetti.png", 64, 16],
+      ["fx_confetti_x2.png", 128, 32],
+    ] as const) {
+      const buf = readFileSync(join(polish, name));
+      expect(buf.readUInt32BE(16)).toBe(w);
+      expect(buf.readUInt32BE(20)).toBe(h);
+    }
   });
 
   it("resolves the life cues, including the store purchase", () => {

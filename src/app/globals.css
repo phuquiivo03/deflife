@@ -587,17 +587,87 @@ body {
   image-rendering: pixelated;
 }
 
-@keyframes life-banner-in {
-  from {
-    transform: translateY(-8px);
+.life-banner-dim {
+  background: rgba(42, 37, 72, 0.32);
+}
+
+@keyframes life-banner-drop {
+  0% {
+    transform: translateY(-120%);
   }
-  to {
-    transform: none;
+  60% {
+    transform: translateY(8px);
+  }
+  80% {
+    transform: translateY(-4px);
+  }
+  100% {
+    transform: translateY(0);
   }
 }
 
 .life-banner {
-  animation: life-banner-in 0.4s steps(4, end);
+  animation-name: life-banner-drop;
+  animation-timing-function: steps(6, end);
+  animation-fill-mode: both;
+}
+
+@keyframes life-banner-spark {
+  0%,
+  49% {
+    outline-color: #e0a020;
+  }
+  50%,
+  100% {
+    outline-color: #fff6c8;
+  }
+}
+
+.life-banner-sparkle {
+  outline: 2px solid #e0a020;
+  animation-name: life-banner-spark;
+  animation-timing-function: steps(2, end);
+  animation-iteration-count: infinite;
+}
+
+.life-confetti-field {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 160px;
+  pointer-events: none;
+}
+
+@keyframes life-confetti-fall {
+  0% {
+    transform: translateY(-16px);
+  }
+  100% {
+    transform: translateY(140px);
+    opacity: 0;
+  }
+}
+
+@keyframes life-confetti-sheet {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: -128px 0;
+  }
+}
+
+.life-confetti-piece {
+  position: absolute;
+  top: 0;
+  width: 32px;
+  height: 32px;
+  background-image: url("/ui/m5_1/fx_confetti_x2.png");
+  background-repeat: no-repeat;
+  background-size: 128px 32px;
+  image-rendering: pixelated;
+  animation-name: life-confetti-fall, life-confetti-sheet;
+  animation-timing-function: steps(5, end), steps(4, end);
+  animation-fill-mode: forwards;
 }
 
 @keyframes ff-flash {
@@ -659,8 +729,14 @@ body {
     box-shadow: inset 0 0 0 2px var(--accent-coral);
   }
 
-  .life-banner {
+  .life-banner,
+  .life-banner-sparkle,
+  .life-confetti-piece {
     animation: none;
+  }
+
+  .life-confetti-field {
+    display: none;
   }
 }
 
