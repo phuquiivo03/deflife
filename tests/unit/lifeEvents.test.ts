@@ -6,7 +6,7 @@ import { SIM_CATALOG } from "@/game/career/content";
 import type { PlayerJob } from "@/game/career/types";
 import { CUE_IDS } from "@/game/audio/cues";
 import { parseManifest, resolveCueId } from "@/game/audio/manifest";
-import { dialogCueKey, noticeCueKey } from "@/game/life/sounds";
+import { dialogCueKey, noticeCueKey, pickMomentCue } from "@/game/life/sounds";
 import { LIFE_EVENTS } from "@/game/life/events-content";
 import {
   bannerForDay,
@@ -96,6 +96,7 @@ describe("life events", () => {
 
     const rolled = rollSmallEvent(empty, "morning", 6, 10 * 60, false, () => 0, SIM_CATALOG);
     expect(rolled.state.feed.pendingId).toBe("wifi_down");
+    expect(rolled.state.feed.notices.find((notice) => notice.id === "event-6-wifi_down")?.cue).toBe("eventOpen");
     expect(rolled.state.feed.pity).toBe(0);
     expect(rolled.state.feed.smallEventDay).toBe(6);
     expect(rolled.state.feed.cooldowns.wifi_down).toBe(11);
@@ -179,7 +180,7 @@ describe("life events", () => {
     expect(rolled.bubble).toContain("Stack Overflow");
     expect(rolled.state.players.mood).toBe(76);
     expect(rolled.state.feed.nextBugDelta).toBe(-1);
-    expect(rolled.state.feed.notices.some((notice) => notice.text.includes("Stack Overflow"))).toBe(true);
+    expect(rolled.state.feed.notices.some((notice) => notice.text.includes("Stack Overflow") && notice.cue === "eventOpen")).toBe(true);
     expect(rolled.state.feed.pendingId).toBeNull();
   });
 
@@ -204,6 +205,8 @@ describe("life events", () => {
       false,
     );
     expect(knock.state.feed.queuedStoryId ?? knock.state.feed.pendingId).toBe("landlord_knock");
+    expect(remind.state.feed.notices.find((notice) => notice.id.includes("landlord_remind"))?.cue).toBe("eventOpen");
+    expect(knock.state.feed.notices.find((notice) => notice.id.includes("landlord_knock"))?.cue).toBe("landlordKnock");
 
     const broke = {
       ...late,
@@ -304,5 +307,18 @@ describe("life event art", () => {
     expect(noticeCueKey({ id: "rent-late-1-2-3", severity: "warn" })).toBe("notifWarn");
     expect(dialogCueKey("landlord_knock")).toBe("landlordKnock");
     expect(dialogCueKey("wifi_down")).toBe("eventOpen");
+    expect(noticeCueKey({ id: "event-1-wifi_down", severity: "info", cue: "eventOpen" })).toBe("eventOpen");
+    expect(noticeCueKey({ id: "custom", severity: "urgent", cue: "notifInfo" })).toBe("notifUrgent");
+    expect(pickMomentCue(["notifInfo", "eventOpen"])).toBe("eventOpen");
+    expect(pickMomentCue(["eventOpen", "eventOpen"])).toBe("eventOpen");
+    expect(pickMomentCue(["landlordKnock", "landlordKnock"])).toBe("landlordKnock");
+    expect(pickMomentCue(["salary"])).toBe("salary");
+    expect(pickMomentCue(["sickCough"])).toBe("sickCough");
+    expect(pickMomentCue(["notifWarn", "salary"])).toBe("salary");
+    expect(pickMomentCue(["notifUrgent", "sickCough"])).toBe("sickCough");
+    expect(pickMomentCue(["notifInfo", "notifWarn", "notifUrgent"])).toBe("notifUrgent");
+    expect(pickMomentCue(["salary", "eventOpen"])).toBe("eventOpen");
+    expect(pickMomentCue(["salary", "sickCough"])).toBe("sickCough");
+    expect(pickMomentCue([])).toBeNull();
   });
 });

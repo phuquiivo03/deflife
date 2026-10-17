@@ -349,6 +349,7 @@ function normalizeNotices(value: unknown): LifeNotice[] {
       text: row.text,
       action,
       read: row.read === true,
+      cue: typeof row.cue === "string" && row.cue.length > 0 ? row.cue : null,
     });
   }
   return notices;

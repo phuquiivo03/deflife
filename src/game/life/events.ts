@@ -308,6 +308,7 @@ function rememberEvent(feed: LifeFeed, event: LifeEventDef, day: number, minute:
     text: event.text,
     action: null,
     read: false,
+    cue: event.id === "landlord_knock" ? "landlordKnock" : "eventOpen",
   });
 }
 
@@ -489,6 +490,7 @@ export function syncLifeSurface(state: CareerState, day: number, minute: number,
       text: "Sức khỏe dưới 30.",
       action: null,
       read: false,
+      cue: "sickCough",
     });
   } else if (!sick && feed.sickOpen) {
     feed = { ...feed, sickOpen: false };
@@ -606,6 +608,7 @@ export function noticesForBills(before: CareerState, after: CareerState, day: nu
       text: "Lương về.",
       action: null,
       read: false,
+      cue: "salary",
     });
   }
   if (next.paidUtilitiesKey === key && prev.paidUtilitiesKey !== key) {
