@@ -472,8 +472,8 @@ describe("migration", () => {
       },
       2,
     );
-    expect(saved.stage).toBe("student");
-    expect(saved.career.shop).toEqual({ owned: [], pin: null });
+    expect(saved.stage).toBe("junior");
+    expect(saved.career.shop).toEqual({ owned: ["room_junior"], pin: null });
     expect(saved.showCharacter).toBe(false);
     expect(saved.loadouts.student.desk).toBe("a");
     expect(saved.totalMinutes).toBe(2000);

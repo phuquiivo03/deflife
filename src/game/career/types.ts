@@ -178,7 +178,7 @@ export type LifeSnapshot = {
 
 export type LifeDiary = LifeSnapshot & { line: string; pin: string };
 
-/** Owned store items and the one pinned target. Older saves own nothing. */
+/** Owned store items and the one pinned target. A pre-store student save owns nothing. */
 export type ShopState = {
   owned: string[];
   pin: string | null;
