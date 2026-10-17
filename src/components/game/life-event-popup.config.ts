@@ -6,17 +6,21 @@ import { SHELL_LAYOUT } from "./shell-layout.config";
  * Documented in docs/design/DESIGN_SYSTEM.md (Event popup)
  * and docs/systems/life.md.
  *
- * The card is anchored to the lower edge of the canvas. There is no
+ * The card is anchored to the lower edge of the canvas, centered.
+ * There is no
  * dimmed backdrop. `zIndex` sits above the side panels and below the
  * holiday banner, modals, and tooltips. `prefers-reduced-motion`
  * skips the fade and rise.
  */
 export const LIFE_EVENT_POPUP = {
-  /** Card width at the desktop canvas, CSS pixels. Narrower canvases scale it down. */
+  /** Card width on the desktop canvas, CSS pixels. Narrower canvases scale it down. */
   widthPx: 424,
   /** Card height at that width, CSS pixels. The ratio is kept when the card shrinks. */
   heightPx: 186,
-  /** Gap between the card and the canvas edge, CSS pixels. */
+  /**
+   * Gap under the card, CSS pixels. The card stays centered and keeps
+   * `widthPx` when the canvas is wider than that.
+   */
   insetPx: 8,
   /**
    * Above the canvas and the side panels (`SHELL_LAYOUT.panelZ`),
@@ -38,6 +42,8 @@ export function lifeEventPopupStyle(): Record<`--${string}`, string> & { zIndex:
     "--event-popup-z": String(LIFE_EVENT_POPUP.zIndex),
     "--event-popup-w": `${LIFE_EVENT_POPUP.widthPx}px`,
     "--event-popup-h": `${LIFE_EVENT_POPUP.heightPx}px`,
+    "--event-popup-num-w": String(LIFE_EVENT_POPUP.widthPx),
+    "--event-popup-num-h": String(LIFE_EVENT_POPUP.heightPx),
     "--event-popup-inset": `${LIFE_EVENT_POPUP.insetPx}px`,
     "--event-popup-enter": `${LIFE_EVENT_POPUP.enterMs}ms`,
     "--event-popup-rise": `${LIFE_EVENT_POPUP.risePx}px`,

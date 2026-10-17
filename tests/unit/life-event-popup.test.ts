@@ -28,6 +28,8 @@ describe("life event popup", () => {
       "--event-popup-z": String(LIFE_EVENT_POPUP.zIndex),
       "--event-popup-w": `${LIFE_EVENT_POPUP.widthPx}px`,
       "--event-popup-h": `${LIFE_EVENT_POPUP.heightPx}px`,
+      "--event-popup-num-w": String(LIFE_EVENT_POPUP.widthPx),
+      "--event-popup-num-h": String(LIFE_EVENT_POPUP.heightPx),
       "--event-popup-inset": `${LIFE_EVENT_POPUP.insetPx}px`,
       "--event-popup-enter": `${LIFE_EVENT_POPUP.enterMs}ms`,
       "--event-popup-rise": `${LIFE_EVENT_POPUP.risePx}px`,

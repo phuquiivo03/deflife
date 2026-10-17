@@ -10,7 +10,8 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: var(--event-popup-inset);
+  box-sizing: border-box;
+  padding: 0 0 var(--event-popup-inset);
   pointer-events: none;
   container-type: size;
 }
@@ -18,14 +19,16 @@
 .card {
   pointer-events: auto;
   display: flex;
+  flex: 0 0 auto;
+  align-items: center;
   gap: 12px;
   box-sizing: border-box;
   width: min(
     var(--event-popup-w),
     100cqw,
-    calc(100cqh * var(--event-popup-w) / var(--event-popup-h))
+    calc(100cqh * var(--event-popup-num-w) / var(--event-popup-num-h))
   );
-  aspect-ratio: var(--event-popup-w) / var(--event-popup-h);
+  aspect-ratio: var(--event-popup-num-w) / var(--event-popup-num-h);
   max-height: 100%;
   padding: 12px;
   overflow: auto;

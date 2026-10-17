@@ -184,7 +184,7 @@ The choice card is `LifeEventPopup`, mounted inside the room frame in `GameShell
 |-----|---------|---------|
 | `widthPx` | 424 | Card width on the desktop canvas |
 | `heightPx` | 186 | Card height. Narrow canvases keep `width / height` |
-| `insetPx` | 8 | Gap from the canvas edge. The card sits on the lower edge |
+| `insetPx` | 8 | Gap under the card. It stays centered at `widthPx` when the canvas is wider |
 | `zIndex` | 20 | Above the canvas and the side panels (`panelZ` 1). Below the holiday banner (`overlayFloorZ` 30), modal backdrops, and tooltips (40) |
 | `enterMs` | 160 | Fade and rise. `prefers-reduced-motion` skips it |
 | `risePx` | 4 | How far the card rises while it fades in |
