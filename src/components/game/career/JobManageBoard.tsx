@@ -90,7 +90,7 @@ export function JobManageBoard({
                   <td className="py-2 text-right">
                     <PixelButton
                       type="button"
-                      variant="secondary"
+                      variant="light"
                       data-testid={`job-do-${job.id}`}
                       onClick={() => (job.task_run ? openTask(job.id) : acceptJob(job.id))}
                     >

@@ -7,6 +7,7 @@ import { PixelButton } from "@/components/ui/button";
 
 <PixelButton variant="primary">Bắt đầu</PixelButton>
 <PixelButton variant="secondary">Để sau</PixelButton>
+<PixelButton variant="light">Học</PixelButton>
 <PixelButton variant="danger">Bỏ</PixelButton>
 <PixelButton variant="icon" aria-label="Sức khỏe">{icon}</PixelButton>
 ```
@@ -17,13 +18,30 @@ Art lives in `public/ui/m5_1/`, with the other M5.1 frames (`m51AssetPath`).
 
 | | |
 |---|---|
-| Keys | `ui_btn_primary`, `ui_btn_secondary`, `ui_btn_danger`, `ui_btn_icon` |
+| Keys | `ui_btn_primary`, `ui_btn_secondary`, `ui_btn_danger`, `ui_btn_icon`. `light` uses the secondary sheets |
 | States | `normal`, `hover`, `pressed` |
 | Files | `ui_btn_<variant>_<state>.png` (24×24) and `ui_btn_<variant>_<state>_x2.png` (48×48) |
 
 `public/ui/m5_1/slices.json` → `ui_btn_*` is the 9-slice: native size 24, inset 8. The component draws at 2× and uses the `_x2` sheet, so the 8px inset is 16 CSS pixels and each art pixel stays one CSS pixel. Corners stay put; the center stretches.
 
 Hover swaps to the hover sheet (brighter face). Press swaps to the pressed sheet.
+
+## Light
+
+`variant="light"` is the notice **Ăn** / **Xem job** face: the secondary 9-slice, a light fill, a dark pixel border, and dark text. An icon, when the control has one, is the first child of the label, so it sits on the left and drops with the face on press.
+
+The numbers live in `BUTTON_LIGHT` (`src/components/ui/button/config.ts`) and the same values are `--btn-light-bg`, `--btn-light-border`, `--btn-light-ink`, `--btn-light-label`, and `--btn-light-weight` in `src/app/globals.css`.
+
+| Token | Value | Meaning |
+|---|---|---|
+| background | `#E8E2F4` | Face of `ui_btn_secondary` (tab lavender) |
+| border | `#1E1428` | Dark pixel edge of that sheet |
+| ink | `#2A2548` | Label. Same as the foreground |
+| weight | 400 | Regular Galmuri. Galmuri11-Bold has no Vietnamese glyphs |
+| label | 16px | Galmuri7, same size as the notice action label |
+| icon | 22px | Integer half of a 44px HUD icon |
+
+**Học**, **Việc làm**, and **Kỹ năng** use this variant. The icons are the existing `icon_learn_book` (open book), `icon_job` (briefcase), and `icon_skills` (`SKILL_MENU_ICON`). **Đã đọc**, each life-event choice, and the job board **Làm** use it too. Notice rows stay on `secondary`, which shares this face and this ink.
 
 ## Press
 
