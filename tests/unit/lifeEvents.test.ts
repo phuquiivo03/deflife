@@ -354,20 +354,22 @@ describe("life event art", () => {
 
     const polish = join(process.cwd(), "public", "ui", "m5_1");
     for (const [name, w, h] of [
-      ["ui_banner_v2.png", 240, 40],
-      ["ui_banner_v2_x2.png", 480, 80],
-      ["fx_confetti.png", 64, 16],
-      ["fx_confetti_x2.png", 128, 32],
-      ["ui_window_notepad.png", 48, 40],
-      ["ui_window_notepad_x2.png", 96, 80],
-      ["icon_btn_food.png", 16, 16],
-      ["icon_btn_food_x2.png", 32, 32],
+      ["ui_banner_v2.png", 480, 64],
+      ["ui_banner_v2_x2.png", 960, 128],
+      ["fx_confetti.png", 256, 32],
+      ["fx_confetti_x2.png", 512, 64],
+      ["ui_window_notepad.png", 64, 40],
+      ["ui_window_notepad_x2.png", 128, 80],
+      ["icon_btn_food.png", 24, 24],
+      ["icon_btn_food_x2.png", 48, 48],
       ["icon_hunger_full.png", 16, 16],
       ["icon_hunger_full_x2.png", 32, 32],
       ["icon_hunger_peckish.png", 16, 16],
       ["icon_hunger_peckish_x2.png", 32, 32],
       ["icon_hunger_hungry.png", 16, 16],
       ["icon_hunger_hungry_x2.png", 32, 32],
+      ["icon_action_eat.png", 16, 16],
+      ["icon_action_eat_x2.png", 32, 32],
     ] as const) {
       const buf = readFileSync(join(polish, name));
       expect(buf.readUInt32BE(16)).toBe(w);
