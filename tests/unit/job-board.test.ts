@@ -7,6 +7,7 @@ import { acceptedJobs, daysUntilDeadline, deadlineIsUrgent } from "@/game/jobs/l
 import { LIFE } from "@/game/life/content";
 import type { PlayerJob } from "@/game/career/types";
 import { startTask } from "@/game/task-run/apply";
+import { useGameStore } from "@/game/state/store";
 
 function job(status: PlayerJob["status"], id = "job-1"): PlayerJob {
   return {
@@ -34,6 +35,7 @@ describe("job management board", () => {
     expect(rows.map((row) => row.id)).toEqual(["b"]);
     expect(daysUntilDeadline(3, 2)).toBe(1);
     expect(deadlineIsUrgent(1, LIFE.job_remind_days)).toBe(true);
+    expect(deadlineIsUrgent(0, LIFE.job_remind_days)).toBe(true);
     expect(deadlineIsUrgent(2, LIFE.job_remind_days)).toBe(false);
     expect(daysUntilDeadline(null, 2)).toBeNull();
   });
@@ -65,6 +67,20 @@ describe("job management board", () => {
     expect(board).toContain("Chưa nhận job nào.");
     expect(chrome).toContain("JobManageBoard");
     expect(chrome).toContain('panel === "jobs"');
+    expect(board).toContain("Modal");
+    expect(board).toContain('from "@/components/ui/button"');
     expect(chrome).not.toContain("JobBoardPanel");
+  });
+
+  it("opens the board from Việc làm and from openJobs", () => {
+    const base = defaultCareer(1, 8 * 60, "student", SIM_CATALOG);
+    useGameStore.setState({ career: base, careerPanel: null, taskJobId: null });
+    useGameStore.getState().openCareerPanel("jobs");
+    expect(useGameStore.getState().careerPanel).toBe("jobs");
+
+    useGameStore.setState({ careerPanel: null, taskJobId: null });
+    useGameStore.getState().runNoticeAction("openJobs");
+    expect(useGameStore.getState().careerPanel).toBe("jobs");
+    expect(useGameStore.getState().taskJobId).toBeNull();
   });
 });
