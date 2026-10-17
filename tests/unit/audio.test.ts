@@ -1003,7 +1003,7 @@ describe.skipIf(!hasManifest)("shipped audio pack", () => {
     const sfx = cues.filter((cue) => cue.type === "sfx");
     const looped = sfx.filter((cue) => cue.loop);
     const oneShots = sfx.filter((cue) => !cue.loop);
-    expect(oneShots).toHaveLength(29);
+    expect(oneShots).toHaveLength(38);
     expect(looped.map((cue) => cue.id).sort()).toEqual(["sfx_typing_loop", "sfx_typing_loop_fast"]);
     expect(looped.every((cue) => cue.volume === 0.38)).toBe(true);
     expect(looped.every((cue) => cue.mp3LeadSeconds === 0.025057)).toBe(true);
@@ -1036,6 +1036,15 @@ describe.skipIf(!hasManifest)("shipped audio pack", () => {
       "energyRestored",
       "typingLoop",
       "typingLoopFast",
+      "eventOpen",
+      "notifInfo",
+      "notifWarn",
+      "notifUrgent",
+      "landlordKnock",
+      "salary",
+      "diaryFlip",
+      "sickCough",
+      "storeBuy",
     ];
     const missing = required.filter((key) => resolveCueKey(ids, key) == null);
     expect(missing, `unmapped ids: ${ids.join(", ")}`).toEqual([]);
