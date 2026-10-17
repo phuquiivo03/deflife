@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { PixelAvatar } from "@/components/game/PixelAvatar";
-import { Button } from "@/components/ui/button";
+import { PixelButton } from "@/components/ui/button";
 import { PanelCard } from "@/components/ui/panel-card";
 import { TRAIT_IDS } from "@/game/career/types";
 import { useGameStore } from "@/game/state/store";
@@ -91,20 +91,20 @@ export function CharacterIntro() {
             <p className="mt-1 font-galmuri-7 text-galmuri-small text-[var(--muted-foreground)]">
               {traitDetail(landed)}
             </p>
-            <ul className="mt-3 space-y-1 text-left font-galmuri-7 text-galmuri-small text-[var(--foreground)]">
-              <li data-testid="character-intro-money">Tiền {formatVnd(money)}</li>
-              <li>Năng lượng {Math.round(energy)}</li>
-              <li>Sức khỏe {Math.round(health)}</li>
-              <li>Tinh thần {Math.round(mood)}</li>
-            </ul>
-            <Button
-              type="button"
-              className="mt-4 min-h-11 w-full"
+            <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1 text-left font-galmuri-7 text-galmuri-small text-[var(--foreground)]">
+              <p>Sức khỏe: {Math.round(health)}</p>
+              <p>Tinh thần: {Math.round(mood)}</p>
+              <p>Năng lượng: {Math.round(energy)}</p>
+              <p data-testid="character-intro-money">Tiền: {formatVnd(money)}</p>
+            </div>
+            <PixelButton
+              variant="primary"
+              className="mt-4 w-full"
               data-testid="character-intro-start"
               onClick={dismissIntro}
             >
               Bắt đầu
-            </Button>
+            </PixelButton>
           </div>
         ) : null}
       </PanelCard>
