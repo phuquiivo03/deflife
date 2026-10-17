@@ -1,0 +1,20 @@
+{
+ "fx_confetti": {
+  "frameW": 32,
+  "frameH": 32,
+  "count": 8,
+  "durationMs": 1500,
+  "layout": "horizontal",
+  "loop": false,
+  "note": "tile/scatter several copies over the game column"
+ },
+ "fx_zzz": {
+  "frameW": 12,
+  "frameH": 12,
+  "count": 3,
+  "durationMs": 900,
+  "layout": "horizontal",
+  "loop": true,
+  "note": "spawn above icon_btn_sleep (top-right), drift up + fade"
+ }
+}
