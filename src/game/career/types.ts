@@ -160,6 +160,11 @@ export type LifeNotice = {
   text: string;
   action: NoticeAction | null;
   read: boolean;
+  /**
+   * Specific cue for this row. When set, it replaces the severity ping.
+   * Absent notices keep the id and severity rules (salary, sick, knock).
+   */
+  cue?: string | null;
 };
 
 export type LifeSnapshot = {

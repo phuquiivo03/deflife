@@ -20,6 +20,7 @@ import {
 import { SIM_CATALOG } from "../career/content";
 import type { CareerState } from "../career/types";
 import { playCueKey } from "../audio/client";
+import type { CueKey } from "../audio/cues";
 import {
   beginTest,
   catchBug,
@@ -73,35 +74,34 @@ import {
   syncLifeSurface as syncLifeSurfaceState,
 } from "../life/events";
 import type { LifeStep } from "../life/events";
-import { dialogCueKey, noticeCueKey, playLifeSound } from "../life/sounds";
+import { dialogCueKey, noticeCueKey, pickMomentCue, playLifeSound } from "../life/sounds";
 import { pinItem, roomOwned } from "../life/furniture";
 import { buyShopItem } from "../life/store-buy";
 
 let clockSkip = false;
 let handlingHospital = false;
 
-function playLifeTransition(previous: CareerState, result: LifeStep) {
+function playLifeTransition(previous: CareerState, result: LifeStep, extra: readonly CueKey[] = []) {
   const before = feedOf(previous);
   const after = feedOf(result.state);
   const seen = new Set(before.notices.map((notice) => notice.id));
-  let playedKnock = false;
+  const keys: CueKey[] = [...extra];
   for (const notice of after.notices) {
     if (seen.has(notice.id)) continue;
-    const key = noticeCueKey(notice);
-    if (key === "landlordKnock") playedKnock = true;
-    playCueKey(key);
+    keys.push(noticeCueKey(notice));
   }
   if (after.pendingId && after.pendingId !== before.pendingId) {
-    const key = dialogCueKey(after.pendingId);
-    if (!(key === "landlordKnock" && playedKnock)) playCueKey(key);
+    keys.push(dialogCueKey(after.pendingId));
   } else if (result.bubble) {
-    playCueKey("eventOpen");
+    keys.push("eventOpen");
   }
+  const cue = pickMomentCue(keys);
+  if (cue) playCueKey(cue);
 }
 
-function commitLife(result: LifeStep) {
+function commitLife(result: LifeStep, extraCues: readonly CueKey[] = []) {
   const current = useGameStore.getState();
-  playLifeTransition(current.career, result);
+  playLifeTransition(current.career, result, extraCues);
   const warns = current.taskJobId ? result.warns : [];
   useGameStore.setState({
     career: result.state,
@@ -344,18 +344,22 @@ export const useGameStore = create<GameState>()(
         const surface = syncLifeSurfaceState(hack.state, day, minuteOfDay, current.taskJobId != null);
         const banner = bannerForDay(surface.state, day);
         const landlord = queueLandlord(banner.state, day, minuteOfDay, current.taskJobId != null);
+        const dayCues: CueKey[] = [];
         if (banner.label) {
           set({ lifeBanner: { label: banner.label, until: Date.now() + LIFE_EVENTS.banner_ms } });
-          playCueKey("eventOpen");
+          dayCues.push("eventOpen");
         }
-        commitLife({
-          state: landlord.state,
-          events: [...result.events, ...hack.events, ...landlord.events],
-          skipDays: Math.max(result.skipDays ?? 0, hack.skipDays, landlord.skipDays),
-          skipMinutes: 0,
-          bubble: null,
-          warns: [...bills.warns, ...surface.warns, ...landlord.warns],
-        });
+        commitLife(
+          {
+            state: landlord.state,
+            events: [...result.events, ...hack.events, ...landlord.events],
+            skipDays: Math.max(result.skipDays ?? 0, hack.skipDays, landlord.skipDays),
+            skipMinutes: 0,
+            bubble: null,
+            warns: [...bills.warns, ...surface.warns, ...landlord.warns],
+          },
+          dayCues,
+        );
       },
       onWake: (fromTotalMinutes) => {
         const diary = openDiary(get().career, SIM_CATALOG);
@@ -520,11 +524,12 @@ export const useGameStore = create<GameState>()(
         const snap = snapshot(get().totalMinutes);
         const surface = syncLifeSurfaceState(get().career, snap.day, snap.minuteOfDay, get().taskJobId != null);
         const banner = bannerForDay(surface.state, snap.day);
+        const bannerCues: CueKey[] = [];
         if (banner.label) {
           set({ lifeBanner: { label: banner.label, until: Date.now() + LIFE_EVENTS.banner_ms } });
-          playCueKey("eventOpen");
+          bannerCues.push("eventOpen");
         }
-        commitLife({ ...surface, state: banner.state });
+        commitLife({ ...surface, state: banner.state }, bannerCues);
       },
       chooseTicket: (choice) => {
         const id = get().taskJobId;
