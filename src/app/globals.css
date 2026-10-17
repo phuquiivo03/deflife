@@ -210,10 +210,6 @@ body {
   background: #ffffff;
 }
 
-.sleep-glow {
-  animation: sleep-glow 1.6s ease-in-out infinite;
-}
-
 /* Career HUD actions: larger accent tiles under the stat row. */
 .hud-actions {
   container-type: inline-size;
@@ -290,18 +286,6 @@ body {
     align-items: center;
     gap: 4px;
   }
-}
-
-.hud-sleep {
-  border-color: transparent;
-  background: var(--room-frame);
-  color: #fff;
-  box-shadow: none;
-}
-
-.hud-sleep:hover:not(:disabled) {
-  background: #3b3466;
-  color: #fff;
 }
 
 .audio-controls {
@@ -432,16 +416,6 @@ body {
   }
   50% {
     opacity: 1;
-  }
-}
-
-@keyframes sleep-glow {
-  0%,
-  100% {
-    box-shadow: 0 0 8px 1px rgba(90, 99, 196, 0.45);
-  }
-  50% {
-    box-shadow: 0 0 16px 4px rgba(240, 180, 120, 0.9);
   }
 }
 
@@ -752,11 +726,6 @@ body {
   .transition-opacity,
   .transition-bouncy {
     transition: none !important;
-  }
-
-  .sleep-glow {
-    animation: none;
-    box-shadow: 0 0 12px 2px rgba(90, 99, 196, 0.75);
   }
 
   .hud-action::after {

@@ -13,8 +13,8 @@ import { AudioControls } from "./AudioControls";
 import { PixelIcon } from "./PixelIcon";
 import { formatVnd } from "@/lib/format-currency";
 import { PanelCard } from "@/components/ui/panel-card";
-import { Button } from "@/components/ui/button";
 import { StatBar } from "./StatBar";
+import { SleepButton } from "./SleepButton";
 
 /** Native icon for the Kỹ năng button. Swap this name when a new file ships. */
 export const SKILL_MENU_ICON = "skills";
@@ -124,19 +124,7 @@ export function PlayerHudCard({ iconFiles = [] }: { iconFiles?: readonly string[
           <span>{clockLabel}</span>
           <span>{phaseById(phaseId).label}</span>
         </span>
-        <Button
-          type="button"
-          size="sm"
-          showArrow={false}
-          disabled={!canSleep}
-          aria-disabled={!canSleep}
-          title={canSleep ? "Ngủ đến 06:00 ngày mai" : "Chỉ ngủ được vào Tối hoặc Đêm"}
-          className={canSleep ? "hud-sleep sleep-glow ml-auto" : "hud-sleep ml-auto"}
-          onClick={sleep}
-          data-testid="sleep-button"
-        >
-          Đi ngủ
-        </Button>
+        <SleepButton canSleep={canSleep} onSleep={sleep} />
       </div>
       <div className="hud-actions mt-3">
         <div className="hud-actions-grid">
