@@ -3,6 +3,7 @@
 import { SIM_CATALOG } from "@/game/career/content";
 import type { PlayerStudyCompletion, StudyActivity } from "@/game/career/types";
 import { canStudyCourse, studyBlockReason } from "@/game/knowledge/logic";
+import { energyCost } from "@/game/life/logic";
 import { useGameStore } from "@/game/state/store";
 import { formatVnd } from "@/lib/format-currency";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ export function StudyPanel({ iconFiles }: { iconFiles: readonly string[] }) {
   const money = useGameStore((s) => s.career.players.money);
   const energy = useGameStore((s) => s.career.players.energy);
   const completions = useGameStore((s) => s.career.player_study_completions);
+  const workStreak = useGameStore((s) => s.career.life.workStreak);
   const buyCourse = useGameStore((s) => s.buyCourse);
   const open = SIM_CATALOG.studyActivities.filter((activity) =>
     canStudyCourse(activity, completions),
@@ -45,6 +47,7 @@ export function StudyPanel({ iconFiles }: { iconFiles: readonly string[] }) {
                 index={index}
                 money={money}
                 energy={energy}
+                workStreak={workStreak}
                 iconFiles={iconFiles}
                 onBuy={buyCourse}
               />
@@ -89,6 +92,7 @@ function CourseOffer({
   index,
   money,
   energy,
+  workStreak,
   iconFiles,
   onBuy,
 }: {
@@ -96,14 +100,17 @@ function CourseOffer({
   index: number;
   money: number;
   energy: number;
+  workStreak: number;
   iconFiles: readonly string[];
-  onBuy: (activityId: string) => void;
+  onBuy: (activityId: string, force?: boolean) => void;
 }) {
   const skill = SIM_CATALOG.skills.find((row) => row.id === activity.skill_id);
   const xp = SIM_CATALOG.studyActivityXp
     .filter((row) => row.activity_id === activity.id)
     .reduce((sum, row) => sum + row.xp, 0);
-  const reason = studyBlockReason(money, energy, activity);
+  const cost = energyCost(activity.energy, workStreak);
+  const reason = studyBlockReason(money, energy, { price: activity.price, energy: cost });
+  const canForce = money >= activity.price && energy < cost;
   return (
     <li
       data-testid={`course-card-${activity.id}`}
@@ -114,12 +121,26 @@ function CourseOffer({
       <div className="min-w-0 flex-1">
         <p className="font-galmuri-9 text-galmuri-body text-[var(--foreground)]">{activity.name}</p>
         <p className="font-galmuri-7 text-galmuri-small text-[var(--muted-foreground)]">
-          {skill?.name} · {formatVnd(activity.price)} · {activity.hours} giờ · {activity.energy}{" "}
+          {skill?.name} · {formatVnd(activity.price)} ·           {activity.hours} giờ · {Math.ceil(cost)}{" "}
           năng lượng · {xp} XP
         </p>
       </div>
       {reason ? (
-        <BlockedButton label="Mua" reason={reason} testId={`course-buy-${activity.id}`} />
+        <div className="flex flex-col gap-1">
+          <BlockedButton label="Mua" reason={reason} testId={`course-buy-${activity.id}`} />
+          {canForce ? (
+            <Button
+              type="button"
+              size="sm"
+              showArrow={false}
+              variant="outline"
+              data-testid={`course-force-${activity.id}`}
+              onClick={() => onBuy(activity.id, true)}
+            >
+              Cố làm
+            </Button>
+          ) : null}
+        </div>
       ) : (
         <Button
           type="button"

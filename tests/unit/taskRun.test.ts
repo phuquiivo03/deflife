@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { SIM_CATALOG } from "@/game/career/content";
+import { jobPay } from "@/game/life/logic";
 import { defaultCareer, ensureTodayBoard } from "@/game/career/actions";
 import { jobEligibility, skillNameMap } from "@/game/jobs/logic";
 import {
@@ -197,7 +198,9 @@ describe("task run state machine", () => {
     const done = cursor.state.player_jobs.find((row) => row.id === job.id);
     expect(done?.status).toBe("completed");
     expect(done?.bugs).toBe(0);
-    expect(cursor.state.players.money).toBe(state.players.money + template.pay);
+    expect(cursor.state.players.money).toBe(
+      state.players.money + jobPay(template.pay, template.tier, 2),
+    );
     expect(cursor.state.players.freelance_completed).toBe(10);
     expect(cursor.state.players.reputation).toBe(2 + template.reputation_gain);
     expect(cursor.events.some((event) => event.type === "taskSucceeded")).toBe(true);

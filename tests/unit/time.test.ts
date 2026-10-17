@@ -125,20 +125,21 @@ describe("clock snapshot", () => {
       const id = hits[0]!.id;
       seen.set(id, (seen.get(id) ?? 0) + 1);
     }
-    expect(phaseAtMinuteOfDay(5 * 60 - 1).id).toBe("night");
-    expect(phaseAtMinuteOfDay(5 * 60).id).toBe("morning");
-    expect(phaseAtMinuteOfDay(11 * 60 - 1).id).toBe("morning");
-    expect(phaseAtMinuteOfDay(11 * 60).id).toBe("noon");
-    expect(phaseAtMinuteOfDay(17 * 60).id).toBe("evening");
-    expect(phaseAtMinuteOfDay(22 * 60).id).toBe("night");
+    expect(phaseAtMinuteOfDay(6 * 60 - 1).id).toBe("night");
+    expect(phaseAtMinuteOfDay(6 * 60).id).toBe("morning");
+    expect(phaseAtMinuteOfDay(12 * 60 - 1).id).toBe("morning");
+    expect(phaseAtMinuteOfDay(12 * 60).id).toBe("noon");
+    expect(phaseAtMinuteOfDay(18 * 60).id).toBe("evening");
+    expect(phaseAtMinuteOfDay(23 * 60).id).toBe("evening");
     expect(phaseAtMinuteOfDay(0).id).toBe("night");
     expect([...seen.keys()].sort()).toEqual(["evening", "morning", "night", "noon"]);
   });
 
-  it("allows sleep only during Tối and Khuya", () => {
+  it("allows sleep only during Tối and Đêm", () => {
     expect(canSleepAt(8 * 60)).toBe(false);
     expect(canSleepAt(12 * 60)).toBe(false);
-    expect(canSleepAt(17 * 60)).toBe(true);
+    expect(canSleepAt(17 * 60)).toBe(false);
+    expect(canSleepAt(18 * 60)).toBe(true);
     expect(canSleepAt(23 * 60)).toBe(true);
     expect(canSleepAt(2 * 60)).toBe(true);
   });
@@ -151,10 +152,10 @@ describe("advanceMinutes", () => {
     expect(advanceMinutes(100.2, 0.5)).toEqual({ totalMinutes: 100.7, events: [] });
   });
 
-  it("emits hour and phase when crossing 11:00", () => {
-    const from = 10 * 60 + 59;
+  it("emits hour and phase when crossing 12:00 into Chiều", () => {
+    const from = 11 * 60 + 59;
     const result = advanceMinutes(from, 2);
-    expect(snapshot(result.totalMinutes).clockLabel).toBe("11:01");
+    expect(snapshot(result.totalMinutes).clockLabel).toBe("12:01");
     expect(result.events.map((event) => event.type)).toEqual([
       "minute",
       "hourChanged",
@@ -163,18 +164,22 @@ describe("advanceMinutes", () => {
     ]);
     const phase = ofType(result.events, "phaseChanged")[0]!;
     expect(phase).toMatchObject({ phase: "noon", previous: "morning", day: 1 });
-    expect(ofType(result.events, "hourChanged").map((event) => event.hour)).toEqual([11]);
+    expect(ofType(result.events, "hourChanged").map((event) => event.hour)).toEqual([12]);
   });
 
-  it("emits dayStarted at midnight without leaving Khuya", () => {
+  it("emits dayStarted at midnight and enters Đêm", () => {
     const result = advanceMinutes(MINUTES_PER_DAY - 1, 1);
     expect(result.events.map((event) => event.type)).toEqual([
       "minute",
       "hourChanged",
+      "phaseChanged",
       "dayStarted",
     ]);
     expect(ofType(result.events, "dayStarted")[0]).toMatchObject({ day: 2 });
-    expect(ofType(result.events, "phaseChanged")).toHaveLength(0);
+    expect(ofType(result.events, "phaseChanged")[0]).toMatchObject({
+      phase: "night",
+      previous: "evening",
+    });
   });
 
   it("matches a minute-by-minute oracle for a short jump and a multi-day catch-up", () => {
@@ -234,7 +239,7 @@ describe("sleep", () => {
 
 describe("seekMinutes", () => {
   it("replays boundaries when jumping forward to a phase", () => {
-    const result = seekMinutes(8 * 60, 17 * 60);
+    const result = seekMinutes(8 * 60, 18 * 60);
     expect(snapshot(result.totalMinutes).phaseId).toBe("evening");
     expect(ofType(result.events, "phaseChanged").map((event) => event.phase)).toEqual([
       "noon",
@@ -244,11 +249,11 @@ describe("seekMinutes", () => {
 
   it("teleports backward without per-minute events", () => {
     const result = seekMinutes(22 * 60, 5 * 60);
-    expect(snapshot(result.totalMinutes)).toMatchObject({ hour: 5, phaseId: "morning", day: 1 });
+    expect(snapshot(result.totalMinutes)).toMatchObject({ hour: 5, phaseId: "night", day: 1 });
     expect(ofType(result.events, "minute")).toHaveLength(0);
     expect(ofType(result.events, "phaseChanged")[0]).toMatchObject({
-      phase: "morning",
-      previous: "night",
+      phase: "night",
+      previous: "evening",
     });
     expect(ofType(result.events, "dayStarted")).toHaveLength(0);
   });

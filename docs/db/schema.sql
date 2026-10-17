@@ -82,7 +82,10 @@ CREATE TABLE players (
   game_day integer NOT NULL CHECK (game_day >= 1),
   game_minute integer NOT NULL CHECK (game_minute BETWEEN 0 AND 1439),
   money integer NOT NULL,
-  energy integer NOT NULL CHECK (energy BETWEEN 0 AND 100),
+  -- Floats. The HUD rounds. Sick players are capped at 70 energy.
+  energy double precision NOT NULL CHECK (energy BETWEEN 0 AND 100),
+  health double precision NOT NULL CHECK (health BETWEEN 0 AND 100),
+  mood double precision NOT NULL CHECK (mood BETWEEN 0 AND 100),
   reputation integer NOT NULL CHECK (reputation >= 0),
   freelance_completed integer NOT NULL CHECK (freelance_completed >= 0)
 );
@@ -131,6 +134,29 @@ CREATE TABLE player_unlocks (
   milestone_id text NOT NULL REFERENCES career_milestones (id),
   reached_day integer NOT NULL CHECK (reached_day >= 1),
   PRIMARY KEY (player_id, milestone_id)
+);
+
+-- One row per player. Counters for the life-sim day (M5 P1).
+CREATE TABLE player_life (
+  player_id text PRIMARY KEY REFERENCES players (id),
+  meals_today integer NOT NULL CHECK (meals_today >= 0),
+  positive_mood_applies integer NOT NULL CHECK (positive_mood_applies >= 0),
+  work_streak integer NOT NULL CHECK (work_streak >= 0),
+  worked_today boolean NOT NULL,
+  fun_slots_today integer NOT NULL CHECK (fun_slots_today >= 0),
+  late_slots_today integer NOT NULL CHECK (late_slots_today >= 0),
+  mood_penalty_tomorrow double precision NOT NULL CHECK (mood_penalty_tomorrow >= 0),
+  rent_debt_days integer NOT NULL CHECK (rent_debt_days >= 0),
+  rent_issued_key text,
+  paid_rent_key text,
+  paid_utilities_key text,
+  paid_salary_key text,
+  burnout_day integer,
+  last_ended_day integer,
+  settled_day integer,
+  morning_resolved_day integer,
+  wake_budget integer NOT NULL CHECK (wake_budget > 0),
+  suppress_end_of_day_until integer
 );
 
 CREATE TABLE player_events (

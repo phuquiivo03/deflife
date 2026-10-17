@@ -21,8 +21,9 @@ export const PERSIST_KEY = "devlife:v1";
  * v3: career tables for knowledge + jobs (see docs/systems/knowledge.md).
  * v4: player_study_completions. Older saves have no course history, so none are completed.
  * v5: player_jobs.task_run. Older jobs have no in-progress CRT task.
+ * v6: health, mood, and the life-sim day counters. Older saves gain the defaults.
  */
-export const PERSIST_VERSION = 5;
+export const PERSIST_VERSION = 6;
 
 export const CHAR_POSE_SIT_BACK = "character/derived/char_sit_back";
 export const ATLAS_URL = "/atlas/devlife.png";

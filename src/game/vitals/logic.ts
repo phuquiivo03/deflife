@@ -2,7 +2,7 @@
 
 export function clampEnergy(value: number, max: number): number {
   if (!Number.isFinite(value)) return 0;
-  return Math.max(0, Math.min(max, Math.floor(value)));
+  return Math.max(0, Math.min(max, value));
 }
 
 export function applyMoney(money: number, delta: number): number {

@@ -5,7 +5,18 @@ import {
   jobRequirementsFor,
   skillNameMap,
 } from "../jobs/logic";
-import { applyEnergy, applyMoney } from "../vitals/logic";
+import { applyMoney } from "../vitals/logic";
+import { LIFE } from "../life/content";
+import {
+  applyActionStats,
+  energyCost,
+  jobPay,
+  lifeOf,
+  markWorked,
+  moodBugBonus,
+  scaleXpForMood,
+} from "../life/logic";
+import type { JobGate } from "../jobs/logic";
 import type { ActionResult } from "../career/actions";
 import {
   type CareerState,
@@ -93,7 +104,21 @@ function requireRun(state: CareerState, jobId: string): { job: PlayerJob; run: T
   return { job, run: job.task_run };
 }
 
-export function startTask(state: CareerState, jobId: string, catalog: SimCatalog): ActionResult {
+function gateFor(state: CareerState): JobGate {
+  const life = lifeOf(state);
+  return {
+    workStreak: life.workStreak,
+    minEnergy: LIFE.low_energy_job,
+    blockFreelance: life.burnoutDay === state.players.game_day,
+  };
+}
+
+export function startTask(
+  state: CareerState,
+  jobId: string,
+  catalog: SimCatalog,
+  force = false,
+): ActionResult {
   const job = findJob(state, jobId);
   if (!job) return fail(state, "Không tìm thấy việc");
   if (job.status === "active" && job.task_run) return { state, events: [], minutes: 0, error: null };
@@ -109,27 +134,33 @@ export function startTask(state: CareerState, jobId: string, catalog: SimCatalog
     template,
     jobRequirementsFor(template.id, catalog.jobTemplateRequirements),
     names,
+    gateFor(state),
   );
-  if (!check.ok) return fail(state, check.missing[0] ?? "Chưa đủ điều kiện");
+  if (!check.ok && !(force && check.energyShort)) {
+    return fail(state, check.missing[0] ?? "Chưa đủ điều kiện");
+  }
 
-  const energy = applyEnergy(state.players.energy, -template.energy, catalog.config.energy_max);
+  const spent = applyActionStats(state, {
+    energy: -template.energy,
+    health: force && check.energyShort ? LIFE.force_health : 0,
+  });
   const nextJob: PlayerJob = {
     ...job,
     status: "active",
     accepted_day: state.players.game_day,
-    pay: template.pay,
+    pay: jobPay(template.pay, template.tier, state.players.reputation),
     hours_required: template.hours,
     task_run: freshRun(taskSeed(job.id)),
   };
   const events: GameEvent[] = [
     { type: "taskStarted", jobId: job.id, templateId: template.id },
     { type: "jobAccepted", jobId: job.id, templateId: template.id },
-    { type: "energyChanged", delta: -template.energy, energy },
+    ...spent.events,
   ];
-  return ok(
-    patchJob({ ...state, players: { ...state.players, energy } }, job.id, nextJob),
-    events,
-  );
+  return {
+    ...ok(patchJob(spent.state, job.id, nextJob), events),
+    skipDays: spent.skipDays,
+  };
 }
 
 export function chooseTicket(
@@ -176,7 +207,7 @@ export function chooseBuild(
     difficulty: ticket?.difficulty ?? 1,
     ticket: found.run.ticket,
     build: choice,
-    eventBugDelta: event?.bug_delta ?? 0,
+    eventBugDelta: (event?.bug_delta ?? 0) + moodBugBonus(state.players.mood),
     formula: TASK_RUN.bugs,
   });
   const timeDelta = choice === "careful" ? TASK_RUN.careful_extra_sec : TASK_RUN.rushed_extra_sec;
@@ -242,22 +273,24 @@ export function finishTest(state: CareerState, jobId: string, catalog: SimCatalo
 }
 
 export function retryTask(state: CareerState, jobId: string, catalog: SimCatalog): ActionResult {
+  void catalog;
   const existing = findJob(state, jobId);
   if (existing?.status === "failed") return fail(state, "Hết lượt làm lại");
   const found = requireRun(state, jobId);
   if (typeof found === "string") return fail(state, found);
   if (!canRetry(found.run, TASK_RUN.max_retries)) return fail(state, "Hết lượt làm lại");
-  if (state.players.energy < TASK_RUN.retry_energy) return fail(state, "Không đủ năng lượng");
+  const cost = energyCost(TASK_RUN.retry_energy, lifeOf(state).workStreak);
+  if (state.players.energy < cost) return fail(state, "Không đủ năng lượng");
 
-  const energy = applyEnergy(state.players.energy, -TASK_RUN.retry_energy, catalog.config.energy_max);
+  const spent = applyActionStats(state, { energy: -TASK_RUN.retry_energy });
   const run = applyRetry(found.run);
-  return ok(
-    patchJob({ ...state, players: { ...state.players, energy } }, jobId, { ...found.job, task_run: run }),
-    [
-      { type: "taskRetried", jobId, energy: TASK_RUN.retry_energy },
-      { type: "energyChanged", delta: -TASK_RUN.retry_energy, energy },
-    ],
-  );
+  return {
+    ...ok(
+      patchJob(spent.state, jobId, { ...found.job, task_run: run }),
+      [{ type: "taskRetried", jobId, energy: TASK_RUN.retry_energy }, ...spent.events],
+    ),
+    skipDays: spent.skipDays,
+  };
 }
 
 function grantToSkill(
@@ -266,9 +299,10 @@ function grantToSkill(
   amount: number,
   catalog: SimCatalog,
 ): { state: CareerState; events: GameEvent[] } {
-  if (amount <= 0) return { state, events: [] };
+  const scaled = scaleXpForMood(amount, state.players.mood);
+  if (scaled <= 0) return { state, events: [] };
   const current = skillById(state.player_skills, skillId);
-  const applied = addSkillXp(current, amount, catalog.skillLevelXp);
+  const applied = addSkillXp(current, scaled, catalog.skillLevelXp);
   return {
     state: { ...state, player_skills: replaceSkill(state.player_skills, applied.skill) },
     events: skillXpEvents(skillId, applied, catalog.config.rank_brackets),
@@ -286,7 +320,8 @@ export function grantTaskSuccess(
   if (!template) return fail(state, "Không tìm thấy việc");
 
   const day = state.players.game_day;
-  const money = applyMoney(state.players.money, template.pay);
+  const pay = jobPay(template.pay, template.tier, state.players.reputation);
+  const money = applyMoney(state.players.money, pay);
   const freelance_completed = state.players.freelance_completed + 1;
   const reputation = state.players.reputation + template.reputation_gain;
   const completed: PlayerJob = {
@@ -294,20 +329,23 @@ export function grantTaskSuccess(
     status: "completed",
     finished_day: day,
     bugs: 0,
+    pay,
     task_run: { ...job.task_run, step: "result", outcome: "success" },
   };
-  let next: CareerState = patchJob(
-    {
-      ...state,
-      players: { ...state.players, money, reputation, freelance_completed },
-    },
-    job.id,
-    completed,
+  let next: CareerState = markWorked(
+    patchJob(
+      {
+        ...state,
+        players: { ...state.players, money, reputation, freelance_completed },
+      },
+      job.id,
+      completed,
+    ),
   );
   const events: GameEvent[] = [
-    { type: "taskSucceeded", jobId: job.id, templateId: template.id, pay: template.pay },
-    { type: "jobCompleted", jobId: job.id, templateId: template.id, pay: template.pay },
-    { type: "moneyChanged", delta: template.pay, money },
+    { type: "taskSucceeded", jobId: job.id, templateId: template.id, pay },
+    { type: "jobCompleted", jobId: job.id, templateId: template.id, pay },
+    { type: "moneyChanged", delta: pay, money },
   ];
   const grants = catalog.jobTemplateXp.filter((row) => row.template_id === template.id);
   for (const grant of grants) {

@@ -1,7 +1,8 @@
 "use client";
 
 import { SIM_CATALOG } from "@/game/career/content";
-import { STUB_PLAYER, VITAL_MAX } from "@/game/state/playerStats";
+import { VITAL_MAX } from "@/game/state/playerStats";
+import { calendar, holidayOn } from "@/game/life/logic";
 import { useGameStore, type CareerPanel } from "@/game/state/store";
 import { canSleepAt, phaseById, snapshot, type PhaseId } from "@/game/time";
 import { resolveShippedIcon } from "@/lib/pixel-assets";
@@ -47,7 +48,8 @@ const CAREER_ACTIONS = [
 }[];
 
 export function PlayerHudCard({ iconFiles = [] }: { iconFiles?: readonly string[] }) {
-  const p = STUB_PLAYER;
+  const health = useGameStore((s) => s.career.players.health);
+  const mood = useGameStore((s) => s.career.players.mood);
   const energy = useGameStore((s) => s.career.players.energy);
   const money = useGameStore((s) => s.career.players.money);
   const day = useGameStore((s) => snapshot(s.totalMinutes).day);
@@ -66,7 +68,7 @@ export function PlayerHudCard({ iconFiles = [] }: { iconFiles?: readonly string[
         <HudVital
           icon="health"
           label="Sức khỏe"
-          value={p.health}
+          value={health}
           max={VITAL_MAX}
           tone="coral"
           testId="hud-health"
@@ -74,7 +76,7 @@ export function PlayerHudCard({ iconFiles = [] }: { iconFiles?: readonly string[
         <HudVital
           icon="mood"
           label="Tinh thần"
-          value={p.mood}
+          value={mood}
           max={VITAL_MAX}
           tone="mint"
           testId="hud-mood"
@@ -101,12 +103,15 @@ export function PlayerHudCard({ iconFiles = [] }: { iconFiles?: readonly string[
           }
           data-testid="game-clock"
           data-day={day}
+          data-weekday={calendar(day).weekdayLabel}
+          data-holiday={holidayOn(day) ?? ""}
           data-time={clockLabel}
           data-phase={phaseId}
           data-fast-forward={fastForward ? "1" : "0"}
         >
           <PhaseMark phaseId={phaseId} iconFiles={iconFiles} />
           <span>Ngày {day}</span>
+          <span>{calendar(day).weekdayLabel}</span>
           <span>{clockLabel}</span>
           <span>{phaseById(phaseId).label}</span>
         </span>
@@ -116,7 +121,7 @@ export function PlayerHudCard({ iconFiles = [] }: { iconFiles?: readonly string[
           showArrow={false}
           disabled={!canSleep}
           aria-disabled={!canSleep}
-          title={canSleep ? "Ngủ đến 06:00 ngày mai" : "Chỉ ngủ được vào Tối hoặc Khuya"}
+          title={canSleep ? "Ngủ đến 06:00 ngày mai" : "Chỉ ngủ được vào Tối hoặc Đêm"}
           className={canSleep ? "hud-sleep sleep-glow ml-auto" : "hud-sleep ml-auto"}
           onClick={sleep}
           data-testid="sleep-button"
@@ -156,14 +161,15 @@ function HudVital({
   tone: "coral" | "mint" | "sky";
   testId: string;
 }) {
+  const shown = Math.round(value);
   return (
-    <div className="hud-vital min-w-0" data-testid={testId} data-value={value} data-max={max}>
+    <div className="hud-vital min-w-0" data-testid={testId} data-value={shown} data-max={max}>
       <div className="hud-vital-head mb-1">
         <PixelIcon name={icon} size={22} alt="" />
         <span className="flex min-w-0 flex-col font-galmuri-7 text-galmuri-small leading-tight">
           <span className="whitespace-nowrap text-[var(--muted-foreground)]">{label}</span>
           <span className="whitespace-nowrap text-[var(--foreground)]">
-            {value}/{max}
+            {shown}/{max}
           </span>
         </span>
       </div>
