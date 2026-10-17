@@ -1,0 +1,60 @@
+/*
+ * Event card on the room canvas. Sizes come from life-event-popup.config.ts.
+ * The host does not take clicks, so the room stays usable around the card.
+ */
+
+.host {
+  position: absolute;
+  z-index: var(--event-popup-z, 20);
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 0 0 var(--event-popup-inset);
+  pointer-events: none;
+  container-type: size;
+}
+
+.card {
+  pointer-events: auto;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+  width: min(
+    var(--event-popup-w),
+    100cqw,
+    calc(100cqh * var(--event-popup-num-w) / var(--event-popup-num-h))
+  );
+  aspect-ratio: var(--event-popup-num-w) / var(--event-popup-num-h);
+  max-height: 100%;
+  padding: 12px;
+  overflow: auto;
+  background: var(--panel-bg);
+  border: 2px solid var(--event-popup-border);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-panel);
+  animation-name: event-popup-in;
+  animation-duration: var(--event-popup-enter);
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
+}
+
+@keyframes event-popup-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--event-popup-rise));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    animation: none;
+  }
+}

@@ -38,6 +38,8 @@ One small event can fire per day, at the end of a slot from 10:00 onward. Chance
 
 Choice copy is the one-line spec text. Đồ án is student only. Prod, họp, headhunter, and đồng nghiệp are junior and senior. Karaoke and mất điện are evening and night. Hackathon is Friday only and resolves the Monday after: win chance `0.10 + 0.03 × max skill level`, prize 20,000,000 and 200 XP on the highest skill. “Mở store” opens the cửa hàng.
 
+A pending event draws on the lower part of the room canvas, not along the bottom of the page. The card is 424×186 CSS pixels and scales down, keeping that ratio, on a narrower or shorter canvas. There is no dimmed backdrop, so the room, the HUD, and the panels stay visible and keep their clicks. The card fades in and rises 4px; `prefers-reduced-motion` skips that. Its layer is above the canvas and the side panels and below the holiday banner, modals, and tooltips. Portraits, lines, and choices are unchanged. Those numbers are `LIFE_EVENT_POPUP` in `src/components/game/life-event-popup.config.ts` and [DESIGN_SYSTEM.md](../design/DESIGN_SYSTEM.md).
+
 ## Store
 
 Rooms and furniture are bought from **Cửa hàng**, the shop icon on the HUD icon bar next to Đi ngủ. The list opens in a modal. Junior is 25,000,000 and needs one skill at level 3 plus 30 reputation. Senior is 180,000,000 and needs two skills at level 8. The header, the 1/2/3 keys, and `?stage=` stay on a room until it is bought. Student is the start and stays available. Buying a room moves the player there. Rent, utilities, and salary follow that room.

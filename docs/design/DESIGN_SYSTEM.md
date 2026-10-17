@@ -138,7 +138,7 @@ Use `PixelAvatar` + `resolveAvatarAsset()` with the same integer-scale rule.
 - **Học** panel has two tabs: **Khóa học** (courses still available to buy) and **Đã học** (finished courses, read-only: skill, XP granted, day completed). Empty states: “Không còn khóa để học.” and “Chưa học khóa nào.” A non-repeatable course moves to **Đã học** after one purchase.
 - **Nhân vật** panel: avatar, name, stage, overall rank badge (rounded mean of the five skill levels), trait row (icon at 22px and the trait name; the bonus line is a tooltip), **Danh tiếng**, Freelance `n/100` with a bar, then the five catalog skills from `skillProgressList` (icon, name, rank badge, `Junior 60%`, bar). No stub skill percents. The trait icon uses the same 22px box as Danh tiếng and Freelance.
 - Bars: 1px border, fill coral / mint / sky per vital. A vital under its warning line blinks a coral inset; a change floats above that bar. `prefers-reduced-motion` keeps the inset and drops the blink.
-- Event dialog and speech bubble sit on the native M5 frames (`ui_dialog_frame`, `ui_speech_bubble`) as a 9-slice at 2×. The sleep diary is a notepad window on `ui_window_notepad` (`public/ui/m5_1/`, native and `_x2`, 9-slice from `slices.json`). The title is drawn in the titlebar. The window buttons are part of that frame. The store list uses `ui_store_frame` the same way, and each item sits on `ui_store_card` at 2× (192×240). That list opens from the HUD shop icon in the shared modal. Portraits and emotes use the native PNG at integer scale with `image-rendering: pixelated`. The room canvas is unchanged.
+- A pending life event (Mẹ gọi, Cúp điện, and the rest) is a card on the lower part of the room canvas. There is no dimmed backdrop: the room, HUD, and panels stay visible and keep clicks. The card is 424×186 CSS pixels and scales down, keeping that ratio, when the canvas is narrower or shorter. It fades and rises; `prefers-reduced-motion` skips the motion. Numbers are `LIFE_EVENT_POPUP` in `src/components/game/life-event-popup.config.ts`. The speech bubble still sits on the native M5 frame (`ui_speech_bubble`) as a 9-slice at 2×. The sleep diary is a notepad window on `ui_window_notepad` (`public/ui/m5_1/`, native and `_x2`, 9-slice from `slices.json`). The title is drawn in the titlebar. The window buttons are part of that frame. The store list uses `ui_store_frame` the same way, and each item sits on `ui_store_card` at 2× (192×240). That list opens from the HUD shop icon in the shared modal. Portraits and emotes use the native PNG at integer scale with `image-rendering: pixelated`. The room canvas is unchanged.
 
 ---
 
@@ -173,6 +173,24 @@ Canvas sizing `ref` stays on the room-size cap box; the visible frame wraps the 
 ## Canvas exception
 
 The **Canvas2D room renderer** is not restyled (integer scale, nearest-neighbour, no CSS shadows on canvas pixels). Debug route `/debug` unchanged.
+
+---
+
+## Event popup
+
+The choice card is `LifeEventPopup`, mounted inside the room frame in `GameShell`. Numbers live in `src/components/game/life-event-popup.config.ts` (`LIFE_EVENT_POPUP`):
+
+| Key | Default | Meaning |
+|-----|---------|---------|
+| `widthPx` | 424 | Card width on the desktop canvas |
+| `heightPx` | 186 | Card height. Narrow canvases keep `width / height` |
+| `insetPx` | 8 | Gap under the card. It stays centered at `widthPx` when the canvas is wider |
+| `zIndex` | 20 | Above the canvas and the side panels (`panelZ` 1). Below the holiday banner (`overlayFloorZ` 30), modal backdrops, and tooltips (40) |
+| `enterMs` | 160 | Fade and rise. `prefers-reduced-motion` skips it |
+| `risePx` | 4 | How far the card rises while it fades in |
+| `border` | `#E3B4D8` | Rose edge, same family as the side-panel frame |
+
+The host does not take pointer events. Only the card does, so the rest of the room stays clickable. Copy, portraits, and choices are the event's own.
 
 ---
 

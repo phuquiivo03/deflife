@@ -540,13 +540,6 @@ body {
   image-rendering: pixelated;
 }
 
-.life-dialog {
-  border-style: solid;
-  border-width: 8px;
-  border-image: url("/ui/m5/ui_dialog_frame.png") 4 fill;
-  image-rendering: pixelated;
-}
-
 .life-notepad {
   position: relative;
   image-rendering: pixelated;
