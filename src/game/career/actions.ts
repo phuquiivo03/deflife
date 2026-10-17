@@ -4,7 +4,6 @@ import {
   canStudyCourse,
   grantedXp,
   skillXpEvents,
-  studyBlockReason,
 } from "../knowledge/logic";
 import { MINUTES_PER_DAY } from "../time/config";
 import { advanceMinutes, snapshot } from "../time";
@@ -16,7 +15,19 @@ import {
   selectBoardTemplates,
   skillNameMap,
 } from "../jobs/logic";
-import { applyEnergy, applyMoney, clampEnergy } from "../vitals/logic";
+import { applyMoney, clampEnergy } from "../vitals/logic";
+import { LIFE } from "../life/content";
+import {
+  applyActionStats,
+  applyLifeDayStart,
+  applySleepRest,
+  defaultLife,
+  energyCost,
+  lifeOf,
+  markWorked,
+  resolveMorning,
+  scaleXpForMood,
+} from "../life/logic";
 import {
   LOCAL_PLAYER_ID,
   SKILL_IDS,
@@ -34,6 +45,8 @@ export type ActionResult = {
   events: GameEvent[];
   minutes: number;
   error: string | null;
+  /** Hospital asks the clock to jump this many days. */
+  skipDays?: number;
 };
 
 function draft(state: CareerState, events: GameEvent[], minutes = 0): ActionResult {
@@ -81,6 +94,8 @@ export function defaultCareer(
       game_minute: minuteOfDay,
       money: config.starting_money,
       energy: clampEnergy(config.starting_energy, config.energy_max),
+      health: LIFE.starting_health,
+      mood: LIFE.starting_mood,
       reputation: config.starting_reputation,
       freelance_completed: 0,
     },
@@ -89,6 +104,7 @@ export function defaultCareer(
     player_jobs: [],
     player_unlocks: [],
     player_events: [],
+    life: defaultLife(day),
   };
 }
 
@@ -185,20 +201,36 @@ export function applyDayStarted(
   minuteOfDay: number,
   stage: string,
   catalog: SimCatalog,
+  options?: { resolveMorning?: boolean },
 ): ActionResult {
-  const synced = syncPlayerClock(state, day, minuteOfDay, stage);
+  const lived = applyLifeDayStart(state, day, stage, {
+    resolveMorning: options?.resolveMorning ?? minuteOfDay === 6 * 60,
+  });
+  const synced = syncPlayerClock(lived.state, day, minuteOfDay, stage);
   const board = refreshBoard(synced, day, catalog);
-  return ok(board.state, board.events);
+  return {
+    ...ok(board.state, [...lived.events, ...board.events]),
+    skipDays: lived.skipDays,
+  };
 }
 
-/** Sleep sets energy to `energyOnSleep`. `dayStarted` does not touch energy. */
-export function applyWake(state: CareerState, catalog: SimCatalog): ActionResult {
-  const refilled = setEnergy(
-    state,
-    catalog.config.energyOnSleep,
-    catalog.config.energy_max,
-  );
-  return ok(refilled.state, refilled.events);
+/**
+ * Sleep recovery from hours asleep. Energy is not set to `energyOnSleep`.
+ * The morning mood queue is applied when the wake lands at 06:00.
+ */
+export function applyWake(state: CareerState, hoursSlept: number): ActionResult {
+  const rested = applySleepRest(state, hoursSlept);
+  if (rested.skipDays > 0) {
+    return { state: rested.state, events: rested.events, minutes: 0, error: null, skipDays: rested.skipDays };
+  }
+  const morning = resolveMorning(rested.state, rested.state.players.game_day);
+  return {
+    state: morning.state,
+    events: [...rested.events, ...morning.events],
+    minutes: 0,
+    error: null,
+    skipDays: morning.skipDays,
+  };
 }
 
 function grantToSkill(
@@ -207,9 +239,10 @@ function grantToSkill(
   amount: number,
   catalog: SimCatalog,
 ): { state: CareerState; events: GameEvent[] } {
-  if (amount <= 0) return { state, events: [] };
+  const scaled = scaleXpForMood(amount, state.players.mood);
+  if (scaled <= 0) return { state, events: [] };
   const current = skillById(state.player_skills, skillId);
-  const applied = addSkillXp(current, amount, catalog.skillLevelXp);
+  const applied = addSkillXp(current, scaled, catalog.skillLevelXp);
   const events = skillXpEvents(skillId, applied, catalog.config.rank_brackets);
   return {
     state: {
@@ -224,6 +257,7 @@ export function applyStudy(
   state: CareerState,
   activityId: string,
   catalog: SimCatalog,
+  force = false,
 ): ActionResult {
   const activity = catalog.studyActivities.find((row) => row.id === activityId);
   if (!activity) return fail(state, "Không tìm thấy khóa học");
@@ -231,27 +265,20 @@ export function applyStudy(
   const completions = state.player_study_completions ?? [];
   if (!canStudyCourse(activity, completions)) return fail(state, "Đã học khóa này");
 
-  const reason = studyBlockReason(
-    state.players.money,
-    state.players.energy,
-    activity,
-  );
-  if (reason) return fail(state, reason);
+  const cost = energyCost(activity.energy, lifeOf(state).workStreak);
+  const broke = state.players.money < activity.price;
+  const tired = state.players.energy < cost;
+  if (broke && tired) return fail(state, "Không đủ tiền và năng lượng");
+  if (broke) return fail(state, "Không đủ tiền");
+  if (tired && !force) return fail(state, "Không đủ năng lượng");
 
-  const money = applyMoney(state.players.money, -activity.price);
-  const energy = applyEnergy(
-    state.players.energy,
-    -activity.energy,
-    catalog.config.energy_max,
-  );
-  let next: CareerState = {
-    ...state,
-    players: { ...state.players, money, energy },
-  };
-  const events: GameEvent[] = [
-    { type: "moneyChanged", delta: -activity.price, money },
-    { type: "energyChanged", delta: -activity.energy, energy },
-  ];
+  const spent = applyActionStats(state, {
+    money: -activity.price,
+    energy: -activity.energy,
+    health: force && tired ? LIFE.force_health : 0,
+  });
+  let next = markWorked(spent.state);
+  const events: GameEvent[] = [...spent.events];
 
   const grants = catalog.studyActivityXp.filter((row) => row.activity_id === activity.id);
   let xpShown = 0;
@@ -261,7 +288,10 @@ export function applyStudy(
     const applied = grantToSkill(next, grant.skill_id, amount, catalog);
     next = applied.state;
     events.push(...applied.events);
-    xpShown += amount;
+    xpShown += applied.events.reduce(
+      (sum, event) => (event.type === "skillXpGained" ? sum + event.amount : sum),
+      0,
+    );
   }
   const minutes = activity.hours * 60;
   const completion: PlayerStudyCompletion = {
@@ -284,7 +314,7 @@ export function applyStudy(
     xp: xpShown,
   });
 
-  return ok(next, events, minutes);
+  return { ...ok(next, events, minutes), skipDays: spent.skipDays };
 }
 
 /** Day the clock shows after the course hours, using the same advance as the store. */

@@ -7,7 +7,7 @@
   "board_size": 4,
   "energy_max": 100,
   "energyOnSleep": 100,
-  "starting_money": 1500000,
+  "starting_money": 3000000,
   "starting_energy": 70,
   "starting_reputation": 0,
   "audio_music_volume": 0.5,

@@ -26,11 +26,15 @@ function useCareerSim() {
     const offDay = timeBus.on("dayStarted", (event) => {
       useGameStore.getState().onDayStarted(event.day, event.totalMinutes);
     });
-    const offSleep = timeBus.on("sleep", () => {
-      useGameStore.getState().onWake();
+    const offHour = timeBus.on("hourChanged", (event) => {
+      useGameStore.getState().onHour(event.hour, event.totalMinutes);
+    });
+    const offSleep = timeBus.on("sleep", (event) => {
+      useGameStore.getState().onWake(event.fromTotalMinutes);
     });
     return () => {
       offDay();
+      offHour();
       offSleep();
     };
   }, []);

@@ -9,6 +9,7 @@ import {
   grantRawXp,
 } from "../../src/game/career/actions";
 import { SIM_CATALOG } from "../../src/game/career/content";
+import { jobPay } from "../../src/game/life/logic";
 import {
   formatRankLabel,
   grantedXp,
@@ -326,7 +327,7 @@ describe("energy refill", () => {
     );
     expect(afterDay.state.players.energy).toBe(40);
 
-    const afterSleep = applyWake(afterDay.state, SIM_CATALOG);
+    const afterSleep = applyWake(afterDay.state, 8);
     expect(afterSleep.state.players.energy).toBe(config.energyOnSleep);
     expect(afterSleep.events).toContainEqual({
       type: "energyChanged",
@@ -339,14 +340,15 @@ describe("energy refill", () => {
 describe("study and instant jobs", () => {
   it("buys a course only when money and energy cover it", () => {
     const start = defaultCareer(1, 480, "student", SIM_CATALOG);
-    const blocked = applyStudy(start, "sysdesign", SIM_CATALOG);
+    const broke = { ...start, players: { ...start.players, money: 1_000 } };
+    const blocked = applyStudy(broke, "sysdesign", SIM_CATALOG);
     expect(blocked.error).toBe("Không đủ tiền");
-    expect(blocked.state.players.money).toBe(start.players.money);
+    expect(blocked.state.players.money).toBe(broke.players.money);
 
     const bought = applyStudy(start, "html", SIM_CATALOG);
     expect(bought.error).toBeNull();
     expect(bought.minutes).toBe(120);
-    expect(bought.state.players.money).toBe(1_500_000 - 200_000);
+    expect(bought.state.players.money).toBe(config.starting_money - 200_000);
     expect(bought.state.players.energy).toBe(70 - 12);
     const frontend = bought.state.player_skills.find((row) => row.skill_id === "frontend");
     expect(frontend).toEqual({ skill_id: "frontend", level: 1, xp: 80 });
@@ -380,7 +382,7 @@ describe("study and instant jobs", () => {
     const first = applyStudy(start, "html", catalog);
     const second = applyStudy(first.state, "html", catalog);
     expect(second.error).toBeNull();
-    expect(second.state.players.money).toBe(1_500_000 - 400_000);
+    expect(second.state.players.money).toBe(config.starting_money - 400_000);
     expect(second.state.player_study_completions).toEqual([
       { activity_id: "html", skill_id: "frontend", xp_gained: 80, completed_day: 1 },
     ]);
@@ -421,7 +423,9 @@ describe("study and instant jobs", () => {
     expect(job.accepted_day).toBe(1);
     expect(job.finished_day).toBe(1);
     expect(job.deadline_day).toBe(open.offered_day + template.deadline_days);
-    expect(done.state.players.money).toBe(start.players.money + template.pay);
+    expect(done.state.players.money).toBe(
+      start.players.money + jobPay(template.pay, template.tier, start.players.reputation),
+    );
     expect(done.state.players.energy).toBe(start.players.energy - template.energy);
     expect(done.state.players.freelance_completed).toBe(10);
     expect(done.state.players.reputation).toBe(template.reputation_gain);

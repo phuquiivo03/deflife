@@ -7,6 +7,7 @@ import type {
   PlayerSkill,
   SkillDef,
 } from "../career/types";
+import { energyCost } from "../life/logic";
 
 /** Highest freelance milestone, used as the profile bar's full mark. */
 export function freelanceGoal(
@@ -22,6 +23,15 @@ export function freelanceGoal(
 export type JobBlock = {
   ok: boolean;
   missing: string[];
+  /** The only problem is energy below the action cost, and energy is still at least the job floor. */
+  energyShort: boolean;
+};
+
+export type JobGate = {
+  workStreak?: number;
+  /** Hard floor. Below this, freelance and remote both stay locked. */
+  minEnergy?: number;
+  blockFreelance?: boolean;
 };
 
 export function jobRequirementsFor(
@@ -37,9 +47,14 @@ export function jobEligibility(
   template: JobTemplate,
   requirements: readonly JobTemplateRequirement[],
   skillNames: ReadonlyMap<string, string>,
+  gate: JobGate = {},
 ): JobBlock {
   const missing: string[] = [];
+  let energyShort = false;
 
+  if (gate.blockFreelance && template.job_type === "freelance") {
+    missing.push("Hôm nay kiệt sức, chưa nhận freelance");
+  }
   if (player.freelance_completed < template.unlock_freelance_completed) {
     missing.push(
       `Cần hoàn thành ${template.unlock_freelance_completed} freelance`,
@@ -48,8 +63,12 @@ export function jobEligibility(
   if (player.reputation < template.min_reputation) {
     missing.push(`Cần ${template.min_reputation} uy tín`);
   }
-  if (player.energy < template.energy) {
-    missing.push(`Cần ${template.energy} năng lượng`);
+  const cost = energyCost(template.energy, gate.workStreak ?? 0);
+  if (gate.minEnergy != null && player.energy < gate.minEnergy) {
+    missing.push("Dưới 15 năng lượng, chưa nhận việc");
+  } else if (player.energy < cost) {
+    energyShort = missing.length === 0;
+    missing.push(`Cần ${Math.ceil(cost)} năng lượng`);
   }
 
   for (const req of requirements) {
@@ -60,7 +79,7 @@ export function jobEligibility(
     }
   }
 
-  return { ok: missing.length === 0, missing };
+  return { ok: missing.length === 0, missing, energyShort: energyShort && missing.length === 1 };
 }
 
 export function skillNameMap(skills: readonly SkillDef[]): Map<string, string> {

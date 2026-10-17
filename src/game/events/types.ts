@@ -50,6 +50,16 @@ export type GameEvent =
       energy: number;
     }
   | {
+      type: "healthChanged";
+      delta: number;
+      health: number;
+    }
+  | {
+      type: "moodChanged";
+      delta: number;
+      mood: number;
+    }
+  | {
       type: "taskStarted";
       jobId: string;
       templateId: string;

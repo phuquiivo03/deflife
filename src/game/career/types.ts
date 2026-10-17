@@ -110,9 +110,41 @@ export type PlayerRow = {
   game_day: number;
   game_minute: number;
   money: number;
+  /** 0–100 float. The HUD rounds. */
   energy: number;
+  /** 0–100 float. Sức khỏe. The HUD rounds. */
+  health: number;
+  /** 0–100 float. The HUD rounds. */
+  mood: number;
   reputation: number;
   freelance_completed: number;
+};
+
+/** Counters for the life-sim day. Personality and furniture stay neutral until later phases. */
+export type LifeState = {
+  mealsToday: number;
+  positiveMoodApplies: number;
+  workStreak: number;
+  workedToday: boolean;
+  funSlotsToday: number;
+  lateSlotsToday: number;
+  /** Mood subtracted at the next 06:00. Late slots and short sleep add to this. */
+  moodPenaltyTomorrow: number;
+  rentDebtDays: number;
+  rentIssuedKey: string | null;
+  paidRentKey: string | null;
+  paidUtilitiesKey: string | null;
+  paidSalaryKey: string | null;
+  /** Freelance is locked when `game_day` equals this. */
+  burnoutDay: number | null;
+  lastEndedDay: number | null;
+  /** Calendar bills and weekday flavor already ran for this game day. */
+  settledDay: number | null;
+  morningResolvedDay: number | null;
+  /** Slot budget captured at the last 06:00, so a midnight rollover does not change it. */
+  wakeBudget: number;
+  /** Skip meal/streak end-of-day while the clock is inside a hospital jump. */
+  suppressEndOfDayUntil: number | null;
 };
 
 export type PlayerSkill = {
@@ -185,6 +217,7 @@ export type CareerState = {
   player_jobs: PlayerJob[];
   player_unlocks: PlayerUnlock[];
   player_events: PlayerEvent[];
+  life: LifeState;
 };
 
 export type SimCatalog = {

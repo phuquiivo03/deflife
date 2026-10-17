@@ -22,12 +22,12 @@ At speed ×1 the clock advances `1440 / REAL_MS_PER_GAME_DAY` in-game minutes pe
 
 | Phase key | Label | Clock | Sleep | Placeholder |
 |---|---|---|---|---|
-| `morning` | Sáng | 05:00–11:00 | no | 🌅 |
-| `noon` | Trưa | 11:00–17:00 | no | ☀️ |
-| `evening` | Tối | 17:00–22:00 | yes | 🌆 |
-| `night` | Khuya | 22:00–05:00 | yes | 🌙 |
+| `morning` | Sáng | 06:00–12:00 | no | 🌅 |
+| `noon` | Chiều | 12:00–18:00 | no | ☀️ |
+| `evening` | Tối | 18:00–24:00 | yes | 🌆 |
+| `night` | Đêm | 00:00–06:00 | yes | 🌙 |
 
-The phase key is also the icon key. Bounds are inclusive at the start and exclusive at the end. Khuya wraps past midnight. Each phase has a `tint` (`{ r, g, b, a }`) drawn as a source-over wash on the room canvas.
+The phase key is also the icon key. Bounds are inclusive at the start and exclusive at the end. Each phase has a `tint` (`{ r, g, b, a }`) drawn as a source-over wash on the room canvas. Slot budgets, late nights, and the calendar live in [life.md](./life.md).
 
 Icons use the same files as the rest of the HUD: `public/ui/icons/icon_<key>.png` (44×44) and `icon_<key>_x4.png` (176×176) for `morning`, `noon`, `evening`, and `night`. Those eight files are already in the repo. The home page reads `public/ui/icons` when it renders and passes the filenames to the HUD. `resolveShippedIcon` picks the integer-scale variant the way `resolveIconAsset` does (22px on the HUD uses the ×4 file, an exact ÷8). The emoji stays only as a fallback when a file is missing, on an element stamped with `data-icon-key`. Dropping a replacement png into that folder and refreshing is enough — no code change.
 
@@ -74,7 +74,7 @@ The React hook `useGameClock` in `src/components/game/useGameClock.ts` owns the 
 3. `phaseChanged` — `{ phase, previous, day, totalMinutes }`
 4. `dayStarted` — `{ day, totalMinutes }`
 
-`sleep` is separate: `{ fromTotalMinutes, toTotalMinutes, day }`. A sleep skip does **not** emit one `minute` per skipped minute (so a future energy drain does not run overnight). It does emit `hourChanged`, `phaseChanged`, and `dayStarted` for the wake time, then `sleep`. Energy is restored by the `sleep` listener, not by `dayStarted`, so the day handler can run first without undoing a course that crossed midnight.
+`sleep` is separate: `{ fromTotalMinutes, toTotalMinutes, day }`. A sleep skip does **not** emit one `minute` per skipped minute (so a slot tick does not run overnight). It does emit `hourChanged`, `phaseChanged`, and `dayStarted` for the wake time, then `sleep`. Energy is restored by the `sleep` listener from hours asleep (`E = min(Emax, E + 12.5h)`), not by `dayStarted`.
 
 `count` on `minute` is `1` during normal play. If one tick crosses more than `MINUTE_EVENT_COALESCE_AFTER` minutes (two in-game days — a long background tab or ×60), minutes collapse to one event per hour segment and `count` is the size of that segment. Hour, phase, and day events are still emitted **once per boundary crossed**, in order. Summing `count` equals the number of in-game minutes that elapsed.
 
@@ -91,7 +91,7 @@ Version 0 and 1 saves have no clock. `migrate` sets `totalMinutes` to `DEFAULT_S
 ## UI
 
 - HUD (`PlayerHudCard`): `Ngày N`, live `HH:MM`, phase icon + label, and **Đi ngủ**.
-- Đi ngủ is disabled during Sáng and Trưa. During Tối and Khuya it is enabled and uses the `.sleep-glow` pulse (a static glow when `prefers-reduced-motion` is set).
+- Đi ngủ is disabled during Sáng and Chiều. During Tối and Đêm it is enabled and uses the `.sleep-glow` pulse (a static glow when `prefers-reduced-motion` is set).
 - Room tint crossfades over `TINT_TRANSITION_MS` (snaps when reduced motion is set). The canvas itself stays pixelated; the wash is a flat fill before the integer upscale.
 - Debug controls (development, or `?debug=1` in production): speed ×1 / ×10 / ×60, Tạm dừng / Tiếp tục, and a jump to each phase.
 

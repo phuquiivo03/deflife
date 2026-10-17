@@ -2,6 +2,8 @@
 
 import { SIM_CATALOG } from "@/game/career/content";
 import { jobEligibility, jobRequirementsFor, skillNameMap, visibleBoardJobs } from "@/game/jobs/logic";
+import { LIFE } from "@/game/life/content";
+import { jobPay, lifeOf } from "@/game/life/logic";
 import { useGameStore } from "@/game/state/store";
 import { snapshot } from "@/game/time";
 import { formatVnd } from "@/lib/format-currency";
@@ -14,6 +16,7 @@ const names = skillNameMap(SIM_CATALOG.skills);
 export function JobBoardPanel({ iconFiles }: { iconFiles: readonly string[] }) {
   const jobs = useGameStore((s) => s.career.player_jobs);
   const player = useGameStore((s) => s.career.players);
+  const life = useGameStore((s) => lifeOf(s.career));
   const skills = useGameStore((s) => s.career.player_skills);
   const day = useGameStore((s) => snapshot(s.totalMinutes).day);
   const acceptJob = useGameStore((s) => s.acceptJob);
@@ -34,7 +37,12 @@ export function JobBoardPanel({ iconFiles }: { iconFiles: readonly string[] }) {
         const template = SIM_CATALOG.jobTemplates.find((row) => row.id === job.template_id);
         if (!template) return null;
         const reqs = jobRequirementsFor(template.id, SIM_CATALOG.jobTemplateRequirements);
-        const check = jobEligibility(player, skills, template, reqs, names);
+        const check = jobEligibility(player, skills, template, reqs, names, {
+          workStreak: life.workStreak,
+          minEnergy: LIFE.low_energy_job,
+          blockFreelance: life.burnoutDay === day,
+        });
+        const pay = jobPay(template.pay, template.tier, player.reputation);
         const done = job.status === "completed";
         const active = job.status === "active";
         const xp = SIM_CATALOG.jobTemplateXp
@@ -63,7 +71,7 @@ export function JobBoardPanel({ iconFiles }: { iconFiles: readonly string[] }) {
                 {template.name}
               </p>
               <p className="font-galmuri-7 text-galmuri-small text-[var(--muted-foreground)]">
-                Bậc {template.tier} · {formatVnd(template.pay)} · {template.energy} năng lượng ·{" "}
+                Bậc {template.tier} · {formatVnd(pay)} · {template.energy} năng lượng ·{" "}
                 {xp} XP · +{template.reputation_gain} uy tín
               </p>
               {done ? (
@@ -95,11 +103,25 @@ export function JobBoardPanel({ iconFiles }: { iconFiles: readonly string[] }) {
                 {active ? "Tiếp tục" : "Nhận"}
               </Button>
             ) : (
-              <BlockedButton
-                label="Nhận"
-                reason={check.missing[0] ?? "Chưa đủ điều kiện"}
-                testId={`job-accept-${job.template_id}`}
-              />
+              <div className="flex flex-col gap-1">
+                <BlockedButton
+                  label="Nhận"
+                  reason={check.missing[0] ?? "Chưa đủ điều kiện"}
+                  testId={`job-accept-${job.template_id}`}
+                />
+                {check.energyShort ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    showArrow={false}
+                    variant="outline"
+                    data-testid={`job-force-${job.template_id}`}
+                    onClick={() => acceptJob(job.id, true)}
+                  >
+                    Cố làm
+                  </Button>
+                ) : null}
+              </div>
             )}
           </li>
         );

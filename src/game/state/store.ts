@@ -36,6 +36,8 @@ import { LocalStorageAdapter, toStateStorage } from "../storage/adapter";
 import { migrateSave } from "../storage/migrate";
 import {
   DEFAULT_START_MINUTES,
+  MINUTES_PER_DAY,
+  SLEEP_WAKE_MINUTE,
   advanceMinutes,
   canSleepAt,
   minutesForPhaseStart,
@@ -46,9 +48,32 @@ import {
   type PhaseId,
   type SpeedPreset,
 } from "../time";
+import type { FoodId } from "../life/content";
+import { crossWakingSlot, eatMeal, hoursUntilWake, mealBlocked, resolveMorning } from "../life/logic";
+
+let clockSkip = false;
+let handlingHospital = false;
 
 function emitGame(events: readonly GameEvent[]) {
   for (const event of events) gameBus.emit(event);
+}
+
+function maybeHospital(skipDays: number | undefined) {
+  if (!skipDays || skipDays <= 0 || handlingHospital) return;
+  handlingHospital = true;
+  clockSkip = true;
+  const current = useGameStore.getState().totalMinutes;
+  const snap = snapshot(current);
+  const target = (snap.day - 1 + skipDays) * MINUTES_PER_DAY + SLEEP_WAKE_MINUTE;
+  const result = seekMinutes(current, Math.max(target, current + 1));
+  useGameStore.setState({ totalMinutes: result.totalMinutes });
+  for (const event of result.events) timeBus.emit(event);
+  clockSkip = false;
+  handlingHospital = false;
+  const landed = snapshot(result.totalMinutes);
+  const morning = resolveMorning(useGameStore.getState().career, landed.day);
+  useGameStore.setState({ career: morning.state });
+  emitGame(morning.events);
 }
 
 export type CareerPanel = "study" | "jobs" | "skills";
@@ -90,11 +115,13 @@ type GameState = {
   closeCareerPanel: () => void;
   ensureTodayBoard: () => void;
   onDayStarted: (day: number, totalMinutes: number) => void;
-  onWake: () => void;
-  buyCourse: (activityId: string) => void;
+  onWake: (fromTotalMinutes: number) => void;
+  onHour: (hour: number, totalMinutes: number) => void;
+  buyCourse: (activityId: string, force?: boolean) => void;
+  eat: (foodId: FoodId) => void;
   /** Job whose CRT task is on screen. Not persisted. */
   taskJobId: string | null;
-  acceptJob: (jobId: string) => void;
+  acceptJob: (jobId: string, force?: boolean) => void;
   openTask: (jobId: string) => void;
   closeTask: () => void;
   chooseTicket: (choice: TaskTicketChoice) => void;
@@ -184,8 +211,10 @@ export const useGameStore = create<GameState>()(
         const current = get().totalMinutes;
         if (!canSleepAt(current)) return;
         const result = sleepToNextMorning(current);
+        clockSkip = true;
         set({ totalMinutes: result.totalMinutes });
         for (const event of result.events) timeBus.emit(event);
+        clockSkip = false;
       },
       jumpToPhase: (phaseId) => {
         const current = get().totalMinutes;
@@ -222,16 +251,43 @@ export const useGameStore = create<GameState>()(
           minuteOfDay,
           current.stage,
           SIM_CATALOG,
+          { resolveMorning: minuteOfDay === SLEEP_WAKE_MINUTE && !clockSkip },
         );
         set({ career: result.state });
         emitGame(result.events);
+        maybeHospital(result.skipDays);
       },
-      onWake: () => {
-        const result = applyWake(get().career, SIM_CATALOG);
+      onWake: (fromTotalMinutes) => {
+        const result = applyWake(get().career, hoursUntilWake(snapshot(fromTotalMinutes).minuteOfDay));
         set({ career: result.state });
         emitGame(result.events);
+        maybeHospital(result.skipDays);
       },
-      buyCourse: (activityId) => {
+      onHour: (hour, totalMinutes) => {
+        if (clockSkip) return;
+        const snap = snapshot(totalMinutes);
+        if (snap.minute !== 0 || hour % 2 !== 0) return;
+        if (hour === 6) {
+          const morning = resolveMorning(get().career, snap.day);
+          set({ career: morning.state });
+          emitGame(morning.events);
+          maybeHospital(morning.skipDays);
+          return;
+        }
+        const crossed = crossWakingSlot(get().career, snap.minuteOfDay);
+        set({ career: crossed.state });
+        emitGame(crossed.events);
+        maybeHospital(crossed.skipDays);
+      },
+      eat: (foodId) => {
+        const current = get().career;
+        if (mealBlocked(current, foodId)) return;
+        const result = eatMeal(current, foodId);
+        set({ career: result.state });
+        emitGame(result.events);
+        maybeHospital(result.skipDays);
+      },
+      buyCourse: (activityId, force = false) => {
         const current = get();
         const snapNow = snapshot(current.totalMinutes);
         const synced = syncPlayerClock(
@@ -240,7 +296,7 @@ export const useGameStore = create<GameState>()(
           snapNow.minuteOfDay,
           current.stage,
         );
-        const result = applyStudy(synced, activityId, SIM_CATALOG);
+        const result = applyStudy(synced, activityId, SIM_CATALOG, force);
         if (result.error) return;
         const advanced = advanceMinutes(current.totalMinutes, result.minutes);
         const snap = snapshot(advanced.totalMinutes);
@@ -251,11 +307,12 @@ export const useGameStore = create<GameState>()(
         });
         emitGame(result.events);
         for (const event of advanced.events) timeBus.emit(event);
+        maybeHospital(result.skipDays);
         window.setTimeout(() => {
           useGameStore.setState({ fastForward: false });
         }, 800);
       },
-      acceptJob: (jobId) => {
+      acceptJob: (jobId, force = false) => {
         const current = get();
         const snap = snapshot(current.totalMinutes);
         const synced = syncPlayerClock(
@@ -264,13 +321,14 @@ export const useGameStore = create<GameState>()(
           snap.minuteOfDay,
           current.stage,
         );
-        const result = startTask(synced, jobId, SIM_CATALOG);
+        const result = startTask(synced, jobId, SIM_CATALOG, force);
         if (result.error) {
           playCueKey("jobFailed");
           return;
         }
         set({ career: result.state, careerPanel: null, taskJobId: jobId });
         emitGame(result.events);
+        maybeHospital(result.skipDays);
       },
       openTask: (jobId) => set({ careerPanel: null, taskJobId: jobId }),
       closeTask: () => set({ taskJobId: null }),

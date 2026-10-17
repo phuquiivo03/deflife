@@ -17,11 +17,14 @@ import {
   type TaskOutcome,
   type TaskRun,
   type TaskStep,
+  type LifeState,
   type TaskTicketChoice,
 } from "../career/types";
 import type { Loadout } from "../types";
 import { snapshot, totalMinutesFromPersisted } from "../time";
 import { clampEnergy } from "../vitals/logic";
+import { LIFE } from "../life/content";
+import { defaultLife } from "../life/logic";
 
 export type PersistedSave = {
   stage: StageId;
@@ -214,6 +217,12 @@ export function careerFromUnknown(
       energy: Number.isFinite(Number(players.energy))
         ? clampEnergy(Number(players.energy), SIM_CATALOG.config.energy_max)
         : fresh.players.energy,
+      health: Number.isFinite(Number(players.health))
+        ? clampEnergy(Number(players.health), LIFE.stat_max)
+        : fresh.players.health,
+      mood: Number.isFinite(Number(players.mood))
+        ? clampEnergy(Number(players.mood), LIFE.stat_max)
+        : fresh.players.mood,
       reputation: num(players.reputation, fresh.players.reputation),
       freelance_completed: num(players.freelance_completed),
     },
@@ -222,14 +231,51 @@ export function careerFromUnknown(
     player_jobs: normalizeJobs(value.player_jobs),
     player_unlocks: normalizeUnlocks(value.player_unlocks),
     player_events: normalizeEvents(value.player_events),
+    life: normalizeLife(value.life, day),
   };
+}
+
+function normalizeLife(value: unknown, day: number): LifeState {
+  const fresh = defaultLife(day);
+  if (!isRecord(value)) return fresh;
+  return {
+    mealsToday: num(value.mealsToday),
+    positiveMoodApplies: num(value.positiveMoodApplies),
+    workStreak: num(value.workStreak),
+    workedToday: value.workedToday === true,
+    funSlotsToday: num(value.funSlotsToday),
+    lateSlotsToday: num(value.lateSlotsToday),
+    moodPenaltyTomorrow: finite(value.moodPenaltyTomorrow),
+    rentDebtDays: num(value.rentDebtDays),
+    rentIssuedKey: strOrNull(value.rentIssuedKey),
+    paidRentKey: strOrNull(value.paidRentKey),
+    paidUtilitiesKey: strOrNull(value.paidUtilitiesKey),
+    paidSalaryKey: strOrNull(value.paidSalaryKey),
+    burnoutDay: value.burnoutDay == null ? null : Math.max(1, num(value.burnoutDay, 1)),
+    lastEndedDay: value.lastEndedDay == null ? null : num(value.lastEndedDay),
+    settledDay: value.settledDay == null ? null : num(value.settledDay),
+    morningResolvedDay: value.morningResolvedDay == null ? null : num(value.morningResolvedDay),
+    wakeBudget: value.wakeBudget == null ? fresh.wakeBudget : Math.max(1, num(value.wakeBudget, fresh.wakeBudget)),
+    suppressEndOfDayUntil:
+      value.suppressEndOfDayUntil == null ? null : num(value.suppressEndOfDayUntil),
+  };
+}
+
+function finite(value: unknown): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
+function strOrNull(value: unknown): string | null {
+  return typeof value === "string" && value.length > 0 ? value : null;
 }
 
 /**
  * Persist version 5. Versions before 3 keep the room and the clock, and gain
  * a fresh career document. Version 3 keeps the career tables. Versions before
  * 4 have no course history, so every course is still uncompleted. Versions
- * before 5 have no task_run; normalize stores null.
+ * before 5 have no task_run; normalize stores null. Versions before 6 have no
+ * health, mood, or life counters; those gain the defaults.
  */
 export function migrateSave(persisted: unknown, version: number): PersistedSave {
   const prev = isRecord(persisted) ? persisted : {};

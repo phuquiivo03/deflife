@@ -5,6 +5,11 @@ import { overallRankBracket, skillProgressList, type SkillProgress } from "@/gam
 import { freelanceGoal } from "@/game/jobs/logic";
 import { STUB_PLAYER } from "@/game/state/playerStats";
 import { useGameStore } from "@/game/state/store";
+import { LIFE } from "@/game/life/content";
+import { calendar, lifeOf, mealBlocked, rentStatus } from "@/game/life/logic";
+import { snapshot } from "@/game/time";
+import { formatVnd } from "@/lib/format-currency";
+import { Button } from "@/components/ui/button";
 import type { StageId } from "@/game/config";
 import { STAGE_LABELS } from "@/lib/stage-labels";
 import { PanelCard } from "@/components/ui/panel-card";
@@ -18,6 +23,9 @@ const goal = freelanceGoal(SIM_CATALOG.milestones);
 export function PlayerInfoPanel({ iconFiles = [] }: { iconFiles?: readonly string[] }) {
   const p = STUB_PLAYER;
   const stage = useGameStore((s) => s.stage);
+  const career = useGameStore((s) => s.career);
+  const day = useGameStore((s) => snapshot(s.totalMinutes).day);
+  const eat = useGameStore((s) => s.eat);
   const playerSkills = useGameStore((s) => s.career.player_skills);
   const reputation = useGameStore((s) => s.career.players.reputation);
   const freelance = useGameStore((s) => s.career.players.freelance_completed);
@@ -26,6 +34,10 @@ export function PlayerInfoPanel({ iconFiles = [] }: { iconFiles?: readonly strin
     skills.map((skill) => skill.level),
     SIM_CATALOG.config.rank_brackets,
   );
+  const life = lifeOf(career);
+  const rent = rentStatus(career, day);
+  const sick = career.players.health < LIFE.sick_below;
+  const burned = life.burnoutDay === day;
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
@@ -44,6 +56,16 @@ export function PlayerInfoPanel({ iconFiles = [] }: { iconFiles?: readonly strin
         >
           {STAGE_LABELS[stage as StageId]} · {overall.label}
         </p>
+        {sick ? (
+          <p className="mt-1 font-galmuri-7 text-galmuri-small text-[var(--accent-coral)]" data-testid="life-sick">
+            Đang ốm
+          </p>
+        ) : null}
+        {burned ? (
+          <p className="mt-1 font-galmuri-7 text-galmuri-small text-[var(--accent-coral)]" data-testid="life-burnout">
+            Hôm nay kiệt sức, chưa nhận freelance
+          </p>
+        ) : null}
         <div className="mt-3 flex w-full items-center gap-2 text-left">
           <PixelIcon name="reputation_medal" size={22} alt="" files={iconFiles} />
           <span className="flex-1 font-galmuri-7 text-galmuri-small text-[var(--muted-foreground)]">
@@ -71,6 +93,46 @@ export function PlayerInfoPanel({ iconFiles = [] }: { iconFiles?: readonly strin
           </span>
         </div>
         <StatBar value={freelance} max={goal} tone="mint" className="mt-1" />
+      </PanelCard>
+
+      <PanelCard className="p-3">
+        <p className="font-galmuri-9 text-galmuri-body text-[var(--foreground)]">Ăn uống</p>
+        <p
+          className="mt-1 font-galmuri-7 text-galmuri-small text-[var(--muted-foreground)]"
+          data-testid="life-meals"
+          data-meals={life.mealsToday}
+        >
+          Bữa {life.mealsToday}/3 · {calendar(day).weekdayLabel}
+        </p>
+        <p className="mt-1 font-galmuri-7 text-galmuri-small text-[var(--muted-foreground)]" data-testid="life-rent" data-rent={rent} data-debt={life.rentDebtDays}>
+          {rent === "paid"
+            ? "Trọ tháng này: đã đóng"
+            : rent === "late"
+              ? `Nợ trọ: ${life.rentDebtDays} ngày`
+              : "Trọ đóng vào ngày 1"}
+        </p>
+        <div className="mt-2 flex flex-col gap-2">
+          {LIFE.foods.map((food) => {
+            const reason = mealBlocked(career, food.id);
+            return (
+              <Button
+                key={food.id}
+                type="button"
+                size="sm"
+                showArrow={false}
+                variant="outline"
+                disabled={reason != null}
+                aria-disabled={reason != null}
+                title={reason ?? food.label}
+                data-testid={`food-${food.id}`}
+                onClick={() => eat(food.id)}
+              >
+                {food.label} · {formatVnd(food.price)}
+                {food.health < 0 ? " · sức khỏe giảm" : ""}
+              </Button>
+            );
+          })}
+        </div>
       </PanelCard>
 
       <PanelCard className="px-3 py-1 lg:flex-1">

@@ -1,4 +1,4 @@
-/** Name, health, and mood stay stubbed until that sim loop exists. */
+/** The display name stays a placeholder. Health and mood live on the career player. */
 export type PlayerStats = {
   name: string;
   health: number;
