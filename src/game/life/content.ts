@@ -86,11 +86,11 @@ export type LifeConfig = {
   job_notice_pending_max: number;
   /** Days a job notice stays open. */
   job_notice_expire_days: number;
-  /** Days to finish an easy (tier 1) job. */
+  /** Days to finish an easy (tier 1) job. Version 18 counts this from the migration day. */
   job_deadline_easy: number;
-  /** Days to finish a mid (tier 2) job. */
+  /** Days to finish a mid (tier 2) job. Version 18 counts this from the migration day. */
   job_deadline_mid: number;
-  /** Days to finish a hard (tier 3+) job. */
+  /** Days to finish a hard (tier 3+) job. Version 18 counts this from the migration day. */
   job_deadline_hard: number;
   /** Reputation change when an accepted job misses its deadline. */
   job_late_reputation: number;
