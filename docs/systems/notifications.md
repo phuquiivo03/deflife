@@ -2,7 +2,7 @@
 
 Left column. Newest first. Empty copy stays “Chưa có thông báo.” **Đã đọc** still marks every stored row read, including a hunger row that this list does not draw. Clicking a row still marks that row read. An action still calls `runNoticeAction` and does nothing else.
 
-Hunger rows stay out of this list and out of the unread disc. `advanceHunger` writes them with id `hunger-<day>-<meals>` and action `eat`. `LifeNotice` has no kind, type, or source, and the icon and severity are shared with other rows, so `isHungerNotice` (`src/components/game/hunger-notice.ts`) matches that action or that id. The panel filters with it at render time. The feed still stores the row. Đói shows on the rice-bowl button under the room. The low Sức khỏe row stays listed and still counts: action `sleep`, id `sick-<day>`.
+Hunger rows stay out of this list and out of the unread disc. `advanceHunger` writes them with id `hunger-<day>-<meals>` and action `eat`. `LifeNotice` has no kind, type, or source, and the icon and severity are shared with other rows, so `isHungerNotice` (`src/components/game/hunger-notice.ts`) matches that action or that id. The panel filters with it at render time. The feed still stores the row. Đói shows on the rice-bowl button beside Đi ngủ on the HUD icon bar. The low Sức khỏe row stays listed and still counts: action `sleep`, id `sick-<day>`.
 
 Numbers live in `src/components/game/notifications.config.ts`.
 

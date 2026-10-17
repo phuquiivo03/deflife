@@ -58,15 +58,15 @@ The tooltip is `src/components/ui/tooltip.tsx` with the text “Đi ngủ”. Th
 
 The HUD **Cửa hàng** control is `StoreButton` (`src/components/game/StoreButton.tsx`): `PixelButton` variant `icon`, no text. The face is `icon_btn_store` (`icon_btn_store.png` 24×24, `icon_btn_store_x2.png` 48×48) drawn at 2× in the 9-slice center, so the button box is the icon plus the two slice borders. The outer size is read in `src/components/game/store-button.config.ts`.
 
-It sits at the trailing end of the room status bar, above the canvas, after Tiền and Ngày/giờ. **Đi ngủ** stays on the HUD icon bar. The gap on that bar is `HUD_ICON_GAP_PX` (8). The tooltip is the shared tooltip with the text “Cửa hàng”, and the button keeps that `aria-label`. Bar spacing is `ROOM_STATUS_BAR` in `src/components/game/shell-layout.config.ts`.
+It sits at the trailing end of the room status bar, above the canvas, after Tiền and Ngày/giờ. **Đi ngủ** stays on the HUD icon bar, with **Ăn** immediately before it. The gap on that bar is `HUD_ICON_GAP_PX` (8). The tooltip is the shared tooltip with the text “Cửa hàng”, and the button keeps that `aria-label`. Bar spacing is `ROOM_STATUS_BAR` in `src/components/game/shell-layout.config.ts`.
 
 The list opens in the shared modal (`src/components/ui/modal.tsx`) as a grid. Column counts are `STORE_GRID` in `src/components/game/store-grid.config.ts`: 4 from 1024px, 2 below that. Tabs **Nội thất**, **Phòng**, and **Tất cả** filter the catalog. Cells use `PixelButton`. An owned item has a mint border and the button **Đã có**. A locked item is dimmed, shows the lock icon, and keeps **Ghim**. Prices and the buy/pin actions are unchanged. Closing is Escape, a backdrop click, or **Đóng**. The notice action “Mở store” still sets `storeOpen`. The Thông báo panel no longer embeds the list.
 
 ## Meals
 
-The rice bowl under the room is `HungerDock` in `src/components/game/FoodPopup.tsx`. The face is `icon_btn_food` drawn at 2× (`foodArtFile`). That graphic is the whole control. There is no hunger badge on the bowl.
+The HUD **Ăn** control is `HungerDock` in `src/components/game/FoodPopup.tsx`. It is mounted on the HUD icon bar in `PlayerHudCard`, immediately before **Đi ngủ**. Sleep stays at the trailing edge of that bar. Both are `PixelButton` variant `icon` with the same outer size: `foodButtonMetrics` matches `sleepButtonMetrics` (the 24px native icon at 2× in the 9-slice center, plus the two slice borders). The face is `icon_btn_food` drawn at 2× (`foodArtFile`). The level is the tooltip, so the bar does not draw a word beside the bowl. There is no hunger badge on the bowl.
 
-The shared tooltip is `src/components/ui/tooltip.tsx`. The text is `foodHungerTip`: “Ăn · ” plus the level from `hungerLabel` (“No”, “Hơi đói”, “Đói”), for example “Ăn · Hơi đói”. The button `aria-label` uses that same string. The level word also sits beside the bowl.
+The shared tooltip is `src/components/ui/tooltip.tsx`. The text is `foodHungerTip`: “Ăn · ” plus the level from `hungerLabel` (“No”, “Hơi đói”, “Đói”), for example “Ăn · Hơi đói”. The button `aria-label` uses that same string. A click still opens the Ăn uống list. On a narrow screen the icon bar wraps and both buttons stay end-aligned.
 
 The bowl icon pulses with opacity and brightness. It does not move. Numbers are `HUNGER_BOWL_BLINK` in `src/components/game/food-dock.config.ts`. The CSS module is `src/components/game/food-dock.module.css`.
 
