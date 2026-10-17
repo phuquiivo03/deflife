@@ -152,6 +152,8 @@ There is **no f4 / `#15112F` inner line** and no padding between the purple body
 
 **Side panels** use the same layers, pads, corners, and inset shadow at scale 1 (`PanelChamferFrame`), in a softer rose-lavender so the deep purple canvas stays the focus. Both columns share one color: f1 `#6A4A66`, f2 `#F8E4F2` → `#E3B4D8`, f3 `#E7C6E2` / `#D08FCB` (page-gradient pink) / `#E4B7D8`. The well is `--panel-bg` (`#F3F1F8`). Glow is `.panel-frame-glow`, lighter than the room. Inner notification and skill cards stay lavender `PanelCard`s.
 
+**Thông báo** rows are compact: 8px padding, Galmuri7 at 16px, and the message clamps to two lines (the clock shares the first line). The header unread count is `ui_badge_unread_lg` at 16px, with an 8px white digit and a light opacity pulse (`prefers-reduced-motion` holds the disc still). Pay rent, view job, and open store are `PixelButton` `icon` actions (`icon_action_pay_rent`, `icon_action_view_job`, `icon_action_open_store`) with the old label as the tooltip and `aria-label`. Open store still runs the notice action that opens the store modal. Eat and sleep glyphs are in the same map. A label with no glyph stays a text button. Sizes: `src/components/game/notifications.config.ts` and [notifications.md](../systems/notifications.md).
+
 Canvas sizing `ref` stays on the room-size cap box; the visible frame wraps the canvas inside it. Pointer hit-testing and `?debug=1` unchanged.
 
 ---
@@ -175,7 +177,7 @@ Chrome hints use `src/components/ui/tooltip.tsx`. Numbers live in `src/component
 | `enterMs` | 120 | Fade and 4px slide. `prefers-reduced-motion` skips it |
 | `disableHoverableContent` | true | Leaving the trigger closes the tip. The tip has no controls |
 
-Hover opens the tip after `openDelayMs`. Keyboard focus opens it immediately and sets `aria-describedby` on the trigger while the tip is open. A coarse pointer opens it on tap; a tap outside, or Escape, closes it. The character-card trait row uses this for the bonus line. The HUD shop and sleep icons use it for “Cửa hàng” and “Đi ngủ”.
+Hover opens the tip after `openDelayMs`. Keyboard focus opens it immediately and sets `aria-describedby` on the trigger while the tip is open. A coarse pointer opens it on tap; a tap outside, or Escape, closes it. The character-card trait row uses this for the bonus line. The HUD shop and sleep icons use it for “Cửa hàng” and “Đi ngủ”. Notice actions use it for “Trả trọ”, “Xem job”, and “Mở store”.
 
 ## Modal
 
