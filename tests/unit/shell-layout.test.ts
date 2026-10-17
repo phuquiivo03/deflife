@@ -2,7 +2,16 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { MODAL } from "@/components/ui/modal.config";
-import { SHELL_LAYOUT, shellPanelMaxHeight, shellPanelVars } from "@/components/game/shell-layout.config";
+import {
+  CENTER_COLUMN_MAX_PX,
+  ROOM_STATUS_BAR,
+  ROOM_VIEWPORT_W,
+  SHELL_LAYOUT,
+  roomStatusBarVars,
+  roomStatusClockLabel,
+  shellPanelMaxHeight,
+  shellPanelVars,
+} from "@/components/game/shell-layout.config";
 
 describe("desktop side panels", () => {
   it("caps the columns at the viewport minus the header and both margins", () => {
@@ -51,5 +60,31 @@ describe("desktop side panels", () => {
       "utf8",
     );
     expect(player).toContain("overflow-y-auto");
+  });
+
+  it("sizes the room status bar from the room cap and keeps it out of the sticky rules", () => {
+    expect(ROOM_VIEWPORT_W).toBe(480);
+    expect(CENTER_COLUMN_MAX_PX).toBe(520);
+    expect(ROOM_STATUS_BAR.maxWidthPx).toBe(CENTER_COLUMN_MAX_PX);
+    expect(ROOM_STATUS_BAR.maxWidthPx).toBeGreaterThan(ROOM_VIEWPORT_W);
+    expect(ROOM_STATUS_BAR.separator).toBe(" · ");
+    expect(roomStatusClockLabel(1, "T2", "08:12", "Sáng")).toBe("Ngày 1 · T2 · 08:12 Sáng");
+    const vars = roomStatusBarVars();
+    expect(vars["--room-status-max"]).toBe("520px");
+    expect(vars["--room-status-gap"]).toBe(`${ROOM_STATUS_BAR.gapBelowPx}px`);
+    expect(vars["--room-status-cluster"]).toBe(`${ROOM_STATUS_BAR.clusterGapPx}px`);
+    const css = readFileSync(
+      join(process.cwd(), "src/components/game/shell-layout.module.css"),
+      "utf8",
+    );
+    const [before, desktop = ""] = css.split(`@media (min-width: ${SHELL_LAYOUT.desktopMinPx}px)`);
+    expect(before).toContain(".statusBar");
+    expect(before).toContain("flex-wrap");
+    expect(before).toContain("margin-left: auto");
+    expect(before).not.toContain("max-height");
+    expect(desktop).not.toContain(".statusBar");
+    const shell = readFileSync(join(process.cwd(), "src/components/game/GameShell.tsx"), "utf8");
+    expect(shell).toContain("ROOM_VIEWPORT_W");
+    expect(shell).not.toContain("const ROOM_VIEWPORT_W");
   });
 });

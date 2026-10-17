@@ -55,13 +55,25 @@ describe("store button metrics", () => {
     expect(STORE_MODAL_MAX_PX).toBe(280);
   });
 
-  it("puts the shop icon on the HUD bar and keeps the notice list", () => {
+  it("puts the shop icon on the room status bar and keeps sleep on the HUD", () => {
     const hud = readFileSync(join(process.cwd(), "src/components/game/PlayerHudCard.tsx"), "utf8");
+    const shell = readFileSync(join(process.cwd(), "src/components/game/GameShell.tsx"), "utf8");
     const button = readFileSync(join(process.cwd(), "src/components/game/StoreButton.tsx"), "utf8");
     const notices = readFileSync(join(process.cwd(), "src/components/game/NotificationsPanel.tsx"), "utf8");
-    expect(hud).toContain("hud-icon-bar");
-    expect(hud).toContain("<StoreButton");
-    expect(hud.indexOf("<StoreButton")).toBeLessThan(hud.indexOf("<SleepButton"));
+    const statusAt = hud.indexOf('data-testid="room-status-bar"');
+    const iconBarAt = hud.indexOf('data-testid="hud-icon-bar"');
+    expect(statusAt).toBeGreaterThan(-1);
+    expect(iconBarAt).toBeGreaterThan(statusAt);
+    expect(hud.indexOf("<StoreButton")).toBeGreaterThan(statusAt);
+    expect(hud.indexOf("<StoreButton")).toBeLessThan(iconBarAt);
+    expect(hud.indexOf('data-testid="hud-money"')).toBeLessThan(iconBarAt);
+    expect(hud.indexOf('data-testid="game-clock"')).toBeLessThan(iconBarAt);
+    expect(hud.split("<StoreButton").length - 1).toBe(1);
+    expect(hud.split('data-testid="hud-money"').length - 1).toBe(1);
+    expect(hud.split('data-testid="game-clock"').length - 1).toBe(1);
+    expect(hud.indexOf("<SleepButton")).toBeGreaterThan(iconBarAt);
+    expect(shell.indexOf("<RoomStatusBar")).toBeGreaterThan(-1);
+    expect(shell.indexOf("<RoomStatusBar")).toBeLessThan(shell.indexOf("<RoomChamferFrame"));
     expect(button).toContain('variant="icon"');
     expect(button).toContain('data-icon-key="icon_btn_store"');
     expect(button).toContain("aria-label={STORE_LABEL}");

@@ -11,7 +11,7 @@ export const STORE_LABEL = "Cửa hàng";
 /** Native size of `icon_btn_store`. The HUD draws the `_x2` sheet at 2×. */
 export const STORE_ICON_NATIVE_PX = 24;
 
-/** CSS pixels between the shop icon and the sleep icon. */
+/** CSS pixels between icons on the HUD icon bar. Đi ngủ stays on that bar. */
 export const HUD_ICON_GAP_PX = 8;
 
 /**
