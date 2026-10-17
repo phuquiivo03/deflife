@@ -41,6 +41,8 @@ export type TaskEventDef = {
   id: string;
   name: string;
   log: string;
+  /** Client changed the requirements. Prints a yellow WARNING line. */
+  warning: boolean;
   bug_delta: number;
   time_delta_sec: number;
 };
@@ -85,6 +87,11 @@ export type TaskRunConfig = {
   max_retries: number;
   fail_reputation: number;
   event_chance: number;
+  error_text: string;
+  terminal_warn_blinks: number;
+  terminal_error_blinks: number;
+  terminal_blink_ms: number;
+  terminal_shake_ms: number;
   bugs: BugFormula;
   bug_motion: BugMotionConfig;
   events: TaskEventDef[];

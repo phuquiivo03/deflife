@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { playCueKey, startLoopKey, stopLoopKey } from "@/game/audio/client";
 import { typingLoopKey } from "@/game/audio/cues";
 import { SIM_CATALOG } from "@/game/career/content";
 import { formatVnd } from "@/lib/format-currency";
 import { jobTimeScale } from "@/game/life/traits";
 import { TASK_RUN, taskDurationSec } from "@/game/task-run/content";
+import { taskEventFlash } from "@/game/task-run/formula";
 import { bugHitPx, bugMotionRand, spawnBugs, stepBug, type BugBody } from "@/game/task-run/motion";
 import { canRetry } from "@/game/task-run/machine";
 import { primarySkillId, ticketForSkill } from "@/game/task-run/apply";
@@ -89,9 +90,9 @@ export function TaskRunOverlay() {
         </h2>
         <TerminalWindow status={status}>
           {terminalLines.length > 0 ? (
-            <ul data-testid="terminal-warns">
+            <ul data-testid="terminal-warns" style={flashStyle()}>
               {terminalLines.map((line) => (
-                <li key={line} className="terminal-sage">
+                <li key={line} className={line.startsWith("> WARN:") ? "terminal-event-warn" : "terminal-sage"}>
                   {line}
                 </li>
               ))}
@@ -272,7 +273,7 @@ function BuildStep({ run, timeScale }: { run: TaskRun; timeScale: number }) {
             {line}
           </li>
         ))}
-        {event && progress > 0.15 ? <li>{event.log}</li> : null}
+        {event && progress > 0.15 ? <EventFlash event={event} /> : null}
       </ul>
       {showChoice && !run.build ? (
         <div className="terminal-popup mt-4" data-testid="task-build-choice">
@@ -290,6 +291,34 @@ function BuildStep({ run, timeScale }: { run: TaskRun; timeScale: number }) {
       ) : null}
       {run.build ? <p className="terminal-sage mt-3">đang đóng gói nốt…</p> : null}
     </div>
+  );
+}
+
+function flashStyle(): CSSProperties {
+  return {
+    ["--terminal-blinks" as string]: TASK_RUN.terminal_warn_blinks,
+    ["--terminal-error-blinks" as string]: TASK_RUN.terminal_error_blinks,
+    ["--terminal-blink-ms" as string]: `${TASK_RUN.terminal_blink_ms}ms`,
+    ["--terminal-shake-ms" as string]: `${TASK_RUN.terminal_shake_ms}ms`,
+  };
+}
+
+function EventFlash({ event }: { event: (typeof TASK_RUN.events)[number] }) {
+  const flash = taskEventFlash(event, TASK_RUN.error_text);
+  return (
+    <>
+      {flash.warning ? (
+        <li className="terminal-event-warn" data-testid="terminal-event-warn" style={flashStyle()}>
+          {flash.warning}
+        </li>
+      ) : null}
+      {flash.error ? (
+        <li className="terminal-event-error" data-testid="terminal-event-error" style={flashStyle()}>
+          {flash.error}
+        </li>
+      ) : null}
+      <li className="terminal-sage">{event.log}</li>
+    </>
   );
 }
 

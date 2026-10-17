@@ -13,7 +13,7 @@ import {
   startTask,
 } from "@/game/task-run/apply";
 import { TASK_RUN } from "@/game/task-run/content";
-import { bugCount, rollTaskEvent } from "@/game/task-run/formula";
+import { bugCount, rollTaskEvent, taskEventFlash } from "@/game/task-run/formula";
 import { canRetry, isCleared } from "@/game/task-run/machine";
 import { bugHitPx, spawnBugs, stepBug } from "@/game/task-run/motion";
 
@@ -250,5 +250,32 @@ describe("task run state machine", () => {
     const twice = rollTaskEvent(42, 1, TASK_RUN.events);
     expect(once?.id).toBe(twice?.id);
     expect(rollTaskEvent(42, 0, TASK_RUN.events)).toBeNull();
+  });
+});
+
+describe("task event lines", () => {
+  it("warns on a requirement change and errors when the event adds a bug", () => {
+    expect(TASK_RUN.terminal_warn_blinks).toBe(3);
+    expect(TASK_RUN.terminal_error_blinks).toBe(3);
+    expect(TASK_RUN.error_text).toBe("có bug");
+    for (const event of TASK_RUN.events) {
+      const flash = taskEventFlash(event, TASK_RUN.error_text);
+      expect(flash.warning != null || flash.error != null).toBe(true);
+    }
+    const scope = TASK_RUN.events.find((event) => event.id === "scope");
+    const offline = TASK_RUN.events.find((event) => event.id === "offline");
+    const womm = TASK_RUN.events.find((event) => event.id === "womm");
+    expect(taskEventFlash(scope!, TASK_RUN.error_text)).toEqual({
+      warning: "> WARNING: Khách đổi yêu cầu",
+      error: "> ERROR: có bug",
+    });
+    expect(taskEventFlash(offline!, TASK_RUN.error_text)).toEqual({
+      warning: "> WARNING: Mất mạng",
+      error: null,
+    });
+    expect(taskEventFlash(womm!, TASK_RUN.error_text)).toEqual({
+      warning: null,
+      error: "> ERROR: có bug",
+    });
   });
 });
