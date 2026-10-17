@@ -642,7 +642,11 @@ export function noticesForBills(before: CareerState, after: CareerState, day: nu
   return step(withFeed(after, feed), { warns });
 }
 
-export function openDiary(state: CareerState, catalog: SimCatalog): CareerState {
+export function openDiary(
+  state: CareerState,
+  catalog: SimCatalog,
+  slept?: { day: number; clock: string } | null,
+): CareerState {
   const feed = feedOf(state);
   const xp = totalSkillXp(state, catalog);
   const line = LIFE_EVENTS.diary_lines[(state.players.game_day - 1) % LIFE_EVENTS.diary_lines.length] ?? "";
@@ -662,8 +666,20 @@ export function openDiary(state: CareerState, catalog: SimCatalog): CareerState 
     rent: books.rent,
     shop: books.shop,
     remaining: books.remaining,
+    sleptDay: slept ? slept.day : null,
+    sleptAt: slept && /^\d{2}:\d{2}$/.test(slept.clock) ? slept.clock : null,
   };
   return withFeed(state, { ...feed, diary });
+}
+
+/** Notepad date line: holiday, weekday, and the clock the player went to sleep. */
+export function diaryWhen(diary: LifeDiary): string {
+  const day = diary.sleptDay ?? diary.day;
+  const parts: string[] = [];
+  if (holidayOn(day)) parts.push("Ngày lễ");
+  parts.push(calendar(day).weekdayLabel);
+  if (diary.sleptAt) parts.push(`ngủ lúc ${diary.sleptAt}`);
+  return parts.join(" · ");
 }
 
 export function captureSnapshot(state: CareerState, catalog: SimCatalog): CareerState {

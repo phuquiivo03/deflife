@@ -4,7 +4,9 @@
 
 import { useEffect, useState } from "react";
 import { LIFE_EVENTS, lifeEventById } from "@/game/life/events-content";
+import { diaryWhen } from "@/game/life/events";
 import { m5AssetPath, type M5AssetKey } from "@/game/life/assets";
+import type { LifeDiary } from "@/game/career/types";
 import { useGameStore } from "@/game/state/store";
 import { Button } from "@/components/ui/button";
 import { formatVnd } from "@/lib/format-currency";
@@ -143,20 +145,19 @@ export function LifeStage() {
               </div>
             </div>
             <ul className="mt-2 space-y-1 font-galmuri-7 text-galmuri-small text-[var(--foreground)]">
+              <li data-testid="diary-when">{diaryWhen(diary)}</li>
               <li data-testid="diary-earned" className="text-[var(--accent-mint)]">
                 Kiếm được +{formatVnd(diary.earned)}
               </li>
               <li data-testid="diary-spent" className="text-[var(--accent-coral)]">
                 Đã tiêu −{formatVnd(diary.spent)}
               </li>
-              {diary.food > 0 ? <li data-testid="diary-food">Ăn −{formatVnd(diary.food)}</li> : null}
-              {diary.rent > 0 ? <li data-testid="diary-rent">Trọ −{formatVnd(diary.rent)}</li> : null}
-              {diary.shop > 0 ? <li data-testid="diary-shop">Mua đồ −{formatVnd(diary.shop)}</li> : null}
+              <DiarySpends diary={diary} />
               <li data-testid="diary-left">Còn lại {formatVnd(diary.remaining)}</li>
-              <li>XP {signed(diary.xp)}</li>
-              <li>Sức khỏe {signed(diary.health)}</li>
-              <li>Tinh thần {signed(diary.mood)}</li>
-              <li>Năng lượng {signed(diary.energy)}</li>
+              <li data-testid="diary-stats">
+                XP {signed(diary.xp)} · Sức khỏe {signed(diary.health)} · Tinh thần {signed(diary.mood)} · Năng lượng{" "}
+                {signed(diary.energy)}
+              </li>
               <li data-testid="diary-pin">{diary.pin || "Chưa ghim món."}</li>
             </ul>
             <p className="mt-2 font-galmuri-7 text-galmuri-small text-[var(--foreground)]">{diary.line}</p>
@@ -170,6 +171,24 @@ export function LifeStage() {
 function signed(value: number): string {
   const shown = Math.round(value);
   return shown > 0 ? `+${shown}` : `${shown}`;
+}
+
+function DiarySpends({ diary }: { diary: LifeDiary }) {
+  const parts: { id: string; text: string }[] = [];
+  if (diary.food > 0) parts.push({ id: "diary-food", text: `Ăn −${formatVnd(diary.food)}` });
+  if (diary.rent > 0) parts.push({ id: "diary-rent", text: `Trọ −${formatVnd(diary.rent)}` });
+  if (diary.shop > 0) parts.push({ id: "diary-shop", text: `Mua đồ −${formatVnd(diary.shop)}` });
+  if (parts.length === 0) return null;
+  return (
+    <li data-testid="diary-breakdown">
+      {parts.map((part, index) => (
+        <span key={part.id}>
+          {index > 0 ? " · " : null}
+          <span data-testid={part.id}>{part.text}</span>
+        </span>
+      ))}
+    </li>
+  );
 }
 
 export function LifeRoomFx() {

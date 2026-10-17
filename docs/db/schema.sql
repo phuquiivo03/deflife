@@ -184,7 +184,7 @@ CREATE TABLE player_life_feed (
   snapshot_health double precision NOT NULL,
   snapshot_mood double precision NOT NULL,
   snapshot_energy double precision NOT NULL,
-  diary jsonb,
+  diary jsonb, -- v16 adds slept_day and slept_at inside this document; older diaries leave them null
   -- Persist v14. Empty for an older save. Spent fields are positive amounts.
   purse jsonb NOT NULL,
   banner_day integer,

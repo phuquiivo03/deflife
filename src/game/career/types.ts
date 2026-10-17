@@ -207,6 +207,10 @@ export type LifeDiary = LifeSnapshot & {
   rent: number;
   shop: number;
   remaining: number;
+  /** Calendar day the player went to sleep. Null on a diary saved before v16. */
+  sleptDay: number | null;
+  /** Clock label for that sleep, `HH:MM`. Null when the night was not recorded. */
+  sleptAt: string | null;
 };
 
 /** Owned store items and the one pinned target. A pre-store save owns nothing. */

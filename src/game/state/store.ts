@@ -370,7 +370,8 @@ export const useGameStore = create<GameState>()(
         );
       },
       onWake: (fromTotalMinutes) => {
-        const diary = openDiary(get().career, SIM_CATALOG);
+        const slept = snapshot(fromTotalMinutes);
+        const diary = openDiary(get().career, SIM_CATALOG, { day: slept.day, clock: slept.clockLabel });
         playCueKey("diaryFlip");
         const result = applyWake(diary, hoursUntilWake(snapshot(fromTotalMinutes).minuteOfDay));
         const snapped = captureSnapshot(result.state, SIM_CATALOG);

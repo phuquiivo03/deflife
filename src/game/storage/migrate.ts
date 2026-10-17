@@ -362,6 +362,8 @@ function normalizeDiary(value: unknown, remainingFallback: number): LifeDiary | 
     rent: Math.max(0, signed(value.rent)),
     shop: Math.max(0, signed(value.shop)),
     remaining: value.remaining == null ? remainingFallback : signed(value.remaining),
+    sleptDay: value.sleptDay == null ? null : num(value.sleptDay, 1),
+    sleptAt: typeof value.sleptAt === "string" && /^\d{2}:\d{2}$/.test(value.sleptAt) ? value.sleptAt : null,
   };
 }
 
@@ -426,6 +428,7 @@ function strOrNull(value: unknown): string | null {
  * version 11 Cẩn thận is rolled once and then marked. Version 13 marks
  * `introSeen` so an older save does not open the creation popup. Version 14
  * starts `feed.purse` empty. Version 15 sets `life.slotsSinceMeal` to 0.
+ * Version 16 clears `sleptDay` and `sleptAt` on an older diary.
  * Money, skills, and progress are kept. See docs/systems/save.md.
  */
 export function migrateSave(
@@ -488,6 +491,12 @@ export function migrateSave(
   }
   if (version < 15) {
     career = { ...career, life: { ...career.life, slotsSinceMeal: 0 } };
+  }
+  if (version < 16 && career.feed.diary) {
+    career = {
+      ...career,
+      feed: { ...career.feed, diary: { ...career.feed.diary, sleptDay: null, sleptAt: null } },
+    };
   }
 
   return {

@@ -16,6 +16,7 @@ import {
   forceSmallEvent,
   hackathonWinChance,
   noteEmptyDay,
+  diaryWhen,
   openDiary,
   payOutstandingRent,
   pickWeighted,
@@ -257,6 +258,10 @@ describe("life events", () => {
     expect(diary.feed.diary?.remaining).toBe(poorer.players.money);
     expect(diary.feed.diary?.health).toBe(-3);
     expect(diary.feed.diary?.line).toBe(LIFE_EVENTS.diary_lines[0]);
+    expect(diary.feed.diary?.sleptAt).toBeNull();
+    const dated = openDiary(poorer, SIM_CATALOG, { day: 1, clock: "23:40" }).feed.diary;
+    expect(dated?.sleptAt).toBe("23:40");
+    expect(dated ? diaryWhen(dated) : "").toBe("Ngày lễ · T2 · ngủ lúc 23:40");
 
     const eaten = eatMeal(start(), "noodles").state;
     const afterFood = openDiary(eaten, SIM_CATALOG).feed.diary;
