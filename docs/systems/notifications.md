@@ -23,14 +23,14 @@ The clock sits on the first line, in the muted color, inside the same clamp.
 
 ## Actions
 
-`PixelButton` variant `icon`. The face is the shared icon 9-slice at 2× (48 CSS px, center 16 CSS px). The glyph is the native `icon_action_*` (16×16), so it fills that center. Tooltip text and `aria-label` are the old button label. The tip is `src/components/ui/tooltip.tsx`.
+`PixelButton` variant `secondary`. The face is the shared 9-slice at 2× (48 CSS px tall, center 16 CSS px). The glyph is the native `icon_action_*` (16×16) and the short label sits beside it in Galmuri7 at `NOTICE_ACTION_LABEL_PX` (16). The row keeps the 8px card padding and the two-line clamp; the button sits under the message so the copy keeps the card width. `aria-label` and the tooltip are that same label. The tip is `src/components/ui/tooltip.tsx`.
 
 | Action | Label | Glyph |
 |--------|-------|-------|
 | `payRent` | Trả trọ | `icon_action_pay_rent` (money stack) |
 | `viewJobs` | Xem job | `icon_action_view_job` (ticket) |
 | `openStore` | Mở store | `icon_action_open_store` (bag). Still `runNoticeAction("openStore")`, which opens the store modal |
-| `eat` | Đi ăn | `icon_action_eat` (rice bowl) |
-| `sleep` | Đi ngủ | `icon_action_sleep` (bed) |
+| `eat` | Ăn | `icon_action_eat` (rice bowl) |
+| `sleep` | Ngủ | `icon_action_sleep` (bed) |
 
-The notice schema emits `payRent`, `viewJobs`, and `openStore` only. `eat` and `sleep` are in the same map so a later action id picks up the glyph without a new button. A label with no glyph uses the old outline text button and the same click.
+A click calls `runNoticeAction` with the action id, including `eat` and `sleep`. A label with no glyph uses the outline text button and the same click. The list region is `overflow-y: auto` inside the desktop panel cap (see the layout section of [DESIGN_SYSTEM.md](../design/DESIGN_SYSTEM.md)).

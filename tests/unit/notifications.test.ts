@@ -6,6 +6,7 @@ import { BUTTON_UI_SCALE, buttonMetrics } from "@/components/ui/button/config";
 import {
   NOTICE_ACTION_ICONS,
   NOTICE_ACTION_ICON_NATIVE_PX,
+  NOTICE_ACTION_LABEL_PX,
   NOTICE_ACTION_LABELS,
   NOTICE_BADGE_COUNT_CAP,
   NOTICE_BADGE_COUNT_PX,
@@ -81,13 +82,15 @@ describe("notification metrics", () => {
     expect(style["--notice-badge-pulse"]).toBe("1600ms");
   });
 
-  it("fits the native action glyph in the 2× icon-button center", () => {
+  it("fits the native glyph and a 16px label in the shared button", () => {
     const metrics = noticeActionButtonMetrics();
     const frame = buttonMetrics(BUTTON_UI_SCALE);
-    expect(metrics.buttonPx).toBe(frame.iconPx);
-    expect(metrics.buttonPx).toBeGreaterThanOrEqual(44);
+    expect(metrics.minHeightPx).toBe(frame.minHeightPx);
+    expect(metrics.minHeightPx).toBeGreaterThanOrEqual(44);
     expect(metrics.centerPx).toBe(NOTICE_ACTION_ICON_NATIVE_PX);
     expect(metrics.glyphPx).toBe(16);
+    expect(metrics.labelPx).toBe(NOTICE_ACTION_LABEL_PX);
+    expect(NOTICE_ACTION_LABEL_PX).toBe(16);
   });
 });
 
@@ -110,17 +113,19 @@ describe("notification actions", () => {
     });
     expect(resolveNoticeAction("eat")).toEqual({
       kind: "icon",
-      label: "Đi ăn",
+      label: "Ăn",
       iconKey: "icon_action_eat",
     });
     expect(resolveNoticeAction("sleep")).toEqual({
       kind: "icon",
-      label: "Đi ngủ",
+      label: "Ngủ",
       iconKey: "icon_action_sleep",
     });
     expect(NOTICE_ACTION_LABELS.payRent).toBe("Trả trọ");
     expect(NOTICE_ACTION_LABELS.viewJobs).toBe("Xem job");
     expect(NOTICE_ACTION_LABELS.openStore).toBe("Mở store");
+    expect(NOTICE_ACTION_LABELS.eat).toBe("Ăn");
+    expect(NOTICE_ACTION_LABELS.sleep).toBe("Ngủ");
   });
 
   it("falls back to the text button when a label has no glyph", () => {
@@ -128,7 +133,7 @@ describe("notification actions", () => {
     expect(resolveNoticeAction("unknown")).toBeNull();
   });
 
-  it("renders icon actions with the shared tooltip and leaves the store list out", () => {
+  it("renders the glyph and the label, and forwards every id including eat and sleep", () => {
     const source = readFileSync(
       join(process.cwd(), "src/components/game/NotificationsPanel.tsx"),
       "utf8",
@@ -137,15 +142,19 @@ describe("notification actions", () => {
       join(process.cwd(), "src/components/game/notifications.module.css"),
       "utf8",
     );
-    expect(source).toContain('variant="icon"');
+    expect(source).toContain('variant="secondary"');
+    expect(source).not.toContain('variant="icon"');
     expect(source).toContain("aria-label={control.label}");
+    expect(source).toContain("{control.label}");
     expect(source).toContain("TooltipContent");
+    expect(source).toContain('data-action-kind="icon-label"');
     expect(source).toContain("runNoticeAction");
     expect(source).toContain("noticeBadgeFile()");
     expect(source).toContain('data-action-kind="text"');
     expect(source).not.toContain("title=");
     expect(source).not.toContain("StorePanel");
     expect(source).not.toContain("storeOpen");
+    expect(css).toContain("overflow-y: auto");
     expect(css).toContain("line-clamp: var(--notice-lines)");
     expect(css).toContain("@media (prefers-reduced-motion: reduce)");
     expect(css).toMatch(/animation:\s*none/);

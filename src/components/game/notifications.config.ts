@@ -60,18 +60,21 @@ export const NOTICE_LIST = {
   lines: 2,
 } as const;
 
-/** Labels the old text buttons showed. Icon buttons keep these as the accessible name. */
+/**
+ * Short labels drawn next to the glyph. `eat` and `sleep` are included so a
+ * notice with that action id renders here. The store handler still branches
+ * the three schema actions; the button passes the id through either way.
+ */
 export const NOTICE_ACTION_LABELS = {
   payRent: "Trả trọ",
   viewJobs: "Xem job",
   openStore: "Mở store",
-  eat: "Đi ăn",
-  sleep: "Đi ngủ",
+  eat: "Ăn",
+  sleep: "Ngủ",
 } as const satisfies Record<NoticeAction | "eat" | "sleep", string>;
 
 /**
- * Spec glyphs. `eat` and `sleep` are mapped here; the notice schema does not
- * emit them. A labeled action with no entry falls back to the text button.
+ * Spec glyphs. A labeled action with no entry falls back to the text button.
  */
 export const NOTICE_ACTION_ICONS = {
   payRent: "icon_action_pay_rent",
@@ -104,19 +107,23 @@ export function actionIconFile(key: NoticeActionIconKey, scale: 1 | 2 = 1): stri
   return scale === 2 ? `${key}_x2.png` : `${key}.png`;
 }
 
+/** Galmuri7. Fits the 16px center of the shared 2× button and stays on one line. */
+export const NOTICE_ACTION_LABEL_PX = 16;
+
 /**
- * The icon-button face is the shared 9-slice at 2×. Its center is 16 CSS px,
- * which matches the native action glyph, so the button stays the 48px face
- * and the glyph is the native sheet.
+ * Labeled action. The face is the shared secondary 9-slice at 2× (48 CSS px
+ * tall, center 16 CSS px). The glyph is the native `icon_action_*` sheet,
+ * which fills that center, and the label sits beside it.
  */
 export function noticeActionButtonMetrics(scale: ButtonScale = BUTTON_UI_SCALE) {
   const frame = buttonMetrics(scale);
   const centerPx = frame.iconPx - frame.slicePx * 2;
   return {
     scale,
-    buttonPx: frame.iconPx,
+    minHeightPx: frame.minHeightPx,
     centerPx,
-    glyphPx: centerPx,
+    glyphPx: NOTICE_ACTION_ICON_NATIVE_PX,
+    labelPx: NOTICE_ACTION_LABEL_PX,
   };
 }
 

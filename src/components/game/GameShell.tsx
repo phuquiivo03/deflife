@@ -28,6 +28,9 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { t } from "@/lib/locale";
 import { STAGE_LABELS } from "@/lib/stage-labels";
+import { cn } from "@/lib/utils";
+import { shellPanelVars } from "./shell-layout.config";
+import shellStyles from "./shell-layout.module.css";
 
 const stageIcons: Record<StageId, React.ReactNode> = {
   student: <Backpack className="h-4 w-4" strokeWidth={2} />,
@@ -140,7 +143,7 @@ export function GameShell({ iconFiles = [] }: { iconFiles?: readonly string[] })
     : { width: "100%", maxWidth: ROOM_VIEWPORT_W, minHeight: 200, aspectRatio: "427 / 240" };
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col lg:h-screen lg:max-h-screen lg:overflow-hidden">
       <header className="relative z-10 flex min-h-14 shrink-0 items-center gap-3 border-b border-white/15 bg-[var(--panel-bg)]/90 px-3 backdrop-blur-sm md:px-4">
         <span className="font-galmuri-11 text-galmuri-title-lg text-[var(--foreground)]">
           devlife
@@ -192,8 +195,14 @@ export function GameShell({ iconFiles = [] }: { iconFiles?: readonly string[] })
       </header>
 
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto lg:items-center lg:justify-[safe_center] lg:px-4 lg:py-6">
-      <div className="relative flex min-h-0 w-full flex-1 flex-col lg:grid lg:w-full lg:max-w-[1200px] lg:flex-none lg:grid-cols-[320px_minmax(0,1fr)_320px] lg:items-stretch lg:gap-5">
-        <aside className="order-2 flex min-h-0 flex-col p-3 lg:order-1 lg:h-full lg:p-0">
+      <div
+        className="relative flex min-h-0 w-full flex-1 flex-col lg:grid lg:w-full lg:max-w-[1200px] lg:flex-none lg:grid-cols-[320px_minmax(0,1fr)_320px] lg:items-stretch lg:gap-5"
+        style={shellPanelVars()}
+      >
+        <aside
+          className={cn("order-2 flex min-h-0 flex-col p-3 lg:order-1 lg:p-0", shellStyles.column)}
+          data-side-panel="notices"
+        >
           <PanelChamferFrame>
             <NotificationsPanel />
           </PanelChamferFrame>
@@ -225,7 +234,10 @@ export function GameShell({ iconFiles = [] }: { iconFiles?: readonly string[] })
           <TaskRunOverlay />
         </main>
 
-        <aside className="order-3 flex min-h-0 flex-col p-3 lg:h-full lg:p-0">
+        <aside
+          className={cn("order-3 flex min-h-0 flex-col p-3 lg:p-0", shellStyles.column)}
+          data-side-panel="player"
+        >
           <PanelChamferFrame>
             <Tabs
               value={sidebarTab}
