@@ -9,6 +9,7 @@ import { getRoom } from "@/game/content";
 import { useGameStore } from "@/game/state/store";
 import { SceneCanvas } from "./SceneCanvas";
 import { LifeRoomFx, LifeStage } from "./LifeStage";
+import { CharacterIntro } from "./CharacterIntro";
 import { CustomizePanel } from "./CustomizePanel";
 import { NotificationsPanel } from "./NotificationsPanel";
 import { PlayerInfoPanel } from "./PlayerInfoPanel";
@@ -259,6 +260,7 @@ export function GameShell({ iconFiles = [] }: { iconFiles?: readonly string[] })
         </aside>
       </div>
       </div>
+      <CharacterIntro />
     </div>
   );
 }

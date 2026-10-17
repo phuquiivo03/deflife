@@ -22,6 +22,8 @@ import {
 import {
   extrovertHomeMood,
   foodPrice,
+  introIndex,
+  INTRO_SPIN_MS,
   isNightOwlHour,
   jobTimeScale,
   rollTrait,
@@ -46,6 +48,19 @@ function skillXp(state: ReturnType<typeof career>, id: string) {
 }
 
 describe("personality", () => {
+  it("spins the creation icons for 1.5s and lands on the rolled trait", () => {
+    expect(INTRO_SPIN_MS).toBe(1500);
+    expect(career("optimist").players.introSeen).toBe(false);
+    expect(introIndex(0, 1500, 5).stopped).toBe(false);
+    expect(introIndex(1499, 1500, 5).stopped).toBe(false);
+    expect(introIndex(1500, 1500, 5)).toEqual({ index: 5, stopped: true });
+    const seen = new Set<number>();
+    for (let elapsed = 0; elapsed < 1500; elapsed += 100) {
+      seen.add(introIndex(elapsed, 1500, 5).index);
+    }
+    expect(seen.size).toBeGreaterThan(1);
+  });
+
   it("rolls exactly one of the six traits", () => {
     expect(TRAIT_IDS).toHaveLength(6);
     expect(rollTrait(() => 0)).toBe("night_owl");
@@ -252,6 +267,7 @@ describe("personality", () => {
     expect(saved.career.players.money).toBe(123_456);
     expect(saved.career.players.trait).toBe("night_owl");
     expect(saved.career.players.traitRolled).toBe(true);
+    expect(saved.career.players.introSeen).toBe(true);
     expect(saved.career.players.freelance_completed).toBe(2);
     expect(saved.career.player_skills.find((row) => row.skill_id === "frontend")).toEqual({
       skill_id: "frontend",
@@ -314,6 +330,19 @@ describe("personality", () => {
     );
     expect(marked.career.players.trait).toBe("careful");
     expect(marked.career.players.traitRolled).toBe(true);
+
+    const pending = migrateSave(
+      {
+        stage: "student",
+        totalMinutes: 480,
+        career: { players: { money: 10, trait: "frugal", traitRolled: true, introSeen: false } },
+      },
+      13,
+      () => 0,
+    );
+    expect(pending.career.players.trait).toBe("frugal");
+    expect(pending.career.players.introSeen).toBe(false);
+    expect(pending.career.players.money).toBe(10);
   });
 
   it("uses the approved trait sheets at 16 and 32", () => {

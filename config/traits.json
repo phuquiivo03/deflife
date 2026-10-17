@@ -1,6 +1,8 @@
 {
   "migration_trait": "careful",
   "extrovertHomePenalty": false,
+  "intro_spin_ms": 1500,
+  "intro_flash_ms": 280,
   "night_from_minute": 1320,
   "night_until_minute": 360,
   "traits": [

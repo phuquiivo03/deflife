@@ -672,6 +672,22 @@ body {
   animation-fill-mode: forwards;
 }
 
+@keyframes intro-flash {
+  0%,
+  100% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: #fff6c8;
+  }
+}
+
+.intro-flash {
+  animation-name: intro-flash;
+  animation-timing-function: steps(2, end);
+  animation-iteration-count: 3;
+}
+
 @keyframes ff-flash {
   0%,
   100% {
@@ -739,6 +755,11 @@ body {
 
   .life-confetti-field {
     display: none;
+  }
+
+  .intro-flash {
+    animation: none;
+    background-color: transparent;
   }
 }
 

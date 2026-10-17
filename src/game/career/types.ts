@@ -125,6 +125,8 @@ export type PlayerRow = {
   trait: TraitId;
   /** Set when the trait was rolled. Later migrations must not roll again. */
   traitRolled: boolean;
+  /** The creation popup has been dismissed. Existing saves migrate as seen. */
+  introSeen: boolean;
 };
 
 /** Counters for the life-sim day. */

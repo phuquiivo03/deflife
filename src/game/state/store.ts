@@ -163,6 +163,7 @@ type GameState = {
   selectSlot: (id: string | null) => void;
   setHover: (id: string | null) => void;
   setShowCharacter: (v: boolean) => void;
+  dismissIntro: () => void;
   setCameraX: (stage: StageId, x: number | null) => void;
   setCustomizeOpen: (v: boolean) => void;
   /** In-game minutes since day 1, 00:00. Persisted. */
@@ -278,6 +279,12 @@ export const useGameStore = create<GameState>()(
       selectSlot: (id) => set({ selectedSlot: id }),
       setHover: (id) => set({ hoveredSlot: id }),
       setShowCharacter: (v) => set({ showCharacter: v }),
+      dismissIntro: () => {
+        const career = get().career;
+        set({
+          career: { ...career, players: { ...career.players, introSeen: true } },
+        });
+      },
       setCameraX: (stage, x) =>
         set((st) => ({ cameraX: { ...st.cameraX, [stage]: x } })),
       setCustomizeOpen: (v) => set({ customizeOpen: v }),
