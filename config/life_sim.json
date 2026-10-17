@@ -58,7 +58,7 @@
   "salary": { "student": 0, "junior": 15000000, "senior": 45000000 },
   "hunger_full_until": 2,
   "hunger_peckish_until": 4,
-  "hunger_notice": "Đói rồi, nhớ ăn một bữa.",
+  "hunger_notice": "Đói rồi, đi ăn thôi.",
   "foods": [
     { "id": "noodles", "label": "Mì", "price": 8000, "health": -3 },
     { "id": "home_rice", "label": "Cơm nhà", "price": 25000, "health": 0 },

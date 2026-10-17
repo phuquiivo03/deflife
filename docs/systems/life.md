@@ -60,7 +60,7 @@ The left column is the notice list, newest first. Unread rows show `ui_badge_unr
 
 ## Meals
 
-Meals track waking slots since the last one. 0–2 is No, 3–4 is Hơi đói, and 5 or more is Đói. The rice-bowl button opens the food popup. Đói blinks the hunger icon and pushes one “Đói rồi, nhớ ăn một bữa.” notice through the existing notice list. Eating sets the slot count back to 0. Thresholds are `hunger_full_until` and `hunger_peckish_until`.
+Meals track waking slots since the last one. 0–2 is No, 3–4 is Hơi đói, and 5 or more is Đói. The rice-bowl button sits under the room and opens the food popup. The character panel does not list meals. Đói blinks the hunger icon and pushes one “Đói rồi, đi ăn thôi.” notice through the existing notice list. Eating sets the slot count back to 0. Thresholds are `hunger_full_until` and `hunger_peckish_until`.
 
 ## Save
 
