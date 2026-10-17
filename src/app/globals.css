@@ -748,15 +748,6 @@ body {
   outline-offset: 2px;
 }
 
-.hunger-badge {
-  position: absolute;
-  top: var(--hunger-y);
-  left: var(--hunger-x);
-  width: var(--hunger-px);
-  height: var(--hunger-px);
-  pointer-events: none;
-}
-
 @keyframes intro-flash {
   0%,
   100% {
@@ -771,16 +762,6 @@ body {
   animation-name: intro-flash;
   animation-timing-function: steps(2, end);
   animation-iteration-count: 3;
-}
-
-@keyframes hunger-blink {
-  50% {
-    opacity: 0.35;
-  }
-}
-
-.hunger-blink {
-  animation: hunger-blink 1.2s steps(2, end) infinite;
 }
 
 @keyframes ui-tooltip-in {
@@ -872,7 +853,6 @@ body {
     background-color: transparent;
   }
 
-  .hunger-blink,
   .ui-tooltip,
   .ui-tooltip[data-state="instant-open"],
   .ui-tooltip[data-state="delayed-open"] {

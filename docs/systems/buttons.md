@@ -62,6 +62,22 @@ It sits on the HUD icon bar immediately before **Đi ngủ**. The gap is `HUD_IC
 
 The list opens in the shared modal (`src/components/ui/modal.tsx`). The existing store cards, prices, and buy/pin actions are unchanged. Closing is Escape, a backdrop click, or **Đóng**. The notice action “Mở store” still sets `storeOpen`. The Thông báo panel no longer embeds the list.
 
+## Meals
+
+The rice bowl under the room is `HungerDock` in `src/components/game/FoodPopup.tsx`. The face is `icon_btn_food` drawn at 2× (`foodArtFile`). That graphic is the whole control. There is no hunger badge on the bowl.
+
+The shared tooltip is `src/components/ui/tooltip.tsx`. The text is `foodHungerTip`: “Ăn · ” plus the level from `hungerLabel` (“No”, “Hơi đói”, “Đói”), for example “Ăn · Hơi đói”. The button `aria-label` uses that same string. The level word also sits beside the bowl.
+
+The bowl icon pulses with opacity and brightness. It does not move. Numbers are `HUNGER_BOWL_BLINK` in `src/components/game/food-dock.config.ts`. The CSS module is `src/components/game/food-dock.module.css`.
+
+| Level | Motion |
+|---|---|
+| No | Still. No animation, no tint. |
+| Hơi đói | 2200ms. Opacity eases down to 0.78, brightness to 0.94. |
+| Đói | 700ms. Opacity eases down to 0.45, brightness to 0.7. |
+
+`prefers-reduced-motion` skips the pulse and holds a static tint: Hơi đói at opacity 0.9 and brightness 0.96, Đói at opacity 0.62 and brightness 0.78.
+
 ## Notice actions
 
 Pay rent, view job, open store, eat, and sleep in the notice list use `PixelButton` variant `secondary`. The glyph (`icon_action_*`, 16×16 native) sits in the 16px center beside a Galmuri7 label: “Trả trọ”, “Xem job”, “Mở store”, “Ăn”, “Ngủ”. `aria-label` and the tooltip repeat that label. Sizes and the text-button fallback are in `src/components/game/notifications.config.ts`.
