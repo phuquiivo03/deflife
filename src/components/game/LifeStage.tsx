@@ -4,7 +4,7 @@
 
 import { useEffect, useState } from "react";
 import { LIFE_EVENTS, lifeEventById } from "@/game/life/events-content";
-import { m51AssetPath, m5AssetPath, type M5AssetKey } from "@/game/life/assets";
+import { m5AssetPath, type M5AssetKey } from "@/game/life/assets";
 import { useGameStore } from "@/game/state/store";
 import { Button } from "@/components/ui/button";
 import { formatVnd } from "@/lib/format-currency";
@@ -50,26 +50,21 @@ export function LifeStage() {
   return (
     <>
       {showBanner ? (
-        <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden" data-testid="life-banner">
+        <div className="pointer-events-none fixed inset-0 z-30 overflow-hidden" data-testid="life-banner">
           <div className="life-banner-dim absolute inset-0" data-testid="life-banner-dim" />
           <div
-            className="life-banner relative z-10 mx-auto mt-6 w-[480px] max-w-full"
+            className="life-banner relative z-10 mx-auto mt-16 w-[min(1200px,calc(100%-1.5rem))]"
             style={{ animationDuration: `${LIFE_EVENTS.banner_enter_ms}ms` }}
           >
             <div
-              className="life-banner-sparkle relative mx-auto w-max"
+              className="life-banner-sparkle"
               style={{ animationDuration: `${LIFE_EVENTS.banner_spark_ms}ms` }}
             >
-              <img
-                src={m51AssetPath("ui_banner_v2_x2.png")}
-                width={480}
-                height={80}
-                alt=""
-                className="pixel-img"
-              />
-              <p className="absolute inset-0 flex items-center justify-center font-galmuri-11 text-galmuri-title text-white">
-                {banner.label}
-              </p>
+              <div className="life-banner-plate" data-testid="life-banner-plate">
+                <p className="px-3 text-center font-galmuri-11 text-galmuri-title text-white" data-testid="life-banner-label">
+                  {banner.label}
+                </p>
+              </div>
             </div>
             <div className="life-confetti-field" data-testid="life-confetti">
               {CONFETTI.map((piece) => (
