@@ -246,5 +246,22 @@ describe("hunger", () => {
     expect(old.career.players.money).toBe(42);
     expect(old.career.life.slotsSinceMeal).toBe(0);
     expect(old.career.player_skills.find((skill) => skill.skill_id === "frontend")).toMatchObject({ level: 3, xp: 4 });
+
+    const dated = migrateSave(
+      {
+        stage: "student",
+        totalMinutes: 480,
+        career: {
+          players: { money: 42 },
+          player_skills: [{ skill_id: "frontend", level: 3, xp: 4 }],
+          feed: { diary: { day: 2, sleptDay: 1, sleptAt: "23:40", money: 0, remaining: 42 } },
+        },
+      },
+      15,
+    );
+    expect(dated.career.players.money).toBe(42);
+    expect(dated.career.feed.diary?.sleptAt).toBeNull();
+    expect(dated.career.feed.diary?.sleptDay).toBeNull();
+    expect(dated.career.player_skills.find((skill) => skill.skill_id === "frontend")).toMatchObject({ level: 3, xp: 4 });
   });
 });

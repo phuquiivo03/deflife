@@ -31,8 +31,9 @@ export const PERSIST_KEY = "devlife:v1";
  * v13: `players.introSeen`. Older saves have already started, so the creation popup stays closed.
  * v14: `feed.purse`. Older saves start the day with an empty purse. Money, skills, and progress stay.
  * v15: `life.slotsSinceMeal`. Older saves start at 0, as if they just ate. Money, skills, and progress stay.
+ * v16: `feed.diary.sleptDay` and `feed.diary.sleptAt`. An older diary omits the sleep clock. Money, skills, and progress stay.
  */
-export const PERSIST_VERSION = 15;
+export const PERSIST_VERSION = 16;
 
 export const CHAR_POSE_SIT_BACK = "character/derived/char_sit_back";
 export const ATLAS_URL = "/atlas/devlife.png";
