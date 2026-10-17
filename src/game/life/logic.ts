@@ -4,6 +4,7 @@ import type { GameEvent } from "../events/types";
 import { applyMoney } from "../vitals/logic";
 import { LIFE, foodById, type FoodId } from "./content";
 import { furnitureDailyHealth, furnitureDailyMood, furnitureSleepBonus } from "./furniture";
+import { advanceHunger } from "./hunger";
 import { notePurse } from "./purse";
 import { foodPrice, traitDecay, traitHomeMood, traitMoodFloor, traitMorningEnergy } from "./traits";
 
@@ -54,6 +55,7 @@ export function defaultLife(day: number): LifeState {
     wakeBudget: slotBudget(day),
     suppressEndOfDayUntil: null,
     homeDays: 0,
+    slotsSinceMeal: 0,
   };
 }
 
@@ -347,7 +349,7 @@ export function eatMeal(state: CareerState, foodId: FoodId): LifeResult {
   const spent = applyActionStats(
     state,
     { money: -price, health: food.health },
-    { ...life, mealsToday: life.mealsToday + 1 },
+    { ...life, mealsToday: life.mealsToday + 1, slotsSinceMeal: 0 },
   );
   return { ...spent, state: notePurse(spent.state, -price, "food") };
 }
@@ -521,12 +523,13 @@ export function crossWakingSlot(
   priorEvents: GameEvent[] = [],
   priorSkip = 0,
 ): LifeResult {
-  const life = lifeOf(state);
+  const hungrier = advanceHunger(state);
+  const life = lifeOf(hungrier);
   const index = slotIndexFromWake(minuteOfDay);
   const budget = life.wakeBudget > 0 ? life.wakeBudget : slotBudget(state.players.game_day);
   if (index >= budget) {
     const late = applyDirect(
-      state,
+      hungrier,
       { health: LIFE.late_slot_health },
       {
         ...life,
@@ -540,9 +543,9 @@ export function crossWakingSlot(
       skipDays: Math.max(priorSkip, late.skipDays),
     };
   }
-  let mood = LIFE.passive_slot_mood * traitDecay(state);
+  let mood = LIFE.passive_slot_mood * traitDecay(hungrier);
   if (life.workStreak >= LIFE.work_streak_at) mood += LIFE.work_streak_slot_mood;
-  const ticked = applyDirect(state, { mood }, life);
+  const ticked = applyDirect(hungrier, { mood }, life);
   return {
     state: ticked.state,
     events: [...priorEvents, ...ticked.events],

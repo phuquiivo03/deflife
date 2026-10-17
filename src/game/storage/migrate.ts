@@ -280,6 +280,7 @@ function normalizeLife(value: unknown, day: number): LifeState {
     suppressEndOfDayUntil:
       value.suppressEndOfDayUntil == null ? null : num(value.suppressEndOfDayUntil),
     homeDays: num(value.homeDays),
+    slotsSinceMeal: Math.max(0, num(value.slotsSinceMeal)),
   };
 }
 
@@ -424,7 +425,8 @@ function strOrNull(value: unknown): string | null {
  * marked `traitRolled`. A version 11 trait other than Cẩn thận is kept. A
  * version 11 Cẩn thận is rolled once and then marked. Version 13 marks
  * `introSeen` so an older save does not open the creation popup. Version 14
- * starts `feed.purse` empty. Money, skills, and progress are kept. See docs/systems/save.md.
+ * starts `feed.purse` empty. Version 15 sets `life.slotsSinceMeal` to 0.
+ * Money, skills, and progress are kept. See docs/systems/save.md.
  */
 export function migrateSave(
   persisted: unknown,
@@ -483,6 +485,9 @@ export function migrateSave(
   }
   if (version < 14) {
     career = { ...career, feed: { ...career.feed, purse: emptyPurse() } };
+  }
+  if (version < 15) {
+    career = { ...career, life: { ...career.life, slotsSinceMeal: 0 } };
   }
 
   return {
