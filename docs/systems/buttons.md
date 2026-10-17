@@ -60,7 +60,7 @@ The HUD **Cửa hàng** control is `StoreButton` (`src/components/game/StoreButt
 
 It sits at the trailing end of the room status bar, above the canvas, after Tiền and Ngày/giờ. **Đi ngủ** stays on the HUD icon bar. The gap on that bar is `HUD_ICON_GAP_PX` (8). The tooltip is the shared tooltip with the text “Cửa hàng”, and the button keeps that `aria-label`. Bar spacing is `ROOM_STATUS_BAR` in `src/components/game/shell-layout.config.ts`.
 
-The list opens in the shared modal (`src/components/ui/modal.tsx`). The existing store cards, prices, and buy/pin actions are unchanged. Closing is Escape, a backdrop click, or **Đóng**. The notice action “Mở store” still sets `storeOpen`. The Thông báo panel no longer embeds the list.
+The list opens in the shared modal (`src/components/ui/modal.tsx`) as a grid. Column counts are `STORE_GRID` in `src/components/game/store-grid.config.ts`: 4 from 1024px, 2 below that. Tabs **Nội thất**, **Phòng**, and **Tất cả** filter the catalog. Cells use `PixelButton`. An owned item has a mint border and the button **Đã có**. A locked item is dimmed, shows the lock icon, and keeps **Ghim**. Prices and the buy/pin actions are unchanged. Closing is Escape, a backdrop click, or **Đóng**. The notice action “Mở store” still sets `storeOpen`. The Thông báo panel no longer embeds the list.
 
 ## Meals
 

@@ -42,7 +42,7 @@ A pending event draws on the lower part of the room canvas, not along the bottom
 
 ## Store
 
-Rooms and furniture are bought from **Cửa hàng**, the shop icon on the room status bar above the room. Đi ngủ stays on the HUD card. The list opens in a modal. Junior is 25,000,000 and needs one skill at level 3 plus 30 reputation. Senior is 180,000,000 and needs two skills at level 8. The header, the 1/2/3 keys, and `?stage=` stay on a room until it is bought. Student is the start and stays available. Buying a room moves the player there. Rent, utilities, and salary follow that room.
+Rooms and furniture are bought from **Cửa hàng**, the shop icon on the room status bar above the room. Đi ngủ stays on the HUD card. The list opens in a modal as a grid: 4 columns from 1024px and 2 below that, with tabs Nội thất, Phòng, and Tất cả. Column counts are `STORE_GRID`. Junior is 25,000,000 and needs one skill at level 3 plus 30 reputation. Senior is 180,000,000 and needs two skills at level 8. The header, the 1/2/3 keys, and `?stage=` stay on a room until it is bought. Student is the start and stays available. Buying a room moves the player there. Rent, utilities, and salary follow that room.
 
 A room's sleep, mood, and health bonuses apply only while the player lives in it. A bought item's bonus applies in every room. The plant is +2 mood a day. The fan and air conditioner add 5 and 10 sleep energy. The mattress is +1 health a day. The ergo chair multiplies job accept and retry energy by 0.9 before the work streak. The second monitor multiplies study and job XP by 1.1, floored, before the mood multiplier, and it stays locked until the Junior room is owned. Event XP is unchanged.
 

@@ -156,7 +156,7 @@ Use `PixelAvatar` + `resolveAvatarAsset()` with the same integer-scale rule.
 - **Học** panel has two tabs: **Khóa học** (courses still available to buy) and **Đã học** (finished courses, read-only: skill, XP granted, day completed). Empty states: “Không còn khóa để học.” and “Chưa học khóa nào.” A non-repeatable course moves to **Đã học** after one purchase.
 - **Nhân vật** panel: avatar, name, stage, overall rank badge (rounded mean of the five skill levels), trait row (icon at 22px and the trait name; the bonus line is a tooltip), **Danh tiếng**, Freelance `n/100` with a bar, then the five catalog skills from `skillProgressList` (icon, name, rank badge, `Junior 60%`, bar). No stub skill percents. The trait icon uses the same 22px box as Danh tiếng and Freelance.
 - Bars: 1px border, fill coral / mint / sky per vital. A vital under its warning line blinks a coral inset; a change floats above that bar. `prefers-reduced-motion` keeps the inset and drops the blink.
-- A pending life event (Mẹ gọi, Cúp điện, and the rest) is a card on the lower part of the room canvas. There is no dimmed backdrop: the room, HUD, and panels stay visible and keep clicks. The card is 424×186 CSS pixels and scales down, keeping that ratio, when the canvas is narrower or shorter. It fades and rises; `prefers-reduced-motion` skips the motion. Numbers are `LIFE_EVENT_POPUP` in `src/components/game/life-event-popup.config.ts`. The speech bubble still sits on the native M5 frame (`ui_speech_bubble`) as a 9-slice at 2×. The sleep diary is a notepad window on `ui_window_notepad` (`public/ui/m5_1/`, native and `_x2`, 9-slice from `slices.json`). The title is drawn in the titlebar. The window buttons are part of that frame. The store list uses `ui_store_frame` the same way, and each item sits on `ui_store_card` at 2× (192×240). That list opens from the room status bar shop icon in the shared modal. Portraits and emotes use the native PNG at integer scale with `image-rendering: pixelated`. The room canvas is unchanged.
+- A pending life event (Mẹ gọi, Cúp điện, and the rest) is a card on the lower part of the room canvas. There is no dimmed backdrop: the room, HUD, and panels stay visible and keep clicks. The card is 424×186 CSS pixels and scales down, keeping that ratio, when the canvas is narrower or shorter. It fades and rises; `prefers-reduced-motion` skips the motion. Numbers are `LIFE_EVENT_POPUP` in `src/components/game/life-event-popup.config.ts`. The speech bubble still sits on the native M5 frame (`ui_speech_bubble`) as a 9-slice at 2×. The sleep diary is a notepad window on `ui_window_notepad` (`public/ui/m5_1/`, native and `_x2`, 9-slice from `slices.json`). The title is drawn in the titlebar. The window buttons are part of that frame. The store opens from the room status bar shop icon in the shared modal as a grid of smaller cells (see Store grid). Portraits and emotes use the native PNG at integer scale with `image-rendering: pixelated`. The room canvas is unchanged.
 
 ---
 
@@ -240,10 +240,29 @@ Popup chrome uses `src/components/ui/modal.tsx`. Numbers live in `src/components
 | `backdrop` | `rgba(42, 37, 72, 0.45)` | Dim, same tint as the other full-screen overlays |
 | `maxHeightVh` | 80 | Dialog cap |
 | `chromePx` | 112 | Title row and padding kept outside the scrolling body |
-| `maxWidthPx` | 420 | Default width cap. The store passes `STORE_MODAL_MAX_PX` (280) |
+| `maxWidthPx` | 420 | Default width cap. The store passes `STORE_GRID.modalMaxPx` (640) |
 | `viewportInsetPx` | 16 | Side inset on a narrow viewport |
 
-The shell traps focus, closes on Escape and a backdrop click, and sets `aria-modal`. **Đóng** closes it too. The store renders the existing list inside it.
+The shell traps focus, closes on Escape and a backdrop click, and sets `aria-modal`. **Đóng** closes it too. The store renders its grid inside it.
+
+## Store grid
+
+The shop dialog is a grid of item cells. Counts live in `src/components/game/store-grid.config.ts` (`STORE_GRID`). `storeGridCss()` writes the column rules, so the stylesheet does not keep a second copy.
+
+| Key | Default | Meaning |
+|-----|---------|---------|
+| `columnsMobile` | 2 | Columns below `desktopMinPx` |
+| `columnsDesktop` | 4 | Columns from `desktopMinPx` up |
+| `desktopMinPx` | 1024 | Tailwind `lg`. Same cutoff as the shell |
+| `gapPx` | 8 | Space between cells |
+| `cellPx` | 148 | Desktop cell width the dialog is sized for. Narrower than the old 192px card |
+| `modalPadPx` | 24 | Panel padding on both sides (modal `p-3`) |
+| `modalMaxPx` | 640 | `cellPx * columnsDesktop + gapPx * (columnsDesktop - 1) + modalPadPx` |
+| `furnitureIconPx` | 64 | Furniture art at 2× (native 32) |
+| `roomIconW` / `roomIconH` | 64 / 40 | Room art at 1× |
+| `badgePx` | 22 | Owned check and lock. Integer half of the 44px icon |
+
+Tabs are **Nội thất**, **Phòng**, and **Tất cả**. The list is a `tablist` (arrow keys move the selection). The catalog has no category field, so `src/components/game/store-shelf.ts` treats a row with a stage, or a `room_` id, as a room and everything else as furniture. **Tất cả** draws furniture first, then rooms. An owned cell has a mint border, the done icon, and its button reads **Đã có**. A locked cell (skill, reputation, or room requirement) is dimmed, shows the lock icon, and its button is **Ghim**. Short on money, **Mua** stays disabled and **Ghim** stays so the item can still be pinned. Prices, buy, and pin still use the existing shop actions. Buttons are `PixelButton`.
 
 ## Motion & a11y
 
