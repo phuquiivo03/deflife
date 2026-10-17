@@ -61,4 +61,4 @@ type Notice = {
 runNoticeAction(id: NoticeActionId, notice?: Notice): void
 ```
 
-A job offer emits `actions` Nhận (`acceptJob`, primary) and Bỏ qua (`dismissNotice`, secondary), with `payload: { jobId }` and legacy `action: "acceptJob"`. Render one button per `actions` entry and pass the notice as the second argument. The panel file stays Dev B's. A label with no glyph uses the outline text button and the same click. The list region is `overflow-y: auto` inside the desktop panel cap (see the layout section of [DESIGN_SYSTEM.md](../design/DESIGN_SYSTEM.md)).
+A job offer emits `actions` Nhận (`acceptJob`, primary) and Bỏ qua (`dismissNotice`, secondary), with `payload: { jobId }` and legacy `action: "acceptJob"`. A deadline reminder emits one button `{ id: "openJobs", label: "Làm", variant: "primary" }` and `payload: { jobId }`. Render one button per `actions` entry and pass the notice as the second argument. The panel file stays Dev B's. A label with no glyph uses the outline text button and the same click. The list region is `overflow-y: auto` inside the desktop panel cap (see the layout section of [DESIGN_SYSTEM.md](../design/DESIGN_SYSTEM.md)).
