@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils";
 import { AudioControls } from "./AudioControls";
 import { PixelIcon } from "./PixelIcon";
 import { formatVnd } from "@/lib/format-currency";
+import { PixelButton } from "@/components/ui/button";
+import { BUTTON_LIGHT } from "@/components/ui/button/config";
 import { PanelCard } from "@/components/ui/panel-card";
 import { StatBar } from "./StatBar";
 import { HUD_ICON_GAP_PX } from "./store-button.config";
@@ -30,28 +32,24 @@ const CAREER_ACTIONS = [
     testId: "open-study",
     label: "Học",
     icon: "learn_book",
-    tone: "hud-action-study",
   },
   {
     id: "jobs",
     testId: "open-jobs",
     label: "Việc làm",
-    icon: "job_freelance",
-    tone: "hud-action-jobs",
+    icon: "job",
   },
   {
     id: "skills",
     testId: "open-skills",
     label: "Kỹ năng",
     icon: SKILL_MENU_ICON,
-    tone: "hud-action-skills",
   },
 ] as const satisfies readonly {
   id: CareerPanel;
   testId: string;
   label: string;
   icon: string;
-  tone: string;
 }[];
 
 /** Tiền, Ngày/giờ, and Cửa hàng. GameShell places this directly above the room. */
@@ -276,15 +274,16 @@ function CareerHudButton({
   onClick: () => void;
 }) {
   return (
-    <button
+    <PixelButton
       type="button"
+      variant="light"
       data-testid={action.testId}
-      className={cn("hud-action", action.tone)}
+      data-icon-key={action.icon}
       onClick={onClick}
     >
-      <PixelIcon name={action.icon} size={22} alt="" files={iconFiles} />
+      <PixelIcon name={action.icon} size={BUTTON_LIGHT.iconPx} alt="" files={iconFiles} />
       <span>{action.label}</span>
-    </button>
+    </PixelButton>
   );
 }
 

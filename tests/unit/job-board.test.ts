@@ -63,6 +63,7 @@ describe("job management board", () => {
     expect(board).toContain(">Deadline<");
     expect(board).toContain("text-[var(--accent-coral)]");
     expect(board).toContain("PixelButton");
+    expect(board).toContain('variant="light"');
     expect(board).toContain("openTask(job.id)");
     expect(board).toContain("Chưa nhận job nào.");
     expect(chrome).toContain("JobManageBoard");

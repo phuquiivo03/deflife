@@ -134,9 +134,9 @@ export function NotificationsPanel() {
         ) : null}
       </div>
       {unread > 0 ? (
-        <Button type="button" size="sm" variant="outline" showArrow={false} onClick={readAll}>
+        <PixelButton type="button" variant="light" onClick={readAll}>
           Đã đọc
-        </Button>
+        </PixelButton>
       ) : null}
       <div className={styles.scroll}>
         {ordered.length === 0 ? (
