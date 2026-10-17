@@ -50,3 +50,13 @@ export function Button({
 }
 
 export { buttonVariants };
+export { PixelButton, type PixelButtonProps } from "./pixel-button";
+export {
+  BUTTON_ASSET_FILES,
+  BUTTON_ASSET_KEYS,
+  BUTTON_PRESS_FACE_SHIFT_PX,
+  BUTTON_UI_SCALE,
+  buttonAssetPath,
+  buttonMetrics,
+  pixelButtonStyle,
+} from "./config";

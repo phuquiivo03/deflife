@@ -1,0 +1,46 @@
+{
+ "ui_window_notepad": {
+  "size": [
+   64,
+   40
+  ],
+  "slice": {
+   "left": 4,
+   "top": 14,
+   "right": 34,
+   "bottom": 4
+  },
+  "note": "title text drawn at runtime in titlebar; _ \u25a1 x buttons are inside the right 34px corner"
+ },
+ "ui_btn_*": {
+  "size": [
+   24,
+   24
+  ],
+  "slice": 8,
+  "files": "ui_btn_{primary,secondary,danger,icon}_{normal,hover,pressed}.png",
+  "note": "pressed face 2px lower; offset label/icon +2px y"
+ },
+ "ui_banner_v2": {
+  "size": [
+   480,
+   64
+  ],
+  "slice": null,
+  "note": "no 9-slice; draw at integer scale centred on game column, overlays side panels; title text drawn by game in centre (x 40..440, y 10..46)"
+ },
+ "ui_badge_unread_lg": {
+  "size": [
+   16,
+   16
+  ],
+  "note": "count drawn by game, white"
+ },
+ "icon_hunger_*": {
+  "size": [
+   16,
+   16
+  ],
+  "note": "overlay top-right of icon_btn_food (offset +12,-4 at native)"
+ }
+}
