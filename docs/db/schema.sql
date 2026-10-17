@@ -159,7 +159,9 @@ CREATE TABLE player_life (
   settled_day integer,
   morning_resolved_day integer,
   wake_budget integer NOT NULL CHECK (wake_budget > 0),
-  suppress_end_of_day_until integer
+  suppress_end_of_day_until integer,
+  -- Persist v15. Older saves start at 0.
+  slots_since_meal integer NOT NULL CHECK (slots_since_meal >= 0)
 );
 
 -- Roll state, diary, and the open dialog (M5 P2). Notices are player_notices.

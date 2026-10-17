@@ -156,6 +156,8 @@ export type LifeState = {
   suppressEndOfDayUntil: number | null;
   /** Consecutive days that ended with no fun slot. Extrovert mood uses this. */
   homeDays: number;
+  /** Waking slots since the last meal. Eating sets this back to 0. */
+  slotsSinceMeal: number;
 };
 
 export type NoticeAction = "payRent" | "viewJobs" | "openStore";

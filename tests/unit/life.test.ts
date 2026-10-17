@@ -22,6 +22,7 @@ import {
   slotBudget,
   slotIndexFromWake,
 } from "@/game/life/logic";
+import { hungerLevel } from "@/game/life/hunger";
 import { playLifeSound, LIFE_SOUND_KEYS } from "@/game/life/sounds";
 import { migrateSave } from "@/game/storage/migrate";
 import { startTask } from "@/game/task-run/apply";
@@ -200,5 +201,50 @@ describe("life study force", () => {
     expect(forced.error).toBeNull();
     expect(forced.state.players.health).toBe(65);
     expect(forced.state.players.energy).toBe(0);
+  });
+});
+
+describe("hunger", () => {
+  it("steps from No to Hơi đói to Đói and reminds once per meal", () => {
+    expect(LIFE.hunger_full_until).toBe(2);
+    expect(LIFE.hunger_peckish_until).toBe(4);
+    expect(hungerLevel(0)).toBe("full");
+    expect(hungerLevel(2)).toBe("full");
+    expect(hungerLevel(3)).toBe("peckish");
+    expect(hungerLevel(4)).toBe("peckish");
+    expect(hungerLevel(5)).toBe("hungry");
+
+    let state = defaultCareer(1, 8 * 60, "student", SIM_CATALOG);
+    for (let i = 0; i < 4; i += 1) state = crossWakingSlot(state, 10 * 60).state;
+    expect(state.life.slotsSinceMeal).toBe(4);
+    expect(state.feed.notices.some((notice) => notice.id.startsWith("hunger-"))).toBe(false);
+    state = crossWakingSlot(state, 12 * 60).state;
+    expect(state.life.slotsSinceMeal).toBe(5);
+    expect(state.feed.notices.filter((notice) => notice.text === LIFE.hunger_notice)).toHaveLength(1);
+    state = crossWakingSlot(state, 14 * 60).state;
+    expect(state.feed.notices.filter((notice) => notice.text === LIFE.hunger_notice)).toHaveLength(1);
+
+    const eaten = eatMeal(state, "noodles").state;
+    expect(eaten.life.slotsSinceMeal).toBe(0);
+    expect(eaten.players.money).toBe(state.players.money - 8_000);
+    let again = eaten;
+    for (let i = 0; i < 5; i += 1) again = crossWakingSlot(again, 16 * 60).state;
+    expect(again.feed.notices.filter((notice) => notice.id.startsWith("hunger-"))).toHaveLength(2);
+
+    const old = migrateSave(
+      {
+        stage: "student",
+        totalMinutes: 480,
+        career: {
+          players: { money: 42 },
+          player_skills: [{ skill_id: "frontend", level: 3, xp: 4 }],
+          life: { slotsSinceMeal: 9 },
+        },
+      },
+      14,
+    );
+    expect(old.career.players.money).toBe(42);
+    expect(old.career.life.slotsSinceMeal).toBe(0);
+    expect(old.career.player_skills.find((skill) => skill.skill_id === "frontend")).toMatchObject({ level: 3, xp: 4 });
   });
 });

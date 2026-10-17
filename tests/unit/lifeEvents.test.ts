@@ -355,6 +355,14 @@ describe("life event art", () => {
       ["fx_confetti_x2.png", 128, 32],
       ["ui_window_notepad.png", 48, 40],
       ["ui_window_notepad_x2.png", 96, 80],
+      ["icon_btn_food.png", 16, 16],
+      ["icon_btn_food_x2.png", 32, 32],
+      ["icon_hunger_full.png", 16, 16],
+      ["icon_hunger_full_x2.png", 32, 32],
+      ["icon_hunger_peckish.png", 16, 16],
+      ["icon_hunger_peckish_x2.png", 32, 32],
+      ["icon_hunger_hungry.png", 16, 16],
+      ["icon_hunger_hungry_x2.png", 32, 32],
     ] as const) {
       const buf = readFileSync(join(polish, name));
       expect(buf.readUInt32BE(16)).toBe(w);

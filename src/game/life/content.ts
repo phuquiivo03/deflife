@@ -75,6 +75,11 @@ export type LifeConfig = {
   rent: Record<StageId, number>;
   utilities: Record<StageId, number>;
   salary: Record<StageId, number>;
+  /** Slots since the last meal still count as No. */
+  hunger_full_until: number;
+  /** Slots since the last meal still count as Hơi đói. */
+  hunger_peckish_until: number;
+  hunger_notice: string;
   foods: FoodDef[];
   weekdays: string[];
   holidays: HolidayDef[];

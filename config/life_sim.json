@@ -56,6 +56,9 @@
   "rent": { "student": 2800000, "junior": 6000000, "senior": 16000000 },
   "utilities": { "student": 600000, "junior": 1200000, "senior": 2400000 },
   "salary": { "student": 0, "junior": 15000000, "senior": 45000000 },
+  "hunger_full_until": 2,
+  "hunger_peckish_until": 4,
+  "hunger_notice": "Đói rồi, nhớ ăn một bữa.",
   "foods": [
     { "id": "noodles", "label": "Mì", "price": 8000, "health": -3 },
     { "id": "home_rice", "label": "Cơm nhà", "price": 25000, "health": 0 },
