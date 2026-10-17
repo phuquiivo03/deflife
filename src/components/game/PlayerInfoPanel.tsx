@@ -6,7 +6,9 @@ import { freelanceGoal } from "@/game/jobs/logic";
 import { STUB_PLAYER } from "@/game/state/playerStats";
 import { useGameStore } from "@/game/state/store";
 import { LIFE } from "@/game/life/content";
+import { m5AssetPath } from "@/game/life/assets";
 import { calendar, lifeOf, mealBlocked, rentStatus } from "@/game/life/logic";
+import { foodPrice, traitDef, traitOf } from "@/game/life/traits";
 import { snapshot } from "@/game/time";
 import { formatVnd } from "@/lib/format-currency";
 import { Button } from "@/components/ui/button";
@@ -35,6 +37,7 @@ export function PlayerInfoPanel({ iconFiles = [] }: { iconFiles?: readonly strin
     SIM_CATALOG.config.rank_brackets,
   );
   const life = lifeOf(career);
+  const trait = traitDef(traitOf(career));
   const rent = rentStatus(career, day);
   const sick = career.players.health < LIFE.sick_below;
   const burned = life.burnoutDay === day;
@@ -56,6 +59,26 @@ export function PlayerInfoPanel({ iconFiles = [] }: { iconFiles?: readonly strin
         >
           {STAGE_LABELS[stage as StageId]} · {overall.label}
         </p>
+        <div
+          className="mt-2 flex w-full items-center gap-2 text-left"
+          data-testid="player-trait"
+          data-trait={trait.id}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element -- trait icons stay pixelated */}
+          <img
+            src={m5AssetPath(trait.icon)}
+            width={32}
+            height={32}
+            alt=""
+            className="pixel-img h-8 w-8 shrink-0"
+          />
+          <span className="min-w-0 flex-1">
+            <span className="block font-galmuri-9 text-galmuri-body text-[var(--foreground)]">{trait.name}</span>
+            <span className="block font-galmuri-7 text-galmuri-small text-[var(--muted-foreground)]">
+              {trait.bonus} · {trait.penalty}
+            </span>
+          </span>
+        </div>
         {sick ? (
           <p className="mt-1 font-galmuri-7 text-galmuri-small text-[var(--accent-coral)]" data-testid="life-sick">
             Đang ốm
@@ -114,6 +137,7 @@ export function PlayerInfoPanel({ iconFiles = [] }: { iconFiles?: readonly strin
         <div className="mt-2 flex flex-col gap-2">
           {LIFE.foods.map((food) => {
             const reason = mealBlocked(career, food.id);
+            const price = foodPrice(food.price, career);
             return (
               <Button
                 key={food.id}
@@ -127,7 +151,7 @@ export function PlayerInfoPanel({ iconFiles = [] }: { iconFiles?: readonly strin
                 data-testid={`food-${food.id}`}
                 onClick={() => eat(food.id)}
               >
-                {food.label} · {formatVnd(food.price)}
+                {food.label} · {formatVnd(price)}
                 {food.health < 0 ? " · sức khỏe giảm" : ""}
               </Button>
             );

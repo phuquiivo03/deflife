@@ -1,8 +1,8 @@
 # Life sim (M5)
 
-Time slots, vitals, bills, small events, the Thông báo panel, and the store. The spec is [docs/specs/M5_life_sim.md](../specs/M5_life_sim.md). Personality is the next phase. Trait icons in `public/ui/m5/` stay placeholders. The other M5 art there is the approved native PNG, including store furniture placed from `src/game/life/placement.json`. The life-sim one-shots are in the SFX sprite. One moment plays one life cue. A specific cue replaces the severity ping, and the same cue fired twice in one tick plays once. A choice or a buff plays `sfx_event_open`. Salary plays `sfx_salary`. The sick threshold plays `sfx_sick_cough`. The day-7 landlord knock plays `sfx_landlord_knock`. The important-day banner shares that same tick and plays `sfx_event_open`. Sleep plays `sfx_diary_flip`. A successful purchase plays `sfx_store_buy` and the existing money-spend cue.
+Time slots, vitals, bills, small events, the Thông báo panel, the store, and personality. The spec is [docs/specs/M5_life_sim.md](../specs/M5_life_sim.md). Trait icons in `public/ui/m5/` are the 16×16 placeholders for the spec keys. The other M5 art there is the approved native PNG, including store furniture placed from `src/game/life/placement.json`. The life-sim one-shots are in the SFX sprite. There is no personality sound. One moment plays one life cue. A specific cue replaces the severity ping, and the same cue fired twice in one tick plays once. A choice or a buff plays `sfx_event_open`. Salary plays `sfx_salary`. The sick threshold plays `sfx_sick_cough`. The day-7 landlord knock plays `sfx_landlord_knock`. The important-day banner shares that same tick and plays `sfx_event_open`. Sleep plays `sfx_diary_flip`. A successful purchase plays `sfx_store_buy` and the existing money-spend cue.
 
-Numbers live in [config/life_sim.json](../../config/life_sim.json) and [config/store.json](../../config/store.json). Starting money stays in `config/game_config.json` (`3000000`).
+Numbers live in [config/life_sim.json](../../config/life_sim.json), [config/store.json](../../config/store.json), and [config/traits.json](../../config/traits.json). Starting money stays in `config/game_config.json` (`3000000`).
 
 ## Calendar
 
@@ -14,9 +14,9 @@ Dated holidays: Tết (month 1, days 1–3), 30/4 as the last day of month 4, 1/
 
 ## Stats
 
-Energy, health, and mood are floats from 0 to 100. The HUD rounds them. An action applies, in order: base, diminishing on a positive mood (`× 0.6^times today`, reset at 06:00), personality `× 1`, furniture, then a work-streak energy cost `× 1.2` when the streak is at least 3, then clamp, then thresholds. An event effect only adds and clamps. At most 3 furniture contributions apply to one stat; the largest are kept.
+Energy, health, and mood are floats from 0 to 100. The HUD rounds them. An action applies, in order: base, diminishing on a positive mood (`× 0.6^times today`, reset at 06:00), the generic personality multiplier `× 1`, furniture, then a work-streak energy cost `× 1.2` when the streak is at least 3, then clamp, then thresholds. Named traits apply their own rates on top of that, listed below. An event effect only adds and clamps. It does not use a trait, including the optimist mood floor. At most 3 furniture contributions apply to one stat; the largest are kept.
 
-Each waking slot: mood −1. If the work streak is at least 3, another −2.
+Each waking slot: mood −1, times the trait decay (1.3 for Chăm chỉ, otherwise 1). If the work streak is at least 3, another −2, not multiplied again.
 
 End of the calendar day (midnight, or sleep if the player skipped midnight): fewer than 2 meals costs 5 health, exactly 3 meals restores 2. Owned furniture then adds its daily health and mood. Mood moves 10% of the way toward 60. Three work days in a row with fewer than 2 fun slots costs 3 mood. A finished course or a finished job counts as work. This phase has no fun action, so fun slots stay 0.
 
@@ -46,10 +46,16 @@ A room's sleep, mood, and health bonuses apply only while the player lives in it
 
 Black Friday multiplies prices by 0.9. One pinned item shows `label percent%` on the sleep diary, using that day's price. When money covers the pin, one notice says “Đủ tiền …”. Floor sprites replace `student.mattress`, `junior.office_chair`, and `junior.bed` and draw their shadow under the placement anchor. `item_mattress.png` is not used.
 
+## Personality
+
+A new character rolls exactly one trait. The character card shows its 16×16 icon at 2×, the Vietnamese name, and the bonus and penalty. Older saves become Cẩn thận. That choice is stable: loading the save does not roll again.
+
+Cú đêm: study and job XP granted while the clock is at 22:00 or later, or before 06:00, is ×1.2, floored. The clock is the minute when the XP is granted. At 06:00, energy −10. Chăm chỉ: study XP ×1.15, floored, and the slot mood decay is ×1.3. Hướng ngoại: soft-skill study and job XP ×1.25, floored, and freelance pay ×1.05 after the pay formula, rounded. Monthly salary is unchanged. A day with no fun slot counts as home. The second home day in a row, and each home day after it, costs 5 mood at the end of the day. This phase still has no fun action, so that penalty starts on day 2. Tiết kiệm: food prices ×0.8, rounded. The button shows the price that is charged. A positive mood from a store purchase would be ×0.5. Purchases do not grant mood, so that penalty has nothing to scale. Cẩn thận: the bug count loses 1 and stays inside the formula min and max. Accepted jobs store hours ×1.1, and the task terminal's ticket, build, and test durations are ×1.1. Lạc quan: mood from actions, the slot tick, morning, and the end of the day does not go under 20. Study and job XP ×0.95, floored. Trait XP is applied before the monitor's ×1.1, and mood ×0.7 is applied after both. Event XP, including the hackathon, is unchanged.
+
 ## Thông báo and UX
 
 The left column is the notice list, newest first. Unread rows show `ui_badge_unread.png`. Empty copy is “Chưa có thông báo.” A new row plays `sfx_notif_info`, `sfx_notif_warn`, or `sfx_notif_urgent`, unless that row carries a specific cue. Payday plays `sfx_salary`. Health under 30 plays `sfx_sick_cough` once. The day-7 landlord plays `sfx_landlord_knock`. A choice or a buff plays only `sfx_event_open` for that moment. Warn and urgent lines also print `> WARN:` in the task terminal. Stat changes float on the HUD bars. Health under 30, mood under 15, and energy under 15 blink, and the room shows cough, cloud, or sweat. A holiday banner uses `ui_banner.png` for 2 seconds and plays `sfx_event_open` as part of the same moment as that morning's notices. Sleep opens the diary (`sfx_diary_flip`) against the morning snapshot, then the snapshot is recaptured.
 
 ## Save
 
-Persist version 9. A notice may carry `cue`; a save from version 8 keeps its money, skills, shop, and progress, and its notices get `cue` null. Older saves keep money and energy and gain health 70, mood 70, empty life counters, and an empty event feed. A save from before the store owns nothing and wakes in the student room. Junior and senior rooms are bought in the store. The standing migration rule is [docs/systems/save.md](save.md).
+Persist version 11. Version 11 adds the trait and the home-day count. A save from version 9 or 10 keeps its money, skills, shop, room, and notice cues, becomes Cẩn thận, and starts home days at 0. A notice may carry `cue`; a save from version 8 keeps its money, skills, shop, and progress, and its notices get `cue` null. Older saves keep money and energy and gain health 70, mood 70, empty life counters, and an empty event feed. A save from before the store owns nothing and wakes in the student room. Junior and senior rooms are bought in the store. The standing migration rule is [docs/systems/save.md](save.md).

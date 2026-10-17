@@ -5,6 +5,7 @@ import { jobEligibility, jobRequirementsFor, skillNameMap, visibleBoardJobs } fr
 import { LIFE } from "@/game/life/content";
 import { jobEnergyFactor } from "@/game/life/furniture";
 import { jobPay, lifeOf } from "@/game/life/logic";
+import { scaleTraitPay } from "@/game/life/traits";
 import { useGameStore } from "@/game/state/store";
 import { snapshot } from "@/game/time";
 import { formatVnd } from "@/lib/format-currency";
@@ -15,7 +16,8 @@ import { BlockedButton } from "./BlockedButton";
 const names = skillNameMap(SIM_CATALOG.skills);
 
 export function JobBoardPanel({ iconFiles }: { iconFiles: readonly string[] }) {
-  const jobs = useGameStore((s) => s.career.player_jobs);
+  const career = useGameStore((s) => s.career);
+  const jobs = career.player_jobs;
   const player = useGameStore((s) => s.career.players);
   const life = useGameStore((s) => lifeOf(s.career));
   const skills = useGameStore((s) => s.career.player_skills);
@@ -45,7 +47,7 @@ export function JobBoardPanel({ iconFiles }: { iconFiles: readonly string[] }) {
           blockFreelance: life.burnoutDay === day,
           energyFactor,
         });
-        const pay = jobPay(template.pay, template.tier, player.reputation);
+        const pay = scaleTraitPay(jobPay(template.pay, template.tier, player.reputation), career);
         const done = job.status === "completed";
         const active = job.status === "active";
         const xp = SIM_CATALOG.jobTemplateXp

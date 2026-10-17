@@ -5,6 +5,7 @@ import { playCueKey, startLoopKey, stopLoopKey } from "@/game/audio/client";
 import { typingLoopKey } from "@/game/audio/cues";
 import { SIM_CATALOG } from "@/game/career/content";
 import { formatVnd } from "@/lib/format-currency";
+import { jobTimeScale } from "@/game/life/traits";
 import { TASK_RUN, taskDurationSec } from "@/game/task-run/content";
 import { bugHitPx, bugMotionRand, spawnBugs, stepBug, type BugBody } from "@/game/task-run/motion";
 import { canRetry } from "@/game/task-run/machine";
@@ -19,6 +20,7 @@ function skillLabel(skillId: string): string {
 }
 
 export function TaskRunOverlay() {
+  const timeScale = useGameStore((s) => jobTimeScale(s.career));
   const jobId = useGameStore((s) => s.taskJobId);
   const job = useGameStore((s) => s.career.player_jobs.find((row) => row.id === jobId));
   const closeTask = useGameStore((s) => s.closeTask);
@@ -103,10 +105,11 @@ export function TaskRunOverlay() {
               difficulty={ticket.difficulty_label}
               skillId={skillId}
               prompt={ticket.prompt}
+              timeScale={timeScale}
             />
           ) : null}
-          {job.task_run.step === "build" ? <BuildStep run={job.task_run} /> : null}
-          {job.task_run.step === "test" ? <TestStep run={job.task_run} /> : null}
+          {job.task_run.step === "build" ? <BuildStep run={job.task_run} timeScale={timeScale} /> : null}
+          {job.task_run.step === "test" ? <TestStep run={job.task_run} timeScale={timeScale} /> : null}
           {job.task_run.step === "result" ? (
             <ResultStep
               run={job.task_run}
@@ -131,6 +134,7 @@ function TicketStep({
   difficulty,
   skillId,
   prompt,
+  timeScale,
 }: {
   title: string;
   quote: string;
@@ -138,6 +142,7 @@ function TicketStep({
   difficulty: string;
   skillId: string;
   prompt: string;
+  timeScale: number;
 }) {
   const choose = useGameStore((s) => s.chooseTicket);
   const ticket = TASK_RUN.tickets.find((row) => row.skill_id === skillId) ?? TASK_RUN.tickets[0];
@@ -155,7 +160,7 @@ function TicketStep({
         <dt className="terminal-sage">
           <Term id="deadline">hạn chót</Term>
         </dt>
-        <dd>{taskDurationSec(TASK_RUN)} giây</dd>
+        <dd>{Math.round(taskDurationSec(TASK_RUN) * timeScale)} giây</dd>
         <dt className="terminal-sage">kỹ năng</dt>
         <dd>
           <Term id={skillId}>{skillId}</Term>
@@ -182,7 +187,7 @@ function TicketStep({
   );
 }
 
-function BuildStep({ run }: { run: TaskRun }) {
+function BuildStep({ run, timeScale }: { run: TaskRun; timeScale: number }) {
   const choose = useGameStore((s) => s.chooseBuild);
   const begin = useGameStore((s) => s.beginTaskTest);
   const event = TASK_RUN.events.find((row) => row.id === run.event_id) ?? null;
@@ -192,7 +197,7 @@ function BuildStep({ run }: { run: TaskRun }) {
 
   const preChoice = Math.max(
     1,
-    TASK_RUN.build_sec +
+    TASK_RUN.build_sec * timeScale +
       (run.ticket === "ask" ? TASK_RUN.ask_extra_sec : 0) +
       (event?.time_delta_sec ?? 0),
   );
@@ -300,7 +305,7 @@ function useReducedMotion(): boolean {
   return reduced;
 }
 
-function TestStep({ run }: { run: TaskRun }) {
+function TestStep({ run, timeScale }: { run: TaskRun; timeScale: number }) {
   const catchTaskBug = useGameStore((s) => s.catchTaskBug);
   const finishTaskTest = useGameStore((s) => s.finishTaskTest);
   const reduced = useReducedMotion();
@@ -314,7 +319,7 @@ function TestStep({ run }: { run: TaskRun }) {
     spawnBugs(run.seed + run.retries, run.bugs_total, TASK_RUN.bug_motion),
   );
   const [hidden, setHidden] = useState<ReadonlySet<number>>(() => new Set());
-  const [left, setLeft] = useState(TASK_RUN.test_sec);
+  const [left, setLeft] = useState(TASK_RUN.test_sec * timeScale);
   const hit = bugHitPx(TASK_RUN.bug_motion);
 
   useEffect(() => {
