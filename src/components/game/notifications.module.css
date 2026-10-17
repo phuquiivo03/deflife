@@ -19,6 +19,16 @@
   overflow-y: auto;
 }
 
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--notice-gap);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
 .action {
   display: inline-flex;
   max-width: 100%;

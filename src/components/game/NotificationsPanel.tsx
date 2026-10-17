@@ -2,8 +2,9 @@
 
 /* eslint-disable @next/next/no-img-element -- native pixel art stays unoptimized */
 
+import type { CSSProperties, MouseEvent } from "react";
 import { m5AssetPath, m51AssetPath, type M5AssetKey } from "@/game/life/assets";
-import type { NoticeAction } from "@/game/career/types";
+import type { Notice, NoticeActionButton, NoticeActionId } from "@/game/career/types";
 import { useGameStore } from "@/game/state/store";
 import { Button, PixelButton } from "@/components/ui/button";
 import { PanelCard, PanelCardTitle } from "@/components/ui/panel-card";
@@ -13,9 +14,12 @@ import {
   NOTICE_BADGE_KEY,
   NOTICE_LIST,
   actionIconFile,
+  listedNoticeActions,
   noticeActionButtonMetrics,
   noticeBadgeFile,
   noticeBadgeMetrics,
+  noticeButtonGlyph,
+  noticeButtonVariant,
   noticeChromeStyle,
   resolveNoticeAction,
 } from "./notifications.config";
@@ -28,15 +32,36 @@ function clock(minute: number): string {
   return `${String(hour).padStart(2, "0")}:${String(rest).padStart(2, "0")}`;
 }
 
+function actionFace(): { style: CSSProperties; glyphPx: number } {
+  const metrics = noticeActionButtonMetrics();
+  return {
+    glyphPx: metrics.glyphPx,
+    style: {
+      minHeight: metrics.minHeightPx,
+      fontFamily: "var(--font-galmuri-7), var(--font-galmuri-9), system-ui, sans-serif",
+      fontSize: metrics.labelPx,
+      lineHeight: 1,
+    },
+  };
+}
+
+function stopRowClick(event: MouseEvent<HTMLElement>) {
+  event.stopPropagation();
+}
+
 function NoticeActionButton({
   action,
   onRun,
 }: {
-  action: string;
-  onRun: (action: string) => void;
+  action: NoticeActionId;
+  onRun: (action: NoticeActionId) => void;
 }) {
   const control = resolveNoticeAction(action);
   const label = control?.label ?? action;
+  const run = (event: MouseEvent<HTMLElement>) => {
+    stopRowClick(event);
+    onRun(action);
+  };
   if (!control || control.kind === "text") {
     return (
       <Button
@@ -47,14 +72,14 @@ function NoticeActionButton({
         className="min-h-11 shrink-0"
         data-testid={`notice-action-${action}`}
         data-action-kind="text"
-        onClick={() => onRun(action)}
+        onClick={run}
       >
         {label}
       </Button>
     );
   }
 
-  const metrics = noticeActionButtonMetrics();
+  const face = actionFace();
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -63,25 +88,20 @@ function NoticeActionButton({
             variant="secondary"
             aria-label={control.label}
             className="shrink-0"
-            style={{
-              minHeight: metrics.minHeightPx,
-              fontFamily: "var(--font-galmuri-7), var(--font-galmuri-9), system-ui, sans-serif",
-              fontSize: metrics.labelPx,
-              lineHeight: 1,
-            }}
+            style={face.style}
             data-testid={`notice-action-${action}`}
             data-action-kind="icon-label"
-            onClick={() => onRun(action)}
+            onClick={run}
           >
             <img
               src={m51AssetPath(actionIconFile(control.iconKey))}
               alt=""
-              width={metrics.glyphPx}
-              height={metrics.glyphPx}
+              width={face.glyphPx}
+              height={face.glyphPx}
               draggable={false}
               data-icon-key={control.iconKey}
               className="pixelated block"
-              style={{ width: metrics.glyphPx, height: metrics.glyphPx }}
+              style={{ width: face.glyphPx, height: face.glyphPx }}
             />
             <span>{control.label}</span>
           </PixelButton>
@@ -94,16 +114,95 @@ function NoticeActionButton({
   );
 }
 
+function NoticeActionsButton({
+  button,
+  notice,
+  runNoticeAction,
+}: {
+  button: NoticeActionButton;
+  notice: Notice;
+  runNoticeAction: (id: NoticeActionId, notice: Notice) => void;
+}) {
+  const variant = noticeButtonVariant(button.variant);
+  const glyph = noticeButtonGlyph(button);
+  const face = actionFace();
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className={styles.action}>
+          <PixelButton
+            variant={variant}
+            aria-label={button.label}
+            className="shrink-0"
+            style={face.style}
+            data-testid={`notice-action-${button.id}`}
+            data-action-kind={glyph ? "icon-label" : "label"}
+            onClick={(event) => {
+              event.stopPropagation();
+              runNoticeAction(button.id, notice);
+            }}
+          >
+            {glyph ? (
+              <img
+                src={m51AssetPath(glyph.file)}
+                alt=""
+                width={face.glyphPx}
+                height={face.glyphPx}
+                draggable={false}
+                data-icon-key={glyph.iconKey}
+                className="pixelated block"
+                style={{ width: face.glyphPx, height: face.glyphPx }}
+              />
+            ) : null}
+            <span>{button.label}</span>
+          </PixelButton>
+        </span>
+      </TooltipTrigger>
+      <TooltipContent side="top" data-testid={`notice-action-tip-${button.id}`}>
+        {button.label}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
+function NoticeRowActions({
+  notice,
+  onRun,
+}: {
+  notice: Notice;
+  onRun: (id: NoticeActionId, notice: Notice) => void;
+}) {
+  const buttons = listedNoticeActions(notice);
+  if (buttons) {
+    return (
+      <div className={styles.actions} data-testid="notice-actions">
+        {buttons.map((button, index) => (
+          <NoticeActionsButton
+            key={`${notice.id}-${button.id}-${index}`}
+            button={button}
+            notice={notice}
+            runNoticeAction={onRun}
+          />
+        ))}
+      </div>
+    );
+  }
+  if (!notice.action) return null;
+  return (
+    <NoticeActionButton
+      action={notice.action}
+      onRun={(id) => {
+        onRun(id, notice);
+      }}
+    />
+  );
+}
+
 export function NotificationsPanel() {
   const notices = useGameStore((s) => s.career.feed?.notices ?? []);
   const readNotice = useGameStore((s) => s.readNotice);
   const readAll = useGameStore((s) => s.readAllNotices);
   const runNoticeAction = useGameStore((s) => s.runNoticeAction);
-  const runAction = (action: string) => {
-    // payRent, viewJobs, openStore, eat, and sleep share this call.
-    // Hunger rows are removed before this list renders.
-    runNoticeAction(action as NoticeAction);
-  };
   const listed = notices.filter((notice) => !isHungerNotice(notice));
   let unread = 0;
   for (const notice of listed) {
@@ -165,9 +264,7 @@ export function NotificationsPanel() {
                       {notice.text}
                     </span>
                   </button>
-                  {notice.action ? (
-                    <NoticeActionButton action={notice.action} onRun={runAction} />
-                  ) : null}
+                  <NoticeRowActions notice={notice} onRun={runNoticeAction} />
                 </PanelCard>
               </li>
             ))}
