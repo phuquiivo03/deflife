@@ -3,7 +3,7 @@
 /* eslint-disable @next/next/no-img-element -- native pixel art stays unoptimized */
 
 import { useEffect, useState } from "react";
-import { LIFE_EVENTS, lifeEventById } from "@/game/life/events-content";
+import { LIFE_EVENTS } from "@/game/life/events-content";
 import { diaryWhen } from "@/game/life/events";
 import { m5AssetPath, m51AssetPath, type M5AssetKey } from "@/game/life/assets";
 import {
@@ -16,7 +16,6 @@ import {
 } from "@/game/life/m51-art";
 import type { LifeDiary } from "@/game/career/types";
 import { useGameStore } from "@/game/state/store";
-import { Button } from "@/components/ui/button";
 import { HungerDock } from "./FoodPopup";
 import { formatVnd } from "@/lib/format-currency";
 
@@ -25,10 +24,8 @@ function art(key: string): string {
 }
 
 export function LifeStage() {
-  const pendingId = useGameStore((s) => s.career.feed?.pendingId ?? null);
   const diary = useGameStore((s) => s.career.feed?.diary ?? null);
   const banner = useGameStore((s) => s.lifeBanner);
-  const chooseLife = useGameStore((s) => s.chooseLife);
   const dismissDiary = useGameStore((s) => s.dismissDiary);
   const syncLifeSurface = useGameStore((s) => s.syncLifeSurface);
   const [now, setNow] = useState(() => Date.now());
@@ -44,7 +41,6 @@ export function LifeStage() {
     return () => window.clearTimeout(timer);
   }, [banner]);
 
-  const event = pendingId ? lifeEventById(pendingId) : null;
   const showBanner = banner != null && banner.until > now;
   const bannerBox = bannerMetrics();
 
@@ -89,39 +85,6 @@ export function LifeStage() {
                   }}
                 />
               ))}
-            </div>
-          </div>
-        </div>
-      ) : null}
-      {event ? (
-        <div className="absolute inset-x-0 bottom-0 z-20 flex h-1/3 min-h-[168px] items-end p-2" data-testid="life-dialog">
-          <div className="life-dialog flex w-full gap-3 p-3">
-            {event.portrait ? (
-              <img
-                src={art(event.portrait)}
-                width={96}
-                height={96}
-                alt=""
-                className="pixel-img h-24 w-24 shrink-0"
-              />
-            ) : null}
-            <div className="flex min-w-0 flex-1 flex-col justify-between gap-2">
-              <p className="font-galmuri-9 text-galmuri-body text-[#F4EBD9]">{event.text}</p>
-              <div className="flex flex-wrap gap-2">
-                {event.choices.map((choice) => (
-                  <Button
-                    key={choice.id}
-                    type="button"
-                    size="sm"
-                    showArrow={false}
-                    className="min-h-11"
-                    data-testid={`life-choice-${choice.id}`}
-                    onClick={() => chooseLife(choice.id)}
-                  >
-                    {choice.text}
-                  </Button>
-                ))}
-              </div>
             </div>
           </div>
         </div>
@@ -188,7 +151,6 @@ export function LifeRoomFx() {
   const health = useGameStore((s) => s.career.players.health);
   const mood = useGameStore((s) => s.career.players.mood);
   const energy = useGameStore((s) => s.career.players.energy);
-  const pendingId = useGameStore((s) => s.career.feed?.pendingId ?? null);
   const bubble = useGameStore((s) => s.lifeBubble);
   const [now, setNow] = useState(() => Date.now());
 
@@ -205,7 +167,6 @@ export function LifeRoomFx() {
 
   return (
     <>
-      {pendingId ? <div className="absolute inset-0 z-10 bg-black/45" data-testid="life-dim" /> : null}
       {emote ? (
         <img
           src={art(emote)}

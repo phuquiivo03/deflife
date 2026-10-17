@@ -9,6 +9,7 @@ import { getRoom } from "@/game/content";
 import { useGameStore } from "@/game/state/store";
 import { SceneCanvas } from "./SceneCanvas";
 import { LifeRoomFx, LifeStage } from "./LifeStage";
+import { LifeEventPopup } from "./LifeEventPopup";
 import { CharacterIntro } from "./CharacterIntro";
 import { CustomizePanel } from "./CustomizePanel";
 import { NotificationsPanel } from "./NotificationsPanel";
@@ -222,6 +223,7 @@ export function GameShell({ iconFiles = [] }: { iconFiles?: readonly string[] })
             >
               <SceneCanvas areaRef={areaRef} debug={debug} />
               <LifeRoomFx />
+              <LifeEventPopup />
             </RoomChamferFrame>
             <div className="mt-3 flex w-full flex-col items-center gap-3 px-2 lg:px-0">
               <PlayerHudCard iconFiles={iconFiles} />
