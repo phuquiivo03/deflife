@@ -18,7 +18,7 @@ import {
   xpNeededForNextLevel,
 } from "../career/actions";
 import { SIM_CATALOG } from "../career/content";
-import type { CareerState, NoticeAction } from "../career/types";
+import type { CareerState } from "../career/types";
 import { playCueKey } from "../audio/client";
 import type { CueKey } from "../audio/cues";
 import {
@@ -210,7 +210,7 @@ type GameState = {
   readNotice: (id: string) => void;
   readAllNotices: () => void;
   dismissDiary: () => void;
-  runNoticeAction: (action: NoticeAction) => void;
+  runNoticeAction: (action: string) => void;
   setStoreOpen: (open: boolean) => void;
   setFoodOpen: (open: boolean) => void;
   buyStoreItem: (id: string) => void;
@@ -500,6 +500,11 @@ export const useGameStore = create<GameState>()(
       readAllNotices: () => set({ career: markAllNoticesRead(get().career) }),
       dismissDiary: () => set({ career: dismissDiary(get().career) }),
       runNoticeAction: (action) => {
+        if (action === "payRent") {
+          commitLife(payOutstandingRent(get().career));
+          get().syncLifeSurface();
+          return;
+        }
         if (action === "viewJobs") {
           set({ careerPanel: "jobs" });
           return;
@@ -516,8 +521,7 @@ export const useGameStore = create<GameState>()(
           get().sleep();
           return;
         }
-        commitLife(payOutstandingRent(get().career));
-        get().syncLifeSurface();
+        console.warn(`Unknown notice action "${action}"`);
       },
       setStoreOpen: (open) => set({ storeOpen: open }),
       setFoodOpen: (open) => set({ foodOpen: open }),
