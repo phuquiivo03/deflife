@@ -1,0 +1,49 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+}
+
+.backdrop[data-state="open"] {
+  animation-name: ui-modal-backdrop-in;
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
+}
+
+.content {
+  transform: translate(-50%, -50%);
+}
+
+.content[data-state="open"] {
+  animation-name: ui-modal-in;
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
+}
+
+@keyframes ui-modal-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ui-modal-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + var(--modal-rise)));
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .backdrop[data-state="open"],
+  .content,
+  .content[data-state="open"] {
+    animation: none;
+  }
+}

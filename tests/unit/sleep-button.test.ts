@@ -104,6 +104,14 @@ describe("sleep button metrics", () => {
     expect(style["--zzz-img"]).toBe(`url("${m51AssetPath("fx_zzz_x2.png")}")`);
   });
 
+  it("uses the shared tooltip and keeps the Đi ngủ aria-label", () => {
+    const source = readFileSync(join(process.cwd(), "src/components/game/SleepButton.tsx"), "utf8");
+    expect(source).toContain("TooltipContent");
+    expect(source).toContain("aria-label={SLEEP_LABEL}");
+    expect(source).toContain("{SLEEP_LABEL}");
+    expect(source).not.toContain("title=");
+  });
+
   it("holds the first zzz frame when motion is reduced", () => {
     const css = readFileSync(
       join(process.cwd(), "src/components/game/sleep-button.module.css"),

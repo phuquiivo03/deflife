@@ -121,12 +121,12 @@ Use `PixelAvatar` + `resolveAvatarAsset()` with the same integer-scale rule.
 ## HUD & stat bars
 
 - HUD card under the room has **no avatar**. Three labeled bars, each with `current/max`: **Sức khỏe** (coral), **Tinh thần** (mint), **Năng lượng** (sky). The numbers are rounded; the saved values are floats. Energy, health, mood, money, and the clock are the career/life state. The name on the character card stays the placeholder.
-- Same card: money chip, `Ngày` + clock + phase icon, then an icon-only **Đi ngủ** (bed `icon_btn_sleep`, no text, tooltip “Đi ngủ”). While sleep is allowed, `fx_zzz` floats above the bed; `prefers-reduced-motion` keeps the first frame still. Timings are in `src/components/game/sleep-button.config.ts`. Then **Học** / **Việc làm** / **Kỹ năng**. The Kỹ năng icon is `icon_skills.png`, chosen by `SKILL_MENU_ICON` in `PlayerHudCard.tsx`.
+- Same card: money chip, `Ngày` + clock + phase icon, then the icon bar. **Cửa hàng** is `icon_btn_store` (no text, tooltip “Cửa hàng”) and sits beside an icon-only **Đi ngủ** (bed `icon_btn_sleep`, no text, tooltip “Đi ngủ”). Both tips use `src/components/ui/tooltip.tsx`. The sleep button keeps its `aria-label`. While sleep is allowed, `fx_zzz` floats above the bed; `prefers-reduced-motion` keeps the first frame still. Timings are in `src/components/game/sleep-button.config.ts` and `src/components/game/store-button.config.ts`. Then **Học** / **Việc làm** / **Kỹ năng**. The Kỹ năng icon is `icon_skills.png`, chosen by `SKILL_MENU_ICON` in `PlayerHudCard.tsx`.
 - Audio row on that card: mute button (**Tắt tiếng** / **Bật tiếng**) and two sliders, **Nhạc** and **Hiệu ứng**. Mute uses `icon_sound_on` / `icon_sound_off` (44×44 native only, shown at 22px, `image-rendering: pixelated`). Each slider puts `icon_volume_low` and `icon_volume_high` at its ends the same way. Defaults live in `game_config.json`: sound on, Nhạc 0.5, Hiệu ứng 0.8. The choice is stored in `localStorage` (`devlife:audio:v2`), separate from the career save. A `devlife:audio:v1` payload is unmuted once and rewritten as v2; a later mute stays muted. SFX play from one preloaded Web Audio sprite. Music starts after the first tap or key, during idle, so it does not block the first paint. On iOS the context uses the media playback channel, so the ring/silent switch does not mute the game; if the sprite cannot be decoded, SFX fall back to per-file audio.
 - **Học** panel has two tabs: **Khóa học** (courses still available to buy) and **Đã học** (finished courses, read-only: skill, XP granted, day completed). Empty states: “Không còn khóa để học.” and “Chưa học khóa nào.” A non-repeatable course moves to **Đã học** after one purchase.
 - **Nhân vật** panel: avatar, name, stage, overall rank badge (rounded mean of the five skill levels), trait row (icon at 22px and the trait name; the bonus line is a tooltip), **Danh tiếng**, Freelance `n/100` with a bar, then the five catalog skills from `skillProgressList` (icon, name, rank badge, `Junior 60%`, bar). No stub skill percents. The trait icon uses the same 22px box as Danh tiếng and Freelance.
 - Bars: 1px border, fill coral / mint / sky per vital. A vital under its warning line blinks a coral inset; a change floats above that bar. `prefers-reduced-motion` keeps the inset and drops the blink.
-- Event dialog and speech bubble sit on the native M5 frames (`ui_dialog_frame`, `ui_speech_bubble`) as a 9-slice at 2×. The sleep diary is a notepad window on `ui_window_notepad` (`public/ui/m5_1/`, native and `_x2`). The store list uses `ui_store_frame` the same way, and each item sits on `ui_store_card` at 2× (192×240). Portraits and emotes use the native PNG at integer scale with `image-rendering: pixelated`. The room canvas is unchanged.
+- Event dialog and speech bubble sit on the native M5 frames (`ui_dialog_frame`, `ui_speech_bubble`) as a 9-slice at 2×. The sleep diary is a notepad window on `ui_window_notepad` (`public/ui/m5_1/`, native and `_x2`). The store list uses `ui_store_frame` the same way, and each item sits on `ui_store_card` at 2× (192×240). That list opens from the HUD shop icon in the shared modal. Portraits and emotes use the native PNG at integer scale with `image-rendering: pixelated`. The room canvas is unchanged.
 
 ---
 
@@ -175,7 +175,25 @@ Chrome hints use `src/components/ui/tooltip.tsx`. Numbers live in `src/component
 | `enterMs` | 120 | Fade and 4px slide. `prefers-reduced-motion` skips it |
 | `disableHoverableContent` | true | Leaving the trigger closes the tip. The tip has no controls |
 
-Hover opens the tip after `openDelayMs`. Keyboard focus opens it immediately and sets `aria-describedby` on the trigger while the tip is open. A coarse pointer opens it on tap; a tap outside, or Escape, closes it. The character-card trait row uses this for the bonus line.
+Hover opens the tip after `openDelayMs`. Keyboard focus opens it immediately and sets `aria-describedby` on the trigger while the tip is open. A coarse pointer opens it on tap; a tap outside, or Escape, closes it. The character-card trait row uses this for the bonus line. The HUD shop and sleep icons use it for “Cửa hàng” and “Đi ngủ”.
+
+## Modal
+
+Popup chrome uses `src/components/ui/modal.tsx`. Numbers live in `src/components/ui/modal.config.ts` (`MODAL`):
+
+| Key | Default | Meaning |
+|-----|---------|---------|
+| `overlayZ` | 40 | Backdrop. Same stack as the career panel, the food popup, and the sheet overlay |
+| `contentZ` | 50 | Dialog. Same stack as sheet content and the level-up popup |
+| `enterMs` | 160 | Fade and rise. `prefers-reduced-motion` skips it |
+| `risePx` | 4 | How far the dialog rises while it fades in |
+| `backdrop` | `rgba(42, 37, 72, 0.45)` | Dim, same tint as the other full-screen overlays |
+| `maxHeightVh` | 80 | Dialog cap |
+| `chromePx` | 112 | Title row and padding kept outside the scrolling body |
+| `maxWidthPx` | 420 | Default width cap. The store passes `STORE_MODAL_MAX_PX` (280) |
+| `viewportInsetPx` | 16 | Side inset on a narrow viewport |
+
+The shell traps focus, closes on Escape and a backdrop click, and sets `aria-modal`. **Đóng** closes it too. The store renders the existing list inside it.
 
 ## Motion & a11y
 
