@@ -160,7 +160,7 @@ export type LifeState = {
   slotsSinceMeal: number;
 };
 
-export type NoticeAction = "payRent" | "viewJobs" | "openStore";
+export type NoticeAction = "payRent" | "viewJobs" | "openStore" | "eat" | "sleep";
 
 export type NoticeSeverity = "info" | "warn" | "urgent";
 

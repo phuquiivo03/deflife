@@ -37,7 +37,7 @@ export function advanceHunger(state: CareerState): CareerState {
     severity: "warn",
     icon: "icon_notif_event.png",
     text: LIFE.hunger_notice,
-    action: null,
+    action: "eat",
     read: false,
   };
   const notices = [...next.feed.notices, notice];

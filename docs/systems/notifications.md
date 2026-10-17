@@ -33,4 +33,4 @@ The clock sits on the first line, in the muted color, inside the same clamp.
 | `eat` | Ăn | `icon_action_eat` (rice bowl) |
 | `sleep` | Ngủ | `icon_action_sleep` (bed) |
 
-A click calls `runNoticeAction` with the action id, including `eat` and `sleep`. A label with no glyph uses the outline text button and the same click. The list region is `overflow-y: auto` inside the desktop panel cap (see the layout section of [DESIGN_SYSTEM.md](../design/DESIGN_SYSTEM.md)).
+A click calls `runNoticeAction` with the action id. `payRent` pays outstanding rent. `eat` opens the Ăn uống modal, the same shape as `openStore`. `sleep` calls the HUD sleep control. Any other id logs a warning and does nothing. A label with no glyph uses the outline text button and the same click. The list region is `overflow-y: auto` inside the desktop panel cap (see the layout section of [DESIGN_SYSTEM.md](../design/DESIGN_SYSTEM.md)).

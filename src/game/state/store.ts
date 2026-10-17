@@ -201,6 +201,8 @@ type GameState = {
   retryTaskRun: () => void;
   /** Ephemeral life UI. Not persisted. */
   storeOpen: boolean;
+  /** Ăn uống modal. Not persisted. */
+  foodOpen: boolean;
   lifeBubble: { text: string; until: number } | null;
   lifeBanner: { label: string; until: number } | null;
   terminalLines: string[];
@@ -208,8 +210,9 @@ type GameState = {
   readNotice: (id: string) => void;
   readAllNotices: () => void;
   dismissDiary: () => void;
-  runNoticeAction: (action: "payRent" | "viewJobs" | "openStore") => void;
+  runNoticeAction: (action: string) => void;
   setStoreOpen: (open: boolean) => void;
+  setFoodOpen: (open: boolean) => void;
   buyStoreItem: (id: string) => void;
   pinStoreItem: (id: string | null) => void;
   debugForceEvent: () => void;
@@ -320,6 +323,7 @@ export const useGameStore = create<GameState>()(
       careerPanel: null,
       taskJobId: null,
       storeOpen: false,
+      foodOpen: false,
       lifeBubble: null,
       lifeBanner: null,
       terminalLines: [],
@@ -496,6 +500,11 @@ export const useGameStore = create<GameState>()(
       readAllNotices: () => set({ career: markAllNoticesRead(get().career) }),
       dismissDiary: () => set({ career: dismissDiary(get().career) }),
       runNoticeAction: (action) => {
+        if (action === "payRent") {
+          commitLife(payOutstandingRent(get().career));
+          get().syncLifeSurface();
+          return;
+        }
         if (action === "viewJobs") {
           set({ careerPanel: "jobs" });
           return;
@@ -504,10 +513,18 @@ export const useGameStore = create<GameState>()(
           set({ storeOpen: true, career: askStore(get().career) });
           return;
         }
-        commitLife(payOutstandingRent(get().career));
-        get().syncLifeSurface();
+        if (action === "eat") {
+          set({ foodOpen: true });
+          return;
+        }
+        if (action === "sleep") {
+          get().sleep();
+          return;
+        }
+        console.warn(`Unknown notice action "${action}"`);
       },
       setStoreOpen: (open) => set({ storeOpen: open }),
+      setFoodOpen: (open) => set({ foodOpen: open }),
       buyStoreItem: (id) => {
         const bought = buyShopItem(get().career, id);
         if (bought.error) return;
