@@ -64,4 +64,4 @@ The list opens in the shared modal (`src/components/ui/modal.tsx`). The existing
 
 ## Notice actions
 
-Pay rent, view job, and open store in the notice list use the same `PixelButton` variant `icon`. Glyphs are `icon_action_pay_rent`, `icon_action_view_job`, and `icon_action_open_store` (16×16 native, drawn in the 16px center of the 2× icon face). The tooltip and `aria-label` keep “Trả trọ”, “Xem job”, and “Mở store”. `icon_action_eat` and `icon_action_sleep` sit in the same map. Sizes and the text-button fallback are in `src/components/game/notifications.config.ts`.
+Pay rent, view job, open store, eat, and sleep in the notice list use `PixelButton` variant `secondary`. The glyph (`icon_action_*`, 16×16 native) sits in the 16px center beside a Galmuri7 label: “Trả trọ”, “Xem job”, “Mở store”, “Ăn”, “Ngủ”. `aria-label` and the tooltip repeat that label. Sizes and the text-button fallback are in `src/components/game/notifications.config.ts`.

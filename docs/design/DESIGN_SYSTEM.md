@@ -27,7 +27,19 @@ Utility class: `devlife-page-bg` on `html`/`body` (gradient + grid in **one** `b
 
 ## Layout (desktop)
 
-On `lg` and up, the three columns are one centered group (`max-w-[1200px]`), not stretched to the viewport. Side columns are **320px**. The center column holds the capped room and the HUD and stays within **520px**. A **20px** gap separates the columns. Leftover width on both sides is only the page gradient. The columns are top-aligned and share one row height, so the side panels match the center column. At 1366px the group still fits with those widths and the same gap. Below `lg`, the stack is unchanged.
+On `lg` and up, the three columns are one centered group (`max-w-[1200px]`), not stretched to the viewport. Side columns are **320px**. The center column holds the capped room and the HUD and stays within **520px**. A **20px** gap separates the columns. Leftover width on both sides is only the page gradient. The columns are top-aligned. At 1366px the group still fits with those widths and the same gap. Below `lg`, the stack is unchanged.
+
+On `lg`, both side panels are sticky and their block size is the viewport cap from `src/components/game/shell-layout.config.ts` (`SHELL_LAYOUT`). That cap is `100vh` minus the header and the scroll region's top and bottom margins, so the columns stay on screen while the center column scrolls. The panel interior scrolls (`overflow-y: auto`). This design system has no pixel scrollbar, so that scroller is the native one. Panel `z-index` stays below the holiday banner, modals, popups, and tooltips, so the banner can paint across the columns. Below `lg` the panels stay in normal flow and scroll with the page. The right panel's cards, type, and tabs are unchanged; only this size and the inner scroll apply.
+
+| Key | Default | Meaning |
+|-----|---------|---------|
+| `desktopMinPx` | 1024 | Tailwind `lg`. Below this, no sticky cap |
+| `headerPx` | 56 | Header `min-h-14`, border included |
+| `marginYPx` | 24 | `lg:py-6`, subtracted twice. This padding is the inset |
+| `stickyTopPx` | 0 | Sticky offset. Stays 0 so it does not stack on that padding |
+| `panelZ` | 1 | Under the banner (`overlayFloorZ` 30) and modal/tooltip layers (40+) |
+
+On `lg` the shell is `h-screen` and the region under the header is what scrolls. The header stays put. Below `lg` the page still scrolls as a whole.
 
 | Column | Content |
 |--------|---------|
@@ -177,7 +189,7 @@ Chrome hints use `src/components/ui/tooltip.tsx`. Numbers live in `src/component
 | `enterMs` | 120 | Fade and 4px slide. `prefers-reduced-motion` skips it |
 | `disableHoverableContent` | true | Leaving the trigger closes the tip. The tip has no controls |
 
-Hover opens the tip after `openDelayMs`. Keyboard focus opens it immediately and sets `aria-describedby` on the trigger while the tip is open. A coarse pointer opens it on tap; a tap outside, or Escape, closes it. The character-card trait row uses this for the bonus line. The HUD shop and sleep icons use it for “Cửa hàng” and “Đi ngủ”. Notice actions use it for “Trả trọ”, “Xem job”, and “Mở store”.
+Hover opens the tip after `openDelayMs`. Keyboard focus opens it immediately and sets `aria-describedby` on the trigger while the tip is open. A coarse pointer opens it on tap; a tap outside, or Escape, closes it. The character-card trait row uses this for the bonus line. The HUD shop and sleep icons use it for “Cửa hàng” and “Đi ngủ”. Notice actions show those words on the button and use the same string for `aria-label` and the tip: “Trả trọ”, “Xem job”, “Mở store”, “Ăn”, and “Ngủ”.
 
 ## Modal
 

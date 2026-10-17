@@ -1,0 +1,19 @@
+/*
+ * Desktop only. The breakpoint number is SHELL_LAYOUT.desktopMinPx.
+ * Mobile keeps the aside in normal flow (no sticky, no viewport cap).
+ */
+
+@media (min-width: 1024px) {
+  .column {
+    position: sticky;
+    top: var(--shell-panel-top);
+    z-index: var(--shell-panel-z);
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: var(--shell-panel-max);
+    max-height: var(--shell-panel-max);
+    min-height: 0;
+  }
+}

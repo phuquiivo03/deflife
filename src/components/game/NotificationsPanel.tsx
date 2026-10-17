@@ -7,7 +7,6 @@ import { unreadCount } from "@/game/life/events";
 import type { NoticeAction } from "@/game/career/types";
 import { useGameStore } from "@/game/state/store";
 import { Button, PixelButton } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { PanelCard, PanelCardTitle } from "@/components/ui/panel-card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
@@ -33,8 +32,8 @@ function NoticeActionButton({
   action,
   onRun,
 }: {
-  action: NoticeAction;
-  onRun: (action: NoticeAction) => void;
+  action: string;
+  onRun: (action: string) => void;
 }) {
   const control = resolveNoticeAction(action);
   const label = control?.label ?? action;
@@ -59,19 +58,19 @@ function NoticeActionButton({
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span className="inline-flex shrink-0">
+        <span className={styles.action}>
           <PixelButton
-            variant="icon"
+            variant="secondary"
             aria-label={control.label}
             className="shrink-0"
             style={{
-              width: metrics.buttonPx,
-              height: metrics.buttonPx,
-              minWidth: metrics.buttonPx,
-              minHeight: metrics.buttonPx,
+              minHeight: metrics.minHeightPx,
+              fontFamily: "var(--font-galmuri-7), var(--font-galmuri-9), system-ui, sans-serif",
+              fontSize: metrics.labelPx,
+              lineHeight: 1,
             }}
             data-testid={`notice-action-${action}`}
-            data-action-kind="icon"
+            data-action-kind="icon-label"
             onClick={() => onRun(action)}
           >
             <img
@@ -84,6 +83,7 @@ function NoticeActionButton({
               className="pixelated block"
               style={{ width: metrics.glyphPx, height: metrics.glyphPx }}
             />
+            <span>{control.label}</span>
           </PixelButton>
         </span>
       </TooltipTrigger>
@@ -101,6 +101,11 @@ export function NotificationsPanel() {
   const readNotice = useGameStore((s) => s.readNotice);
   const readAll = useGameStore((s) => s.readAllNotices);
   const runNoticeAction = useGameStore((s) => s.runNoticeAction);
+  const runAction = (action: string) => {
+    // eat and sleep use the same call. The store handler on this branch
+    // branches payRent, viewJobs, and openStore.
+    runNoticeAction(action as NoticeAction);
+  };
   const ordered = [...notices].reverse();
   const badge = noticeBadgeMetrics();
 
@@ -130,7 +135,7 @@ export function NotificationsPanel() {
           Đã đọc
         </Button>
       ) : null}
-      <ScrollArea className="min-h-0 flex-1">
+      <div className={styles.scroll}>
         {ordered.length === 0 ? (
           <p className="font-galmuri-7 text-galmuri-small text-[var(--muted-foreground)]" data-testid="notice-empty">
             Chưa có thông báo.
@@ -158,14 +163,14 @@ export function NotificationsPanel() {
                     </span>
                   </button>
                   {notice.action ? (
-                    <NoticeActionButton action={notice.action} onRun={runNoticeAction} />
+                    <NoticeActionButton action={notice.action} onRun={runAction} />
                   ) : null}
                 </PanelCard>
               </li>
             ))}
           </ul>
         )}
-      </ScrollArea>
+      </div>
     </div>
   );
 }
