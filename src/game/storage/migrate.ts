@@ -374,7 +374,13 @@ function normalizeNotices(value: unknown): LifeNotice[] {
     if (!isRecord(row) || typeof row.id !== "string" || typeof row.text !== "string") continue;
     const severity: NoticeSeverity = row.severity === "warn" || row.severity === "urgent" ? row.severity : "info";
     const action: NoticeAction | null =
-      row.action === "payRent" || row.action === "viewJobs" || row.action === "openStore" ? row.action : null;
+      row.action === "payRent" ||
+      row.action === "viewJobs" ||
+      row.action === "openStore" ||
+      row.action === "eat" ||
+      row.action === "sleep"
+        ? row.action
+        : null;
     notices.push({
       id: row.id,
       day: num(row.day, 1),

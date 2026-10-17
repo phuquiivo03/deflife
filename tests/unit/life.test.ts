@@ -220,7 +220,9 @@ describe("hunger", () => {
     expect(state.feed.notices.some((notice) => notice.id.startsWith("hunger-"))).toBe(false);
     state = crossWakingSlot(state, 12 * 60).state;
     expect(state.life.slotsSinceMeal).toBe(5);
-    expect(state.feed.notices.filter((notice) => notice.text === LIFE.hunger_notice)).toHaveLength(1);
+    expect(state.feed.notices.filter((notice) => notice.text === LIFE.hunger_notice)).toEqual([
+      expect.objectContaining({ action: "eat" }),
+    ]);
     state = crossWakingSlot(state, 14 * 60).state;
     expect(state.feed.notices.filter((notice) => notice.text === LIFE.hunger_notice)).toHaveLength(1);
 
@@ -263,5 +265,29 @@ describe("hunger", () => {
     expect(dated.career.feed.diary?.sleptAt).toBeNull();
     expect(dated.career.feed.diary?.sleptDay).toBeNull();
     expect(dated.career.player_skills.find((skill) => skill.skill_id === "frontend")).toMatchObject({ level: 3, xp: 4 });
+
+    const acted = migrateSave(
+      {
+        stage: "student",
+        totalMinutes: 480,
+        career: {
+          players: { money: 42 },
+          feed: {
+            notices: [
+              { id: "hunger-1-0", text: "Đói rồi, đi ăn thôi.", action: "eat", severity: "warn" },
+              { id: "sick-1", text: "Sức khỏe dưới 30.", action: "sleep", severity: "warn" },
+              { id: "old", text: "Giữ nguyên.", action: "nope" },
+            ],
+          },
+        },
+      },
+      16,
+    );
+    expect(acted.career.players.money).toBe(42);
+    expect(acted.career.feed.notices.map((notice) => [notice.id, notice.action])).toEqual([
+      ["hunger-1-0", "eat"],
+      ["sick-1", "sleep"],
+      ["old", null],
+    ]);
   });
 });

@@ -7,6 +7,7 @@ import type { PlayerJob } from "@/game/career/types";
 import { CUE_IDS } from "@/game/audio/cues";
 import { parseManifest, resolveCueId } from "@/game/audio/manifest";
 import { dialogCueKey, noticeCueKey, pickMomentCue } from "@/game/life/sounds";
+import { LIFE } from "@/game/life/content";
 import { LIFE_EVENTS } from "@/game/life/events-content";
 import {
   bannerForDay,
@@ -284,7 +285,9 @@ describe("life events", () => {
 
     const sick = { ...start(), players: { ...start().players, health: 20 } };
     const noted = syncLifeSurface(sick, 1, 8 * 60, false);
-    expect(noted.state.feed.notices.filter((notice) => notice.id === "sick-1")).toHaveLength(1);
+    expect(noted.state.feed.notices.filter((notice) => notice.id === "sick-1")).toEqual([
+      expect.objectContaining({ action: "sleep", text: `Sức khỏe dưới ${LIFE.sick_below}.` }),
+    ]);
     expect(syncLifeSurface(noted.state, 1, 8 * 60, false).state.feed.notices.filter((notice) => notice.id === "sick-1")).toHaveLength(1);
 
     const banner = bannerForDay(start(), 1);

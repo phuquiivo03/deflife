@@ -18,7 +18,7 @@ import {
   xpNeededForNextLevel,
 } from "../career/actions";
 import { SIM_CATALOG } from "../career/content";
-import type { CareerState } from "../career/types";
+import type { CareerState, NoticeAction } from "../career/types";
 import { playCueKey } from "../audio/client";
 import type { CueKey } from "../audio/cues";
 import {
@@ -201,6 +201,8 @@ type GameState = {
   retryTaskRun: () => void;
   /** Ephemeral life UI. Not persisted. */
   storeOpen: boolean;
+  /** Ăn uống modal. Not persisted. */
+  foodOpen: boolean;
   lifeBubble: { text: string; until: number } | null;
   lifeBanner: { label: string; until: number } | null;
   terminalLines: string[];
@@ -208,8 +210,9 @@ type GameState = {
   readNotice: (id: string) => void;
   readAllNotices: () => void;
   dismissDiary: () => void;
-  runNoticeAction: (action: "payRent" | "viewJobs" | "openStore") => void;
+  runNoticeAction: (action: NoticeAction) => void;
   setStoreOpen: (open: boolean) => void;
+  setFoodOpen: (open: boolean) => void;
   buyStoreItem: (id: string) => void;
   pinStoreItem: (id: string | null) => void;
   debugForceEvent: () => void;
@@ -320,6 +323,7 @@ export const useGameStore = create<GameState>()(
       careerPanel: null,
       taskJobId: null,
       storeOpen: false,
+      foodOpen: false,
       lifeBubble: null,
       lifeBanner: null,
       terminalLines: [],
@@ -504,10 +508,19 @@ export const useGameStore = create<GameState>()(
           set({ storeOpen: true, career: askStore(get().career) });
           return;
         }
+        if (action === "eat") {
+          set({ foodOpen: true });
+          return;
+        }
+        if (action === "sleep") {
+          get().sleep();
+          return;
+        }
         commitLife(payOutstandingRent(get().career));
         get().syncLifeSurface();
       },
       setStoreOpen: (open) => set({ storeOpen: open }),
+      setFoodOpen: (open) => set({ foodOpen: open }),
       buyStoreItem: (id) => {
         const bought = buyShopItem(get().career, id);
         if (bought.error) return;

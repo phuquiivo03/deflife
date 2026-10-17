@@ -2,7 +2,6 @@
 
 /* eslint-disable @next/next/no-img-element -- native pixel art stays unoptimized */
 
-import { useState } from "react";
 import { PixelButton } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { LIFE } from "@/game/life/content";
@@ -22,7 +21,8 @@ import { formatVnd } from "@/lib/format-currency";
 
 export function HungerDock() {
   const career = useGameStore((s) => s.career);
-  const [open, setOpen] = useState(false);
+  const open = useGameStore((s) => s.foodOpen);
+  const setOpen = useGameStore((s) => s.setFoodOpen);
   const slots = lifeOf(career).slotsSinceMeal;
   const hunger = hungerLevel(slots);
   const dock = foodDockMetrics();
