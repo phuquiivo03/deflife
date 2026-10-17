@@ -749,7 +749,9 @@ body {
 
   .terminal-cursor,
   .terminal-blip,
-  .terminal-bug {
+  .terminal-bug,
+  .terminal-event-warn,
+  .terminal-event-error {
     animation: none;
   }
 
@@ -880,6 +882,22 @@ body {
   color: var(--terminal-amber);
 }
 
+.terminal-event-warn {
+  color: var(--terminal-amber);
+  animation-name: terminal-event-blink, terminal-event-shake;
+  animation-duration: var(--terminal-blink-ms, 360ms), var(--terminal-shake-ms, 280ms);
+  animation-timing-function: steps(2, end), steps(2, end);
+  animation-iteration-count: var(--terminal-blinks, 3), var(--terminal-blinks, 3);
+}
+
+.terminal-event-error {
+  color: var(--terminal-bug-red);
+  animation-name: terminal-event-blink;
+  animation-duration: var(--terminal-blink-ms, 360ms);
+  animation-timing-function: steps(2, end);
+  animation-iteration-count: var(--terminal-error-blinks, 3);
+}
+
 .terminal-cmd {
   display: flex;
   width: 100%;
@@ -996,4 +1014,27 @@ body {
 
 @keyframes terminal-blink {
   50% { opacity: 0; }
+}
+
+@keyframes terminal-event-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.15;
+  }
+}
+
+@keyframes terminal-event-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-2px);
+  }
+  75% {
+    transform: translateX(2px);
+  }
 }

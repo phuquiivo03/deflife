@@ -172,7 +172,7 @@ Strict usage: **one phosphor accent** (`#39ff7a`) for emphasis, glow, keys, bars
 | `terminal-amber` | `#ffd24a` | **Only** live status blip, “available”/highlight tag (max 1–2 per viewport). |
 | `terminal-white` | `#ffffff` | Hero name banner only (scoped class). |
 | Traffic lights | `#ff5f57`, `#febc2e`, `#28c840` | Window chrome dots only (not UI accents). |
-| `terminal-bug-red` | `#ff4b4b` | **bug-red exception.** Test-step bug glyph only (`.terminal-bug i`). |
+| `terminal-bug-red` | `#ff4b4b` | **bug-red exception.** Test-step bug glyph (`.terminal-bug i`) and the task-event `> ERROR:` line. |
 
 **Rules**
 
@@ -182,7 +182,7 @@ Strict usage: **one phosphor accent** (`#39ff7a`) for emphasis, glow, keys, bars
 
 **Exception — bug-red**
 
-The crawling test-step bug sprite is the only extra hue inside the terminal. Token `terminal-bug-red` (`#ff4b4b`) paints `.terminal-bug i` and nothing else. Failure UI stays phosphor green: `[fail]` labels, minus numbers, and result copy are not red. Traffic-light chrome (`#ff5f57` / `#febc2e` / `#28c840`) is the window dots, not this token.
+The crawling test-step bug sprite and a task event's `> ERROR:` line share token `terminal-bug-red` (`#ff4b4b`). The glyph is `.terminal-bug i`. The line is `.terminal-event-error`. A client requirement change prints `> WARNING:` in `terminal-amber`, blinks 3 times, and shakes lightly. Failure UI stays phosphor green: `[fail]` labels, minus numbers, and result copy are not red. Traffic-light chrome (`#ff5f57` / `#febc2e` / `#28c840`) is the window dots, not this token. Amber on the live status blip stays as it was.
 
 ### 6.2 Typography
 

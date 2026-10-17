@@ -71,3 +71,14 @@ export function rollTaskEvent(
   const index = Math.min(events.length - 1, Math.floor(rand() * events.length));
   return events[index] ?? null;
 }
+
+/** Terminal lines for one build event. A requirement change warns; a bug errors. */
+export function taskEventFlash(
+  event: Pick<TaskEventDef, "name" | "warning" | "bug_delta">,
+  errorText: string,
+): { warning: string | null; error: string | null } {
+  return {
+    warning: event.warning ? `> WARNING: ${event.name}` : null,
+    error: event.bug_delta > 0 ? `> ERROR: ${errorText}` : null,
+  };
+}
