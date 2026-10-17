@@ -8,6 +8,7 @@ import { useGameStore } from "@/game/state/store";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PanelCard, PanelCardTitle } from "@/components/ui/panel-card";
+import { StorePanel } from "./StorePanel";
 
 const ACTION_LABEL = {
   payRent: "Trả trọ",
@@ -24,7 +25,8 @@ function clock(minute: number): string {
 export function NotificationsPanel() {
   const notices = useGameStore((s) => s.career.feed?.notices ?? []);
   const career = useGameStore((s) => s.career);
-  const storeAsked = career.feed?.storeAsked === true;
+  const storeOpen = useGameStore((s) => s.storeOpen);
+  const setStoreOpen = useGameStore((s) => s.setStoreOpen);
   const unread = unreadCount(career);
   const readNotice = useGameStore((s) => s.readNotice);
   const readAll = useGameStore((s) => s.readAllNotices);
@@ -34,7 +36,18 @@ export function NotificationsPanel() {
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 p-4">
       <div className="flex items-center justify-between gap-2">
-        <PanelCardTitle>Thông báo</PanelCardTitle>
+        <PanelCardTitle>{storeOpen ? "Cửa hàng" : "Thông báo"}</PanelCardTitle>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          showArrow={false}
+          className="min-h-11"
+          data-testid={storeOpen ? "store-back" : "open-store"}
+          onClick={() => setStoreOpen(!storeOpen)}
+        >
+          {storeOpen ? "Thông báo" : "Cửa hàng"}
+        </Button>
         {unread > 0 ? (
           <span className="relative inline-flex" data-testid="notice-badge" data-count={unread}>
             <img src={m5AssetPath("ui_badge_unread.png")} width={20} height={20} alt="" className="pixel-img" />
@@ -44,11 +57,12 @@ export function NotificationsPanel() {
           </span>
         ) : null}
       </div>
-      {unread > 0 ? (
+      {!storeOpen && unread > 0 ? (
         <Button type="button" size="sm" variant="outline" showArrow={false} onClick={readAll}>
           Đã đọc
         </Button>
       ) : null}
+      {storeOpen ? <StorePanel /> : (
       <ScrollArea className="min-h-0 flex-1">
         {ordered.length === 0 ? (
           <p className="font-galmuri-7 text-galmuri-small text-[var(--muted-foreground)]" data-testid="notice-empty">
@@ -98,12 +112,8 @@ export function NotificationsPanel() {
             ))}
           </ul>
         )}
-        {storeAsked ? (
-          <p className="mt-2 font-galmuri-7 text-galmuri-small text-[var(--muted-foreground)]" data-testid="store-later">
-            Cửa hàng mở ở giai đoạn sau.
-          </p>
-        ) : null}
       </ScrollArea>
+      )}
     </div>
   );
 }

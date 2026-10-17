@@ -2,10 +2,7 @@ import { playCueKey } from "../audio/client";
 import type { CueKey } from "../audio/cues";
 import type { LifeNotice } from "../career/types";
 
-/**
- * Life-sim cues. `sfx_store_buy` is in the audio pack and stays silent until
- * the store phase has a purchase.
- */
+/** Life-sim cues. A successful store purchase plays `sfx_store_buy`. */
 export const LIFE_SOUND_KEYS = [
   "sfx_notif_info",
   "sfx_notif_warn",
@@ -27,7 +24,7 @@ const CUE_FOR_LIFE: Record<LifeSoundKey, CueKey | null> = {
   sfx_event_open: "eventOpen",
   sfx_landlord_knock: "landlordKnock",
   sfx_salary: "salary",
-  sfx_store_buy: null,
+  sfx_store_buy: "storeBuy",
   sfx_diary_flip: "diaryFlip",
   sfx_sick_cough: "sickCough",
 };

@@ -1,0 +1,71 @@
+{
+  "black_friday_discount": 0.1,
+  "ergo_energy": 0.9,
+  "monitor_xp": 1.1,
+  "items": [
+    {
+      "id": "room_junior",
+      "label": "Phòng Junior",
+      "price": 25000000,
+      "icon": "icon_store_room_junior.png",
+      "stage": "junior",
+      "skills": 1,
+      "level": 3,
+      "reputation": 30,
+      "sleep": 10,
+      "daily_mood": 3
+    },
+    {
+      "id": "room_senior",
+      "label": "Phòng Senior",
+      "price": 180000000,
+      "icon": "icon_store_room_senior.png",
+      "stage": "senior",
+      "skills": 2,
+      "level": 8,
+      "sleep": 20,
+      "daily_health": 2
+    },
+    {
+      "id": "plant",
+      "label": "Cây xanh",
+      "price": 150000,
+      "icon": "icon_store_plant.png",
+      "daily_mood": 2
+    },
+    {
+      "id": "fan",
+      "label": "Quạt",
+      "price": 400000,
+      "icon": "icon_store_fan.png",
+      "sleep": 5
+    },
+    {
+      "id": "aircon",
+      "label": "Máy lạnh",
+      "price": 7000000,
+      "icon": "icon_store_aircon.png",
+      "sleep": 10
+    },
+    {
+      "id": "ergo_chair",
+      "label": "Ghế công thái học",
+      "price": 3500000,
+      "icon": "icon_store_ergo_chair.png"
+    },
+    {
+      "id": "monitor2",
+      "label": "Màn hình thứ 2",
+      "price": 4000000,
+      "icon": "icon_store_monitor2.png",
+      "requires": "room_junior"
+    },
+    {
+      "id": "mattress",
+      "label": "Nệm xịn",
+      "price": 5000000,
+      "icon": "icon_store_mattress.png",
+      "daily_health": 1
+    }
+  ]
+}

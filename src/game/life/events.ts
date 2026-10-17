@@ -3,6 +3,7 @@ import { SKILL_IDS } from "../career/types";
 import type { GameEvent } from "../events/types";
 import { addSkillXp, skillXpEvents, xpToNextLevel } from "../knowledge/logic";
 import type { SimCatalog } from "../career/types";
+import { pinProgressLine, pinReady } from "./furniture";
 import { applyEventStats, calendar, holidayOn, isDeployFriday, lifeOf, monthKey, scaleXpForMood, slotIndexFromWake, stageBill } from "./logic";
 import { LIFE } from "./content";
 import { LIFE_EVENTS, lifeEventById, type LifeChoice, type LifeEventDef } from "./events-content";
@@ -537,6 +538,20 @@ export function syncLifeSurface(state: CareerState, day: number, minute: number,
     });
   }
 
+  const ready = pinReady(state);
+  if (ready) {
+    add({
+      id: `pin-ready-${ready.id}`,
+      day,
+      minute,
+      severity: "info",
+      icon: "icon_notif_store.png",
+      text: `Đủ tiền ${ready.label}.`,
+      action: "openStore",
+      read: false,
+    });
+  }
+
   const completed = new Set(
     state.player_jobs.filter((job) => job.status === "completed").map((job) => job.template_id),
   );
@@ -633,6 +648,7 @@ export function openDiary(state: CareerState, catalog: SimCatalog): CareerState 
     mood: state.players.mood - feed.snapshot.mood,
     energy: state.players.energy - feed.snapshot.energy,
     line,
+    pin: pinProgressLine(state),
   };
   return withFeed(state, { ...feed, diary });
 }

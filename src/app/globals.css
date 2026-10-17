@@ -559,6 +559,13 @@ body {
   animation: stat-blink 1s steps(2, end) infinite;
 }
 
+.store-frame {
+  border-style: solid;
+  border-width: 8px;
+  border-image: url("/ui/m5/ui_store_frame.png") 4 fill;
+  image-rendering: pixelated;
+}
+
 .life-dialog {
   border-style: solid;
   border-width: 8px;

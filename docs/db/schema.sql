@@ -187,6 +187,13 @@ CREATE TABLE player_life_feed (
   store_asked boolean NOT NULL
 );
 
+-- Bought rooms and furniture, plus the one pinned item (M5 P3).
+CREATE TABLE player_shop (
+  player_id text PRIMARY KEY REFERENCES players (id),
+  owned jsonb NOT NULL,
+  pinned_item text
+);
+
 CREATE TABLE player_notices (
   id text NOT NULL,
   player_id text NOT NULL REFERENCES player_life_feed (player_id),

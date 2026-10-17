@@ -3,6 +3,7 @@
 import { SIM_CATALOG } from "@/game/career/content";
 import { jobEligibility, jobRequirementsFor, skillNameMap, visibleBoardJobs } from "@/game/jobs/logic";
 import { LIFE } from "@/game/life/content";
+import { jobEnergyFactor } from "@/game/life/furniture";
 import { jobPay, lifeOf } from "@/game/life/logic";
 import { useGameStore } from "@/game/state/store";
 import { snapshot } from "@/game/time";
@@ -18,6 +19,7 @@ export function JobBoardPanel({ iconFiles }: { iconFiles: readonly string[] }) {
   const player = useGameStore((s) => s.career.players);
   const life = useGameStore((s) => lifeOf(s.career));
   const skills = useGameStore((s) => s.career.player_skills);
+  const energyFactor = useGameStore((s) => jobEnergyFactor(s.career));
   const day = useGameStore((s) => snapshot(s.totalMinutes).day);
   const acceptJob = useGameStore((s) => s.acceptJob);
   const openTask = useGameStore((s) => s.openTask);
@@ -41,6 +43,7 @@ export function JobBoardPanel({ iconFiles }: { iconFiles: readonly string[] }) {
           workStreak: life.workStreak,
           minEnergy: LIFE.low_energy_job,
           blockFreelance: life.burnoutDay === day,
+          energyFactor,
         });
         const pay = jobPay(template.pay, template.tier, player.reputation);
         const done = job.status === "completed";

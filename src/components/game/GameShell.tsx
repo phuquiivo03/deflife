@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Backpack, Coffee, Monitor } from "lucide-react";
 import { STAGES, type StageId } from "@/game/config";
+import { roomOwned } from "@/game/life/furniture";
 import { getRoom } from "@/game/content";
 import { useGameStore } from "@/game/state/store";
 import { SceneCanvas } from "./SceneCanvas";
@@ -48,6 +49,8 @@ export function GameShell({ iconFiles = [] }: { iconFiles?: readonly string[] })
 
   const stage = useGameStore((s) => s.stage);
   const setStage = useGameStore((s) => s.setStage);
+  const juniorOpen = useGameStore((s) => roomOwned(s.career, "junior"));
+  const seniorOpen = useGameStore((s) => roomOwned(s.career, "senior"));
   const hydrated = useGameStore((s) => s._hasHydrated);
   useGameClock(hydrated);
   useGameAudio();
@@ -146,17 +149,24 @@ export function GameShell({ iconFiles = [] }: { iconFiles?: readonly string[] })
           className="min-w-0 flex-1"
         >
           <TabsList className="tabs-lavender h-11 w-full max-w-xl border-0 bg-transparent p-1 md:h-10">
-            {STAGES.map((s) => (
-              <TabsTrigger
-                key={s}
-                value={s}
-                className="gap-1.5 border-0 font-galmuri-11 text-galmuri-title shadow-none data-[state=active]:border-0 data-[state=active]:shadow-[var(--shadow-panel)]"
-              >
-                {stageIcons[s]}
-                <span className="hidden sm:inline">{STAGE_LABELS[s]}</span>
-                <span className="sm:hidden">{STAGE_LABELS[s][0]}</span>
-              </TabsTrigger>
-            ))}
+            {STAGES.map((s) => {
+              const open = s === "student" || (s === "junior" ? juniorOpen : seniorOpen);
+              return (
+                <TabsTrigger
+                  key={s}
+                  value={s}
+                  disabled={!open}
+                  title={open ? STAGE_LABELS[s] : "Chưa mở"}
+                  data-testid={`stage-${s}`}
+                  data-owned={open ? "1" : "0"}
+                  className="gap-1.5 border-0 font-galmuri-11 text-galmuri-title shadow-none data-[state=active]:border-0 data-[state=active]:shadow-[var(--shadow-panel)]"
+                >
+                  {stageIcons[s]}
+                  <span className="hidden sm:inline">{STAGE_LABELS[s]}</span>
+                  <span className="sm:hidden">{STAGE_LABELS[s][0]}</span>
+                </TabsTrigger>
+              );
+            })}
           </TabsList>
         </Tabs>
         <div className="flex shrink-0 items-center gap-2">

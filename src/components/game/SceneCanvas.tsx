@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getCatalog, getRoom } from "@/game/content";
 import { resolveScene } from "@/game/layout/resolveScene";
+import { sortDrawEntries } from "@/game/layout/sort";
+import { replacedItemIds, storeDrawEntries } from "@/game/life/placement";
 import { loadAtlas, type LoadedAtlas } from "@/game/render/atlas";
 import { canvasCssWithinFrame } from "@/lib/chamfer-frame";
 import { createRenderer } from "@/game/render/canvasRenderer";
@@ -30,6 +32,7 @@ export function SceneCanvas({ areaRef, debug = false }: Props) {
   const dragRef = useRef<{ x: number; cam: number } | null>(null);
 
   const stage = useGameStore((s) => s.stage);
+  const owned = useGameStore((s) => s.career.shop?.owned);
   const loadout = useGameStore((s) => s.loadouts[stage]);
   const showCharacter = useGameStore((s) => s.showCharacter);
   const selectedSlot = useGameStore((s) => s.selectedSlot);
@@ -45,19 +48,23 @@ export function SceneCanvas({ areaRef, debug = false }: Props) {
   const catalog = useMemo(() => getCatalog(), []);
   const slotIndex = useMemo(() => buildSlotIndex(stage), [stage]);
 
-  const scene = useMemo(
-    () =>
-      atlasRef.current
-        ? resolveScene(
-            room,
-            catalog,
-            loadout,
-            atlasRef.current.frameLookup,
-            { showCharacter, slotIndex },
-          )
-        : null,
-    [room, catalog, loadout, showCharacter, slotIndex, atlasReady],
-  );
+  const scene = useMemo(() => {
+    if (!atlasRef.current) return null;
+    const ownedIds = owned ?? [];
+    const resolved = resolveScene(room, catalog, loadout, atlasRef.current.frameLookup, {
+      showCharacter,
+      slotIndex,
+      suppressItemIds: replacedItemIds(stage, ownedIds),
+    });
+    const desk = resolved.placements.find((placement) => placement.slotId === "desk");
+    return {
+      entries: sortDrawEntries([
+        ...resolved.entries,
+        ...storeDrawEntries(stage, ownedIds, desk?.baseline ?? null),
+      ]),
+      placements: resolved.placements,
+    };
+  }, [room, catalog, loadout, showCharacter, slotIndex, atlasReady, stage, owned]);
 
   useEffect(() => {
     let cancelled = false;

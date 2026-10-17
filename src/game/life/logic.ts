@@ -3,6 +3,7 @@ import type { StageId } from "../config";
 import type { GameEvent } from "../events/types";
 import { applyMoney } from "../vitals/logic";
 import { LIFE, foodById, type FoodId } from "./content";
+import { furnitureDailyHealth, furnitureDailyMood, furnitureSleepBonus } from "./furniture";
 
 export type Calendar = {
   year: number;
@@ -267,7 +268,7 @@ function applyDirect(
 
 /**
  * Action order: base, diminishing positive mood, personality, furniture, streak, clamp, thresholds.
- * Personality is 1 and furniture is 0 until those phases ship.
+ * Personality stays 1 until that phase. Job energy and work XP apply their furniture rates at the call site.
  */
 export function applyActionStats(
   state: CareerState,
@@ -367,7 +368,8 @@ function endOfDay(state: CareerState): LifeResult {
   else if (life.mealsToday === LIFE.meals_full) health += LIFE.meals_full_health;
 
   const workStreak = life.workedToday ? life.workStreak + 1 : 0;
-  let mood = LIFE.furniture_daily_mood;
+  health += furnitureDailyHealth(state);
+  let mood = furnitureDailyMood(state);
   mood += (LIFE.mood_anchor - state.players.mood) * LIFE.mood_regress;
   if (workStreak >= LIFE.work_streak_at && life.funSlotsToday < LIFE.fun_slots_for_grind) {
     mood += LIFE.grind_mood;
@@ -525,7 +527,7 @@ export function applySleepRest(state: CareerState, hours: number): LifeResult {
   const safeHours = Number.isFinite(hours) && hours > 0 ? hours : 0;
   const emax = energyMaxForHealth(state.players.health);
   const energy =
-    Math.min(emax, state.players.energy + LIFE.sleep_energy_per_hour * safeHours + LIFE.furniture_sleep_bonus) -
+    Math.min(emax, state.players.energy + LIFE.sleep_energy_per_hour * safeHours + furnitureSleepBonus(state)) -
     state.players.energy;
   let health = 0;
   let penalty = life.moodPenaltyTomorrow;

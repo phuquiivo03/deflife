@@ -120,7 +120,7 @@ export type PlayerRow = {
   freelance_completed: number;
 };
 
-/** Counters for the life-sim day. Personality and furniture stay neutral until later phases. */
+/** Counters for the life-sim day. Personality stays neutral until that phase. */
 export type LifeState = {
   mealsToday: number;
   positiveMoodApplies: number;
@@ -171,9 +171,15 @@ export type LifeSnapshot = {
   energy: number;
 };
 
-export type LifeDiary = LifeSnapshot & { line: string };
+export type LifeDiary = LifeSnapshot & { line: string; pin: string };
 
-/** Random events, notices, and the sleep diary. P3 store pin is not here yet. */
+/** Owned store items and the one pinned target. Older saves own nothing. */
+export type ShopState = {
+  owned: string[];
+  pin: string | null;
+};
+
+/** Random events, notices, and the sleep diary. */
 export type LifeFeed = {
   pity: number;
   pityCountedDay: number | null;
@@ -268,6 +274,7 @@ export type CareerState = {
   player_events: PlayerEvent[];
   life: LifeState;
   feed: LifeFeed;
+  shop: ShopState;
 };
 
 export type SimCatalog = {

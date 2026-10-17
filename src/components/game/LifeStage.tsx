@@ -91,7 +91,7 @@ export function LifeStage() {
               <li>Sức khỏe {signed(diary.health)}</li>
               <li>Tinh thần {signed(diary.mood)}</li>
               <li>Năng lượng {signed(diary.energy)}</li>
-              <li>Chưa ghim món.</li>
+              <li data-testid="diary-pin">{diary.pin || "Chưa ghim món."}</li>
             </ul>
             <p className="mt-2 font-galmuri-7 text-galmuri-small text-[var(--foreground)]">{diary.line}</p>
             <Button type="button" size="sm" showArrow={false} className="mt-3 min-h-11" data-testid="life-diary-close" onClick={dismissDiary}>

@@ -120,7 +120,7 @@ Use `PixelAvatar` + `resolveAvatarAsset()` with the same integer-scale rule.
 - **Học** panel has two tabs: **Khóa học** (courses still available to buy) and **Đã học** (finished courses, read-only: skill, XP granted, day completed). Empty states: “Không còn khóa để học.” and “Chưa học khóa nào.” A non-repeatable course moves to **Đã học** after one purchase.
 - **Nhân vật** panel: avatar, name, stage, overall rank badge (rounded mean of the five skill levels), **Danh tiếng**, Freelance `n/100` with a bar, then the five catalog skills from `skillProgressList` (icon, name, rank badge, `Junior 60%`, bar). No stub skill percents.
 - Bars: 1px border, fill coral / mint / sky per vital. A vital under its warning line blinks a coral inset; a change floats above that bar. `prefers-reduced-motion` keeps the inset and drops the blink.
-- Event dialog, diary, and speech bubble sit on the native M5 frames (`ui_dialog_frame`, `ui_diary_page`, `ui_speech_bubble`) as a 9-slice at 2×. Portraits and emotes use the native PNG at integer scale with `image-rendering: pixelated`. The room canvas is unchanged.
+- Event dialog, diary, and speech bubble sit on the native M5 frames (`ui_dialog_frame`, `ui_diary_page`, `ui_speech_bubble`) as a 9-slice at 2×. The store list uses `ui_store_frame` the same way, and each item sits on `ui_store_card` at 2× (192×240). Portraits and emotes use the native PNG at integer scale with `image-rendering: pixelated`. The room canvas is unchanged.
 
 ---
 

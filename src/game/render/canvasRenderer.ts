@@ -45,6 +45,7 @@ export function createRenderer(
   let highlight: string | null = null;
   let debug: DebugDraw | null = null;
   let tint: AmbientTint | null = null;
+  const bitmaps = new Map<string, HTMLImageElement>();
 
   const loadBg = (url: string) => {
     bgUrl = url;
@@ -82,6 +83,21 @@ export function createRenderer(
     }
   };
 
+  const drawBitmap = (entry: DrawEntry) => {
+    const url = entry.bitmap;
+    if (!url) return false;
+    let img = bitmaps.get(url);
+    if (!img) {
+      img = new Image();
+      img.onload = () => paint();
+      img.src = url;
+      bitmaps.set(url, img);
+    }
+    if (!img.complete || img.naturalWidth === 0) return true;
+    wctx.drawImage(img, entry.x, entry.y, entry.bitmapW ?? img.naturalWidth, entry.bitmapH ?? img.naturalHeight);
+    return true;
+  };
+
   const paint = () => {
     if (!view) return;
     const { scale, viewW, viewH, cameraX, cssW, cssH, dpr } = view;
@@ -101,6 +117,7 @@ export function createRenderer(
     wctx.rect(0, 0, WORLD.w, WORLD.h);
     wctx.clip();
     for (const e of entries) {
+      if (drawBitmap(e)) continue;
       drawFrame(
         wctx,
         e.sprite,
@@ -123,7 +140,7 @@ export function createRenderer(
 
     if (highlight) {
       for (const e of entries) {
-        if (e.slotId !== highlight) continue;
+        if (e.slotId !== highlight || e.bitmap) continue;
         const frame = atlas.getFrame(e.sprite);
         const w = e.srcW ?? frame.frame.w;
         const h = e.srcH ?? frame.frame.h;
