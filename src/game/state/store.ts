@@ -51,6 +51,7 @@ import {
 } from "../time";
 import type { FoodId } from "../life/content";
 import { crossWakingSlot, eatMeal, hoursUntilWake, mealBlocked, resolveMorning } from "../life/logic";
+import { rollTrait } from "../life/traits";
 import { LIFE_EVENTS } from "../life/events-content";
 import {
   askStore,
@@ -308,7 +309,7 @@ export const useGameStore = create<GameState>()(
         set({ totalMinutes: result.totalMinutes });
         for (const event of result.events) timeBus.emit(event);
       },
-      career: defaultCareer(1, DEFAULT_START_MINUTES, "student", SIM_CATALOG),
+      career: defaultCareer(1, DEFAULT_START_MINUTES, "student", SIM_CATALOG, rollTrait()),
       careerPanel: null,
       taskJobId: null,
       storeOpen: false,

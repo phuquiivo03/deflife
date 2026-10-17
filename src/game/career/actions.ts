@@ -19,6 +19,7 @@ import { applyMoney, clampEnergy } from "../vitals/logic";
 import { LIFE } from "../life/content";
 import { defaultFeed } from "../life/events";
 import { defaultShop, scaleWorkXp } from "../life/furniture";
+import { MIGRATION_TRAIT, scaleTraitXp, type TraitId } from "../life/traits";
 import {
   applyActionStats,
   applyLifeDayStart,
@@ -86,6 +87,7 @@ export function defaultCareer(
   minuteOfDay: number,
   stage: string,
   catalog: SimCatalog,
+  trait: TraitId = MIGRATION_TRAIT,
 ): CareerState {
   const { config } = catalog;
   return {
@@ -100,6 +102,7 @@ export function defaultCareer(
       mood: LIFE.starting_mood,
       reputation: config.starting_reputation,
       freelance_completed: 0,
+      trait,
     },
     player_skills: SKILL_IDS.map((skill_id) => ({ skill_id, level: 1, xp: 0 })),
     player_study_completions: [],
@@ -295,7 +298,10 @@ export function applyStudy(
   let xpShown = 0;
   for (const grant of grants) {
     const skill = skillById(next.player_skills, grant.skill_id);
-    const amount = scaleWorkXp(grantedXp(grant.xp, skill.level, "study", catalog.config), next);
+    const amount = scaleWorkXp(
+      scaleTraitXp(grantedXp(grant.xp, skill.level, "study", catalog.config), next, grant.skill_id, "study"),
+      next,
+    );
     const applied = grantToSkill(next, grant.skill_id, amount, catalog);
     next = applied.state;
     events.push(...applied.events);

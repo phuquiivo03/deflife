@@ -1,4 +1,4 @@
-/** Paths stay on the spec keys. Trait icons stay placeholders until that phase. */
+/** Paths stay on the spec keys. Trait icons are the 16×16 placeholders for those keys. */
 export const M5_ASSET_KEYS = [
   "ui_dialog_frame.png",
   "ui_diary_page.png",

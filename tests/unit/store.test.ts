@@ -276,6 +276,8 @@ describe("store catalog", () => {
     expect(saved.stage).toBe("junior");
     expect(saved.totalMinutes).toBe(20_000);
     expect(saved.career.players.money).toBe(2_850_000);
+    expect(saved.career.players.trait).toBe("careful");
+    expect(saved.career.life.homeDays).toBe(0);
     expect(saved.career.players.energy).toBe(40);
     expect(saved.career.players.freelance_completed).toBe(2);
     expect(saved.career.player_skills.find((row) => row.skill_id === "frontend")).toEqual({

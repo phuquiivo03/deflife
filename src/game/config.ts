@@ -25,8 +25,10 @@ export const PERSIST_KEY = "devlife:v1";
  * v7: life feed (events, notices, diary). Older saves gain an empty feed.
  * v8: store ownership and the pinned item. Older saves own nothing and stay in the student room.
  * v9: notice `cue`. Older notices leave it null and keep the id and severity rules.
+ * v10 was a short-lived room grant that was reverted. Do not reuse it.
+ * v11: `players.trait` and `life.homeDays`. Older saves become Cẩn thận. Home days start at 0.
  */
-export const PERSIST_VERSION = 9;
+export const PERSIST_VERSION = 11;
 
 export const CHAR_POSE_SIT_BACK = "character/derived/char_sit_back";
 export const ATLAS_URL = "/atlas/devlife.png";

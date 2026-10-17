@@ -104,6 +104,9 @@ export type GameConfig = {
   rank_brackets: RankBracket[];
 };
 
+export const TRAIT_IDS = ["night_owl", "diligent", "extrovert", "frugal", "careful", "optimist"] as const;
+export type TraitId = (typeof TRAIT_IDS)[number];
+
 export type PlayerRow = {
   id: string;
   stage: string;
@@ -118,9 +121,11 @@ export type PlayerRow = {
   mood: number;
   reputation: number;
   freelance_completed: number;
+  /** One trait rolled at creation. Older saves receive the migration default. */
+  trait: TraitId;
 };
 
-/** Counters for the life-sim day. Personality stays neutral until that phase. */
+/** Counters for the life-sim day. */
 export type LifeState = {
   mealsToday: number;
   positiveMoodApplies: number;
@@ -145,6 +150,8 @@ export type LifeState = {
   wakeBudget: number;
   /** Skip meal/streak end-of-day while the clock is inside a hospital jump. */
   suppressEndOfDayUntil: number | null;
+  /** Consecutive days that ended with no fun slot. Extrovert mood uses this. */
+  homeDays: number;
 };
 
 export type NoticeAction = "payRent" | "viewJobs" | "openStore";

@@ -26,6 +26,7 @@ import { clampEnergy } from "../vitals/logic";
 import { LIFE } from "../life/content";
 import { normalizeShop } from "../life/furniture";
 import { defaultLife } from "../life/logic";
+import { isTraitId, MIGRATION_TRAIT } from "../life/traits";
 import { defaultFeed } from "../life/events";
 import type { LifeDiary, LifeFeed, LifeNotice, LifeSnapshot, NoticeAction, NoticeSeverity } from "../career/types";
 
@@ -95,7 +96,7 @@ function normalizeJobs(value: unknown): PlayerJob[] {
       template_id: row.template_id,
       job_type: jobType,
       status,
-      hours_required: num(row.hours_required),
+      hours_required: decimal(row.hours_required),
       progress_hours: num(row.progress_hours),
       bugs: num(row.bugs),
       pay: num(row.pay),
@@ -186,6 +187,12 @@ function normalizeTaskRun(value: unknown): TaskRun | null {
   };
 }
 
+function decimal(value: unknown): number {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 0) return 0;
+  return Math.round(parsed * 10) / 10;
+}
+
 function num(value: unknown, fallback = 0): number {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return fallback;
@@ -228,6 +235,7 @@ export function careerFromUnknown(
         : fresh.players.mood,
       reputation: num(players.reputation, fresh.players.reputation),
       freelance_completed: num(players.freelance_completed),
+      trait: isTraitId(players.trait) ? players.trait : MIGRATION_TRAIT,
     },
     player_skills: normalizeSkills(value.player_skills),
     player_study_completions: normalizeCompletions(value.player_study_completions),
@@ -268,6 +276,7 @@ function normalizeLife(value: unknown, day: number): LifeState {
     wakeBudget: value.wakeBudget == null ? fresh.wakeBudget : Math.max(1, num(value.wakeBudget, fresh.wakeBudget)),
     suppressEndOfDayUntil:
       value.suppressEndOfDayUntil == null ? null : num(value.suppressEndOfDayUntil),
+    homeDays: num(value.homeDays),
   };
 }
 
@@ -387,8 +396,9 @@ function strOrNull(value: unknown): string | null {
  * event feed; normalize adds an empty one. Versions before 8 have no store,
  * so they own nothing and wake in the student room. Junior and senior rooms
  * are bought in the store. Versions before 9 have notices without `cue`;
- * those cues stay null. Money, skills, and progress are kept. See
- * docs/systems/save.md.
+ * those cues stay null. Versions before 11 have no trait, so they become
+ * Cẩn thận and home-day counts start at 0. Money, skills, and progress are
+ * kept. See docs/systems/save.md.
  */
 export function migrateSave(persisted: unknown, version: number): PersistedSave {
   const prev = isRecord(persisted) ? persisted : {};
@@ -420,6 +430,13 @@ export function migrateSave(persisted: unknown, version: number): PersistedSave 
         ...career.feed,
         notices: career.feed.notices.map((notice) => ({ ...notice, cue: null })),
       },
+    };
+  }
+  if (version < 11) {
+    career = {
+      ...career,
+      players: { ...career.players, trait: MIGRATION_TRAIT },
+      life: { ...career.life, homeDays: 0 },
     };
   }
 

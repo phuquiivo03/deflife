@@ -4,6 +4,7 @@ import type { GameEvent } from "../events/types";
 import { applyMoney } from "../vitals/logic";
 import { LIFE, foodById, type FoodId } from "./content";
 import { furnitureDailyHealth, furnitureDailyMood, furnitureSleepBonus } from "./furniture";
+import { foodPrice, traitDecay, traitHomeMood, traitMoodFloor, traitMorningEnergy } from "./traits";
 
 export type Calendar = {
   year: number;
@@ -51,6 +52,7 @@ export function defaultLife(day: number): LifeState {
     morningResolvedDay: null,
     wakeBudget: slotBudget(day),
     suppressEndOfDayUntil: null,
+    homeDays: 0,
   };
 }
 
@@ -178,10 +180,15 @@ function finish(
   next: Vitals,
   life: LifeState,
   events: GameEvent[],
+  personality = true,
 ): LifeResult {
   let energy = clampStat(next.energy);
   let health = clampStat(next.health);
-  const mood = clampStat(next.mood);
+  let mood = clampStat(next.mood);
+  if (personality) {
+    const floor = traitMoodFloor(state);
+    if (floor != null) mood = Math.max(mood, floor);
+  }
   let money = applyMoney(0, next.money);
   let skipDays = 0;
   let nextLife = life;
@@ -250,6 +257,7 @@ function applyDirect(
   state: CareerState,
   delta: Partial<Pick<Vitals, "energy" | "health" | "mood" | "money">>,
   life: LifeState = lifeOf(state),
+  personality = true,
 ): LifeResult {
   const before = vitalsOf(state);
   return finish(
@@ -263,12 +271,14 @@ function applyDirect(
     },
     life,
     [],
+    personality,
   );
 }
 
 /**
  * Action order: base, diminishing positive mood, personality, furniture, streak, clamp, thresholds.
- * Personality stays 1 until that phase. Job energy and work XP apply their furniture rates at the call site.
+ * The generic personality multiplier stays 1. Named traits apply their own rates at the call site.
+ * Job energy and work XP apply their furniture rates at the call site.
  */
 export function applyActionStats(
   state: CareerState,
@@ -312,7 +322,7 @@ export function applyEventStats(
   state: CareerState,
   delta: { energy?: number; health?: number; mood?: number; money?: number },
 ): LifeResult {
-  return applyDirect(state, delta, lifeOf(state));
+  return applyDirect(state, delta, lifeOf(state), false);
 }
 
 export function markWorked(state: CareerState): CareerState {
@@ -330,12 +340,13 @@ export function eatMeal(state: CareerState, foodId: FoodId): LifeResult {
   if (life.mealsToday >= LIFE.meals_full) {
     return { state, events: [], skipDays: 0 };
   }
-  if (state.players.money < food.price) {
+  const price = foodPrice(food.price, state);
+  if (state.players.money < price) {
     return { state, events: [], skipDays: 0 };
   }
   const spent = applyActionStats(
     state,
-    { money: -food.price, health: food.health },
+    { money: -price, health: food.health },
     { ...life, mealsToday: life.mealsToday + 1 },
   );
   return spent;
@@ -345,7 +356,7 @@ export function mealBlocked(state: CareerState, foodId: FoodId): string | null {
   const food = foodById(foodId);
   if (!food) return "Không có món này";
   if (lifeOf(state).mealsToday >= LIFE.meals_full) return "Hôm nay ăn đủ 3 bữa";
-  if (state.players.money < food.price) return "Không đủ tiền";
+  if (state.players.money < foodPrice(food.price, state)) return "Không đủ tiền";
   return null;
 }
 
@@ -368,12 +379,14 @@ function endOfDay(state: CareerState): LifeResult {
   else if (life.mealsToday === LIFE.meals_full) health += LIFE.meals_full_health;
 
   const workStreak = life.workedToday ? life.workStreak + 1 : 0;
+  const homeDays = life.funSlotsToday > 0 ? 0 : (Number.isFinite(life.homeDays) ? life.homeDays : 0) + 1;
   health += furnitureDailyHealth(state);
   let mood = furnitureDailyMood(state);
   mood += (LIFE.mood_anchor - state.players.mood) * LIFE.mood_regress;
   if (workStreak >= LIFE.work_streak_at && life.funSlotsToday < LIFE.fun_slots_for_grind) {
     mood += LIFE.grind_mood;
   }
+  mood += traitHomeMood(state, homeDays);
 
   const nextLife: LifeState = {
     ...life,
@@ -382,6 +395,7 @@ function endOfDay(state: CareerState): LifeResult {
     mealsToday: 0,
     funSlotsToday: 0,
     lateSlotsToday: 0,
+    homeDays,
     lastEndedDay: day,
   };
   return applyDirect(state, { health, mood }, nextLife);
@@ -482,7 +496,11 @@ export function resolveMorning(state: CareerState, day: number): LifeResult {
     morningResolvedDay: day,
     wakeBudget: slotBudget(day),
   };
-  const rested = applyDirect(state, { mood: penalty > 0 ? -penalty : 0 }, nextLife);
+  const rested = applyDirect(
+    state,
+    { mood: penalty > 0 ? -penalty : 0, energy: traitMorningEnergy(state) },
+    nextLife,
+  );
   return crossWakingSlot(rested.state, 6 * 60, rested.events, rested.skipDays);
 }
 
@@ -512,7 +530,7 @@ export function crossWakingSlot(
       skipDays: Math.max(priorSkip, late.skipDays),
     };
   }
-  let mood = LIFE.passive_slot_mood * LIFE.trait_decay;
+  let mood = LIFE.passive_slot_mood * traitDecay(state);
   if (life.workStreak >= LIFE.work_streak_at) mood += LIFE.work_streak_slot_mood;
   const ticked = applyDirect(state, { mood }, life);
   return {

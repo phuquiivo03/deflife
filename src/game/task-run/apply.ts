@@ -9,6 +9,7 @@ import { applyMoney } from "../vitals/logic";
 import { LIFE } from "../life/content";
 import { takePendingBugDelta } from "../life/events";
 import { jobEnergyFactor, scaleWorkXp } from "../life/furniture";
+import { scaleTraitPay, scaleTraitXp, traitBugCount, traitJobHours } from "../life/traits";
 import {
   applyActionStats,
   energyCost,
@@ -151,8 +152,8 @@ export function startTask(
     ...job,
     status: "active",
     accepted_day: state.players.game_day,
-    pay: jobPay(template.pay, template.tier, state.players.reputation),
-    hours_required: template.hours,
+    pay: scaleTraitPay(jobPay(template.pay, template.tier, state.players.reputation), state),
+    hours_required: traitJobHours(template.hours, state),
     task_run: freshRun(taskSeed(job.id)),
   };
   const events: GameEvent[] = [
@@ -206,14 +207,18 @@ export function chooseBuild(
   const skill = skillById(state.player_skills, skillId);
   const event = TASK_RUN.events.find((row) => row.id === found.run.event_id) ?? null;
   const pendingBugs = takePendingBugDelta(state);
-  const bugs = bugCount({
-    skillLevel: skill.level,
-    difficulty: ticket?.difficulty ?? 1,
-    ticket: found.run.ticket,
-    build: choice,
-    eventBugDelta: (event?.bug_delta ?? 0) + moodBugBonus(state.players.mood) + pendingBugs.delta,
-    formula: TASK_RUN.bugs,
-  });
+  const bugs = traitBugCount(
+    bugCount({
+      skillLevel: skill.level,
+      difficulty: ticket?.difficulty ?? 1,
+      ticket: found.run.ticket,
+      build: choice,
+      eventBugDelta: (event?.bug_delta ?? 0) + moodBugBonus(state.players.mood) + pendingBugs.delta,
+      formula: TASK_RUN.bugs,
+    }),
+    state,
+    TASK_RUN.bugs,
+  );
   const timeDelta = choice === "careful" ? TASK_RUN.careful_extra_sec : TASK_RUN.rushed_extra_sec;
   const run = applyBuildChoice(found.run, choice, bugs, timeDelta);
   return ok(patchJob(pendingBugs.state, jobId, { ...found.job, bugs, task_run: run }), [
@@ -325,7 +330,7 @@ export function grantTaskSuccess(
   if (!template) return fail(state, "Không tìm thấy việc");
 
   const day = state.players.game_day;
-  const pay = jobPay(template.pay, template.tier, state.players.reputation);
+  const pay = scaleTraitPay(jobPay(template.pay, template.tier, state.players.reputation), state);
   const money = applyMoney(state.players.money, pay);
   const freelance_completed = state.players.freelance_completed + 1;
   const reputation = state.players.reputation + template.reputation_gain;
@@ -355,7 +360,10 @@ export function grantTaskSuccess(
   const grants = catalog.jobTemplateXp.filter((row) => row.template_id === template.id);
   for (const grant of grants) {
     const skill = skillById(next.player_skills, grant.skill_id);
-    const amount = scaleWorkXp(grantedXp(grant.xp, skill.level, "job", catalog.config), next);
+    const amount = scaleWorkXp(
+      scaleTraitXp(grantedXp(grant.xp, skill.level, "job", catalog.config), next, grant.skill_id, "job"),
+      next,
+    );
     const applied = grantToSkill(next, grant.skill_id, amount, catalog);
     next = applied.state;
     events.push(...applied.events);

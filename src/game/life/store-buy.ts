@@ -3,6 +3,7 @@ import type { StageId } from "../config";
 import type { GameEvent } from "../events/types";
 import { buyBlock, shopOf, storeItem, storePrice } from "./furniture";
 import { applyEventStats } from "./logic";
+import { scaleShoppingMood } from "./traits";
 
 export type BuyResult = {
   state: CareerState;
@@ -19,7 +20,8 @@ export function buyShopItem(state: CareerState, id: string): BuyResult {
     return { state, events: [], skipDays: 0, error: error ?? "Không có món này.", moveTo: null };
   }
   const price = storePrice(item, state.players.game_day);
-  const spent = applyEventStats(state, { money: -price });
+  const mood = scaleShoppingMood(0, state);
+  const spent = applyEventStats(state, mood === 0 ? { money: -price } : { money: -price, mood });
   const shop = shopOf(spent.state);
   const moveTo = item.stage ?? null;
   const next: CareerState = {
