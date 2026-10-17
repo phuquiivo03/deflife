@@ -4,15 +4,11 @@ import { SIM_CATALOG } from "@/game/career/content";
 import { overallRankBracket, skillProgressList, type SkillProgress } from "@/game/knowledge/logic";
 import { freelanceGoal } from "@/game/jobs/logic";
 import { STUB_PLAYER } from "@/game/state/playerStats";
-import { useState } from "react";
 import { useGameStore } from "@/game/state/store";
 import { LIFE } from "@/game/life/content";
-import { calendar, lifeOf, rentStatus } from "@/game/life/logic";
-import { m51AssetPath } from "@/game/life/assets";
-import { hungerLabel, hungerLevel } from "@/game/life/hunger";
+import { lifeOf, rentStatus } from "@/game/life/logic";
 import { traitDef, traitDetail, traitIconSrc, traitOf } from "@/game/life/traits";
 import { snapshot } from "@/game/time";
-import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { StageId } from "@/game/config";
 import { STAGE_LABELS } from "@/lib/stage-labels";
@@ -20,7 +16,6 @@ import { PanelCard } from "@/components/ui/panel-card";
 import { RankBadge } from "./career/RankBadge";
 import { PixelIcon } from "./PixelIcon";
 import { PixelAvatar } from "./PixelAvatar";
-import { FoodPopup } from "./FoodPopup";
 import { StatBar } from "./StatBar";
 
 const goal = freelanceGoal(SIM_CATALOG.milestones);
@@ -33,7 +28,6 @@ export function PlayerInfoPanel({ iconFiles = [] }: { iconFiles?: readonly strin
   const stage = useGameStore((s) => s.stage);
   const career = useGameStore((s) => s.career);
   const day = useGameStore((s) => snapshot(s.totalMinutes).day);
-  const [foodOpen, setFoodOpen] = useState(false);
   const playerSkills = useGameStore((s) => s.career.player_skills);
   const reputation = useGameStore((s) => s.career.players.reputation);
   const freelance = useGameStore((s) => s.career.players.freelance_completed);
@@ -43,8 +37,6 @@ export function PlayerInfoPanel({ iconFiles = [] }: { iconFiles?: readonly strin
     SIM_CATALOG.config.rank_brackets,
   );
   const life = lifeOf(career);
-  const slots = life.slotsSinceMeal;
-  const hunger = hungerLevel(slots);
   const trait = traitDef(traitOf(career));
   const rent = rentStatus(career, day);
   const sick = career.players.health < LIFE.sick_below;
@@ -133,57 +125,18 @@ export function PlayerInfoPanel({ iconFiles = [] }: { iconFiles?: readonly strin
           </span>
         </div>
         <StatBar value={freelance} max={goal} tone="mint" className="mt-1" />
-      </PanelCard>
-
-      <PanelCard className="p-3">
-        <p className="font-galmuri-9 text-galmuri-body text-[var(--foreground)]">Ăn uống</p>
         <p
-          className="mt-1 font-galmuri-7 text-galmuri-small text-[var(--muted-foreground)]"
-          data-testid="life-meals"
-          data-meals={life.mealsToday}
+          className="mt-2 w-full text-left font-galmuri-7 text-galmuri-small text-[var(--muted-foreground)]"
+          data-testid="life-rent"
+          data-rent={rent}
+          data-debt={life.rentDebtDays}
         >
-          Bữa {life.mealsToday}/3 · {calendar(day).weekdayLabel}
-        </p>
-        <p className="mt-1 font-galmuri-7 text-galmuri-small text-[var(--muted-foreground)]" data-testid="life-rent" data-rent={rent} data-debt={life.rentDebtDays}>
           {rent === "paid"
             ? "Trọ tháng này: đã đóng"
             : rent === "late"
               ? `Nợ trọ: ${life.rentDebtDays} ngày`
               : "Trọ đóng vào ngày 1"}
         </p>
-        <div className="mt-2 flex items-center gap-3">
-          <Button
-            type="button"
-            size="icon"
-            variant="outline"
-            className="min-h-11 min-w-11"
-            data-testid="food-open"
-            aria-label="Ăn uống"
-            onClick={() => setFoodOpen(true)}
-          >
-            <img
-              src={m51AssetPath("icon_btn_food_x2.png")}
-              width={32}
-              height={32}
-              alt=""
-              className="pixel-img h-8 w-8"
-            />
-          </Button>
-          <span className="flex items-center gap-2" data-testid="hunger" data-hunger={hunger} data-slots={slots}>
-            <img
-              src={m51AssetPath(`icon_hunger_${hunger}_x2.png`)}
-              width={32}
-              height={32}
-              alt=""
-              className={hunger === "hungry" ? "pixel-img hunger-blink h-8 w-8" : "pixel-img h-8 w-8"}
-              data-testid="hunger-icon"
-            />
-            <span className="font-galmuri-7 text-galmuri-small text-[var(--foreground)]" data-testid="hunger-label">
-              {hungerLabel(hunger)}
-            </span>
-          </span>
-        </div>
-        {foodOpen ? <FoodPopup onClose={() => setFoodOpen(false)} /> : null}
       </PanelCard>
 
       <PanelCard className="px-3 py-1 lg:flex-1">

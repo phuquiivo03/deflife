@@ -9,6 +9,7 @@ import { m5AssetPath, type M5AssetKey } from "@/game/life/assets";
 import type { LifeDiary } from "@/game/career/types";
 import { useGameStore } from "@/game/state/store";
 import { Button } from "@/components/ui/button";
+import { HungerDock } from "./FoodPopup";
 import { formatVnd } from "@/lib/format-currency";
 
 function art(key: string): string {
@@ -51,6 +52,7 @@ export function LifeStage() {
 
   return (
     <>
+      <HungerDock />
       {showBanner ? (
         <div className="pointer-events-none fixed inset-0 z-30 overflow-hidden" data-testid="life-banner">
           <div className="life-banner-dim absolute inset-0" data-testid="life-banner-dim" />
