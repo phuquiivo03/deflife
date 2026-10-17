@@ -3,7 +3,7 @@
 /* eslint-disable @next/next/no-img-element -- native pixel art stays unoptimized */
 
 import { m5AssetPath, m51AssetPath, type M5AssetKey } from "@/game/life/assets";
-import type { NoticeAction } from "@/game/career/types";
+import type { LifeNotice, Notice, NoticeActionButton, NoticeActionId } from "@/game/career/types";
 import { useGameStore } from "@/game/state/store";
 import { Button, PixelButton } from "@/components/ui/button";
 import { PanelCard, PanelCardTitle } from "@/components/ui/panel-card";
@@ -22,10 +22,63 @@ import {
 import { isHungerNotice } from "./hunger-notice";
 import styles from "./notifications.module.css";
 
+const JOB_BUTTON_IDS = new Set<NoticeActionId>(["acceptJob", "dismissNotice", "openJobs"]);
+
 function clock(minute: number): string {
   const hour = Math.floor(minute / 60) % 24;
   const rest = minute % 60;
   return `${String(hour).padStart(2, "0")}:${String(rest).padStart(2, "0")}`;
+}
+
+function jobButtons(notice: LifeNotice): NoticeActionButton[] | null {
+  const buttons = notice.actions;
+  if (!buttons?.some((button) => JOB_BUTTON_IDS.has(button.id))) return null;
+  return buttons;
+}
+
+function NoticeOffer({
+  notice,
+  buttons,
+  onRead,
+  onRun,
+}: {
+  notice: LifeNotice;
+  buttons: NoticeActionButton[];
+  onRead: (id: string) => void;
+  onRun: (id: NoticeActionId, notice: Notice) => void;
+}) {
+  return (
+    <div className={styles.offer}>
+      <button type="button" className={styles.offerHead} onClick={() => onRead(notice.id)}>
+        <img
+          src={m5AssetPath(notice.icon as M5AssetKey)}
+          width={NOTICE_LIST.rowIconPx}
+          height={NOTICE_LIST.rowIconPx}
+          alt=""
+          className={`pixel-img ${styles.rowIcon}`}
+        />
+        <span className={styles.offerCopy}>
+          <span className={styles.offerLine}>
+            <span className={`font-galmuri-9 ${styles.jobName}`}>{notice.title ?? notice.text}</span>
+            <span className={styles.clock}>{clock(notice.minute)}</span>
+          </span>
+          {notice.detail ? <span className={`font-galmuri-7 ${styles.detail}`}>{notice.detail}</span> : null}
+        </span>
+      </button>
+      <span className={styles.buttons}>
+        {buttons.map((button) => (
+          <PixelButton
+            key={button.id}
+            variant={button.variant === "primary" ? "primary" : "secondary"}
+            data-testid={`notice-action-${button.id}`}
+            onClick={() => onRun(button.id, notice)}
+          >
+            {button.label}
+          </PixelButton>
+        ))}
+      </span>
+    </div>
+  );
 }
 
 function NoticeActionButton({
@@ -99,10 +152,11 @@ export function NotificationsPanel() {
   const readNotice = useGameStore((s) => s.readNotice);
   const readAll = useGameStore((s) => s.readAllNotices);
   const runNoticeAction = useGameStore((s) => s.runNoticeAction);
-  const runAction = (action: string) => {
+  const runAction = (action: string, notice?: Notice) => {
     // payRent, viewJobs, openStore, eat, and sleep share this call.
+    // Job buttons pass the notice so Nhận and Làm hit that row.
     // Hunger rows are removed before this list renders.
-    runNoticeAction(action as NoticeAction);
+    runNoticeAction(action as NoticeActionId, notice);
   };
   const listed = notices.filter((notice) => !isHungerNotice(notice));
   let unread = 0;
@@ -145,32 +199,41 @@ export function NotificationsPanel() {
           </p>
         ) : (
           <ul className={styles.list} data-testid="notice-list">
-            {ordered.map((notice) => (
+            {ordered.map((notice) => {
+              const buttons = jobButtons(notice);
+              return (
               <li key={notice.id}>
                 <PanelCard
                   className={styles.item}
                   data-testid={`notice-${notice.id}`}
                   data-read={notice.read ? "1" : "0"}
                 >
-                  <button type="button" className={styles.body} onClick={() => readNotice(notice.id)}>
-                    <img
-                      src={m5AssetPath(notice.icon as M5AssetKey)}
-                      width={NOTICE_LIST.rowIconPx}
-                      height={NOTICE_LIST.rowIconPx}
-                      alt=""
-                      className={`pixel-img ${styles.rowIcon}`}
-                    />
-                    <span className={`font-galmuri-7 ${styles.copy}`}>
-                      <span className={styles.clock}>{clock(notice.minute)} </span>
-                      {notice.text}
-                    </span>
-                  </button>
-                  {notice.action ? (
-                    <NoticeActionButton action={notice.action} onRun={runAction} />
-                  ) : null}
+                  {buttons ? (
+                    <NoticeOffer notice={notice} buttons={buttons} onRead={readNotice} onRun={runAction} />
+                  ) : (
+                    <>
+                      <button type="button" className={styles.body} onClick={() => readNotice(notice.id)}>
+                        <img
+                          src={m5AssetPath(notice.icon as M5AssetKey)}
+                          width={NOTICE_LIST.rowIconPx}
+                          height={NOTICE_LIST.rowIconPx}
+                          alt=""
+                          className={`pixel-img ${styles.rowIcon}`}
+                        />
+                        <span className={`font-galmuri-7 ${styles.copy}`}>
+                          <span className={styles.clock}>{clock(notice.minute)} </span>
+                          {notice.text}
+                        </span>
+                      </button>
+                      {notice.action ? (
+                        <NoticeActionButton action={notice.action} onRun={runAction} />
+                      ) : null}
+                    </>
+                  )}
                 </PanelCard>
               </li>
-            ))}
+              );
+            })}
           </ul>
         )}
       </div>
