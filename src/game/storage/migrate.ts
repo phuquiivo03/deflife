@@ -18,6 +18,9 @@ import {
   type TaskRun,
   type TaskStep,
   type LifeState,
+  type NoticeActionButton,
+  type NoticeActionId,
+  NOTICE_ACTION_DEFAULT_LABEL,
   type TaskTicketChoice,
 } from "../career/types";
 import type { Loadout } from "../types";
@@ -29,7 +32,7 @@ import { defaultLife } from "../life/logic";
 import { isTraitId, MIGRATION_TRAIT, rollTrait } from "../life/traits";
 import { defaultFeed } from "../life/events";
 import { emptyPurse } from "../life/purse";
-import type { LifeDiary, LifeFeed, LifeNotice, LifeSnapshot, NoticeAction, NoticeSeverity } from "../career/types";
+import type { LifeDiary, LifeFeed, LifeNotice, LifeSnapshot, NoticeSeverity } from "../career/types";
 
 export type PersistedSave = {
   stage: StageId;
@@ -281,6 +284,7 @@ function normalizeLife(value: unknown, day: number): LifeState {
       value.suppressEndOfDayUntil == null ? null : num(value.suppressEndOfDayUntil),
     homeDays: num(value.homeDays),
     slotsSinceMeal: Math.max(0, num(value.slotsSinceMeal)),
+    jobNoticeSlots: Math.max(0, num(value.jobNoticeSlots)),
   };
 }
 
@@ -367,31 +371,69 @@ function normalizeDiary(value: unknown, remainingFallback: number): LifeDiary | 
   };
 }
 
+const NOTICE_ACTIONS: readonly NoticeActionId[] = [
+  "payRent",
+  "viewJobs",
+  "openStore",
+  "eat",
+  "sleep",
+  "acceptJob",
+  "dismissNotice",
+  "openJobs",
+];
+
+function noticeActionOf(value: unknown): NoticeActionId | null {
+  return NOTICE_ACTIONS.find((action) => action === value) ?? null;
+}
+
+function noticeButton(value: unknown): NoticeActionButton | null {
+  if (typeof value === "string") {
+    const id = noticeActionOf(value);
+    return id ? { id, label: NOTICE_ACTION_DEFAULT_LABEL[id] } : null;
+  }
+  if (!isRecord(value)) return null;
+  const id = noticeActionOf(value.id);
+  if (!id) return null;
+  const label = typeof value.label === "string" && value.label.trim().length > 0 ? value.label : NOTICE_ACTION_DEFAULT_LABEL[id];
+  const button: NoticeActionButton = { id, label };
+  if (typeof value.icon === "string" && value.icon.length > 0) button.icon = value.icon;
+  if (value.variant === "primary" || value.variant === "secondary") button.variant = value.variant;
+  return button;
+}
+
 function normalizeNotices(value: unknown): LifeNotice[] {
   if (!Array.isArray(value)) return [];
   const notices: LifeNotice[] = [];
   for (const row of value) {
     if (!isRecord(row) || typeof row.id !== "string" || typeof row.text !== "string") continue;
     const severity: NoticeSeverity = row.severity === "warn" || row.severity === "urgent" ? row.severity : "info";
-    const action: NoticeAction | null =
-      row.action === "payRent" ||
-      row.action === "viewJobs" ||
-      row.action === "openStore" ||
-      row.action === "eat" ||
-      row.action === "sleep"
-        ? row.action
-        : null;
-    notices.push({
+    const legacy = noticeActionOf(row.action);
+    const listed = Array.isArray(row.actions) ? row.actions.flatMap((item) => {
+      const parsed = noticeButton(item);
+      return parsed ? [parsed] : [];
+    }) : [];
+    const actions = listed.length > 0 ? listed : legacy ? [noticeButton(legacy)!] : [];
+    const payloadRecord = isRecord(row.payload) ? row.payload : null;
+    const jobId =
+      payloadRecord && typeof payloadRecord.jobId === "string" && payloadRecord.jobId.length > 0
+        ? payloadRecord.jobId
+        : typeof row.jobId === "string" && row.jobId.length > 0
+          ? row.jobId
+          : null;
+    const notice: LifeNotice = {
       id: row.id,
       day: num(row.day, 1),
       minute: num(row.minute),
       severity,
       icon: typeof row.icon === "string" ? row.icon : "icon_notif_event.png",
       text: row.text,
-      action,
+      action: actions[0]?.id ?? legacy,
+      actions,
       read: row.read === true,
       cue: typeof row.cue === "string" && row.cue.length > 0 ? row.cue : null,
-    });
+    };
+    if (jobId) notice.payload = { jobId };
+    notices.push(notice);
   }
   return notices;
 }
@@ -435,6 +477,8 @@ function strOrNull(value: unknown): string | null {
  * `introSeen` so an older save does not open the creation popup. Version 14
  * starts `feed.purse` empty. Version 15 sets `life.slotsSinceMeal` to 0.
  * Version 16 clears `sleptDay` and `sleptAt` on an older diary.
+ * Version 17 turns a legacy `action` into `{ id, label }`, folds `jobId` into
+ * `payload`, and starts `life.jobNoticeSlots` at 0.
  * Money, skills, and progress are kept. See docs/systems/save.md.
  */
 export function migrateSave(
@@ -502,6 +546,12 @@ export function migrateSave(
     career = {
       ...career,
       feed: { ...career.feed, diary: { ...career.feed.diary, sleptDay: null, sleptAt: null } },
+    };
+  }
+  if (version < 17) {
+    career = {
+      ...career,
+      life: { ...career.life, jobNoticeSlots: 0 },
     };
   }
 

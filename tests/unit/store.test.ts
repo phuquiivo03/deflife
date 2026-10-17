@@ -310,6 +310,7 @@ describe("store catalog", () => {
         icon: "icon_notif_salary.png",
         text: "Lương về.",
         action: null,
+        actions: [],
         read: true,
         cue: null,
       },

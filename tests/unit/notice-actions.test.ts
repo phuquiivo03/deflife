@@ -64,7 +64,7 @@ describe("runNoticeAction", () => {
   it("warns and does nothing for an unknown id", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     oweRent();
-    useGameStore.getState().runNoticeAction("nope");
+    useGameStore.getState().runNoticeAction("nope" as "eat");
     const next = useGameStore.getState();
     expect(next.career.players.money).toBe(3_000_000);
     expect(next.career.life.paidRentKey).toBeNull();

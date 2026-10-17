@@ -161,7 +161,9 @@ CREATE TABLE player_life (
   wake_budget integer NOT NULL CHECK (wake_budget > 0),
   suppress_end_of_day_until integer,
   -- Persist v15. Older saves start at 0.
-  slots_since_meal integer NOT NULL CHECK (slots_since_meal >= 0)
+  slots_since_meal integer NOT NULL CHECK (slots_since_meal >= 0),
+  -- Persist v17. Older saves start at 0.
+  job_notice_slots integer NOT NULL CHECK (job_notice_slots >= 0)
 );
 
 -- Roll state, diary, and the open dialog (M5 P2). Notices are player_notices.
@@ -209,7 +211,13 @@ CREATE TABLE player_notices (
   severity text NOT NULL CHECK (severity IN ('info', 'warn', 'urgent')),
   icon text NOT NULL,
   body text NOT NULL,
-  action text CHECK (action IN ('payRent', 'viewJobs', 'openStore')),
+  action text CHECK (
+    action IN ('payRent', 'viewJobs', 'openStore', 'eat', 'sleep', 'acceptJob', 'dismissNotice', 'openJobs')
+  ),
+  -- Persist v17. Buttons `{ id, label, icon?, variant? }`. Older rows copy `action` into one button.
+  actions jsonb NOT NULL,
+  -- Persist v17. `{ jobId }` when the row is about one job. Null otherwise.
+  payload jsonb,
   read boolean NOT NULL,
   -- Persist v9. Null keeps the id and severity sound rules.
   cue text CHECK (cue IS NULL OR cue IN ('eventOpen', 'landlordKnock', 'salary', 'sickCough', 'storeBuy', 'diaryFlip')),

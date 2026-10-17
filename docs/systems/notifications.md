@@ -35,4 +35,30 @@ The clock sits on the first line, in the muted color, inside the same clamp.
 | `eat` | Ăn | `icon_action_eat` (rice bowl) |
 | `sleep` | Ngủ | `icon_action_sleep` (bed) |
 
-A click calls `runNoticeAction` with the action id. `payRent` pays outstanding rent. `eat` opens the Ăn uống modal, the same shape as `openStore`, but those hunger rows are not drawn in this list. `sleep` calls the HUD sleep control and stays on the low Sức khỏe row. Any other id logs a warning and does nothing. A label with no glyph uses the outline text button and the same click. The list region is `overflow-y: auto` inside the desktop panel cap (see the layout section of [DESIGN_SYSTEM.md](../design/DESIGN_SYSTEM.md)).
+A click calls `runNoticeAction(id, notice)`. `payRent` pays outstanding rent. `eat` opens the Ăn uống modal, the same shape as `openStore`. Hunger rows are still written to the feed; this list does not draw them. `sleep` calls the HUD sleep control and stays on the low Sức khỏe row. `acceptJob` accepts that row's job. `dismissNotice` closes that row. `openJobs` opens the job board and, when `payload.jobId` is an accepted job, the terminal. Any other id logs `Unknown notice action "…"` and does nothing.
+
+A notice may carry several buttons. The persisted shape after version 17 is:
+
+```ts
+type NoticeActionId =
+  | "payRent" | "viewJobs" | "openStore" | "eat" | "sleep"
+  | "acceptJob" | "dismissNotice" | "openJobs"
+
+type Notice = {
+  id: string
+  day: number
+  minute: number
+  severity: "info" | "warn" | "urgent"
+  icon: string
+  text: string
+  action: NoticeActionId | null // legacy single id, actions[0].id
+  actions?: { id: NoticeActionId; label: string; icon?: string; variant?: "primary" | "secondary" }[]
+  payload?: { jobId?: string }
+  read: boolean
+  cue: string | null
+}
+
+runNoticeAction(id: NoticeActionId, notice?: Notice): void
+```
+
+A job offer emits `actions` Nhận (`acceptJob`, primary) and Bỏ qua (`dismissNotice`, secondary), with `payload: { jobId }` and legacy `action: "acceptJob"`. Render one button per `actions` entry and pass the notice as the second argument. The panel file stays Dev B's. A label with no glyph uses the outline text button and the same click. The list region is `overflow-y: auto` inside the desktop panel cap (see the layout section of [DESIGN_SYSTEM.md](../design/DESIGN_SYSTEM.md)).

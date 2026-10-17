@@ -80,6 +80,19 @@ export type LifeConfig = {
   /** Slots since the last meal still count as Hơi đói. */
   hunger_peckish_until: number;
   hunger_notice: string;
+  /** Waking slots between new job notices. */
+  job_notice_every_slots: number;
+  /** Unaccepted job notices kept in the list. */
+  job_notice_pending_max: number;
+  /** Days a job notice stays open. */
+  job_notice_expire_days: number;
+  job_deadline_easy: number;
+  job_deadline_mid: number;
+  job_deadline_hard: number;
+  job_late_reputation: number;
+  job_late_mood: number;
+  /** Days left when the deadline reminder is posted. */
+  job_remind_days: number;
   foods: FoodDef[];
   weekdays: string[];
   holidays: HolidayDef[];
