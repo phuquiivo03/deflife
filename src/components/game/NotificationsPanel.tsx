@@ -3,7 +3,6 @@
 /* eslint-disable @next/next/no-img-element -- native pixel art stays unoptimized */
 
 import { m5AssetPath, m51AssetPath, type M5AssetKey } from "@/game/life/assets";
-import { unreadCount } from "@/game/life/events";
 import type { NoticeAction } from "@/game/career/types";
 import { useGameStore } from "@/game/state/store";
 import { Button, PixelButton } from "@/components/ui/button";
@@ -20,6 +19,7 @@ import {
   noticeChromeStyle,
   resolveNoticeAction,
 } from "./notifications.config";
+import { isHungerNotice } from "./hunger-notice";
 import styles from "./notifications.module.css";
 
 function clock(minute: number): string {
@@ -96,17 +96,20 @@ function NoticeActionButton({
 
 export function NotificationsPanel() {
   const notices = useGameStore((s) => s.career.feed?.notices ?? []);
-  const career = useGameStore((s) => s.career);
-  const unread = unreadCount(career);
   const readNotice = useGameStore((s) => s.readNotice);
   const readAll = useGameStore((s) => s.readAllNotices);
   const runNoticeAction = useGameStore((s) => s.runNoticeAction);
   const runAction = (action: string) => {
-    // eat and sleep use the same call. The store handler on this branch
-    // branches payRent, viewJobs, and openStore.
+    // payRent, viewJobs, openStore, eat, and sleep share this call.
+    // Hunger rows are removed before this list renders.
     runNoticeAction(action as NoticeAction);
   };
-  const ordered = [...notices].reverse();
+  const listed = notices.filter((notice) => !isHungerNotice(notice));
+  let unread = 0;
+  for (const notice of listed) {
+    if (!notice.read) unread += 1;
+  }
+  const ordered = [...listed].reverse();
   const badge = noticeBadgeMetrics();
 
   return (

@@ -1,6 +1,8 @@
 # Thông báo
 
-Left column. Newest first. Empty copy stays “Chưa có thông báo.” **Đã đọc** still marks every row read. Clicking a row still marks that row read. An action still calls `runNoticeAction` and does nothing else.
+Left column. Newest first. Empty copy stays “Chưa có thông báo.” **Đã đọc** still marks every stored row read, including a hunger row that this list does not draw. Clicking a row still marks that row read. An action still calls `runNoticeAction` and does nothing else.
+
+Hunger rows stay out of this list and out of the unread disc. `advanceHunger` writes them with id `hunger-<day>-<meals>` and action `eat`. `LifeNotice` has no kind, type, or source, and the icon and severity are shared with other rows, so `isHungerNotice` (`src/components/game/hunger-notice.ts`) matches that action or that id. The panel filters with it at render time. The feed still stores the row. Đói shows on the rice-bowl button under the room. The low Sức khỏe row stays listed and still counts: action `sleep`, id `sick-<day>`.
 
 Numbers live in `src/components/game/notifications.config.ts`.
 
@@ -33,4 +35,4 @@ The clock sits on the first line, in the muted color, inside the same clamp.
 | `eat` | Ăn | `icon_action_eat` (rice bowl) |
 | `sleep` | Ngủ | `icon_action_sleep` (bed) |
 
-A click calls `runNoticeAction` with the action id. `payRent` pays outstanding rent. `eat` opens the Ăn uống modal, the same shape as `openStore`. `sleep` calls the HUD sleep control. Any other id logs a warning and does nothing. A label with no glyph uses the outline text button and the same click. The list region is `overflow-y: auto` inside the desktop panel cap (see the layout section of [DESIGN_SYSTEM.md](../design/DESIGN_SYSTEM.md)).
+A click calls `runNoticeAction` with the action id. `payRent` pays outstanding rent. `eat` opens the Ăn uống modal, the same shape as `openStore`, but those hunger rows are not drawn in this list. `sleep` calls the HUD sleep control and stays on the low Sức khỏe row. Any other id logs a warning and does nothing. A label with no glyph uses the outline text button and the same click. The list region is `overflow-y: auto` inside the desktop panel cap (see the layout section of [DESIGN_SYSTEM.md](../design/DESIGN_SYSTEM.md)).
