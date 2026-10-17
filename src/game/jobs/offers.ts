@@ -1,4 +1,13 @@
-import type { CareerState, JobTemplate, LifeNotice, SimCatalog, StoredNoticeAction } from "../career/types";
+import type {
+  CareerState,
+  JobTemplate,
+  LifeNotice,
+  Notice,
+  NoticeActionButton,
+  NoticeActionId,
+  SimCatalog,
+} from "../career/types";
+import { NOTICE_ACTION_DEFAULT_LABEL } from "../career/types";
 import { SIM_CATALOG } from "../career/content";
 import { LIFE } from "../life/content";
 import { lifeOf } from "../life/logic";
@@ -6,6 +15,17 @@ import { formatVnd } from "@/lib/format-currency";
 import { jobRequirementsFor, offerJob, shuffleSeeded, skillNameMap } from "./logic";
 
 export const JOB_OFFER_ICON = "icon_notif_job.png";
+
+const NOTICE_ACTION_IDS: readonly NoticeActionId[] = [
+  "payRent",
+  "viewJobs",
+  "openStore",
+  "eat",
+  "sleep",
+  "acceptJob",
+  "dismissNotice",
+  "openJobs",
+];
 
 const DIFFICULTY_LABEL = {
   easy: "Dễ",
@@ -15,9 +35,14 @@ const DIFFICULTY_LABEL = {
 
 export type JobDifficulty = keyof typeof DIFFICULTY_LABEL;
 
-export function noticeActionList(notice: Pick<LifeNotice, "action" | "actions">): StoredNoticeAction[] {
-  if (notice.actions && notice.actions.length > 0) return notice.actions;
+export function noticeActionList(notice: Pick<LifeNotice, "action" | "actions">): NoticeActionId[] {
+  if (notice.actions && notice.actions.length > 0) return notice.actions.map((button) => button.id);
   return notice.action ? [notice.action] : [];
+}
+
+export function noticeJobId(notice: Pick<LifeNotice, "payload"> | null | undefined): string | null {
+  const jobId = notice?.payload?.jobId;
+  return typeof jobId === "string" && jobId.length > 0 ? jobId : null;
 }
 
 export function difficultyForTier(tier: number): JobDifficulty {
@@ -34,7 +59,7 @@ export function deadlineDaysForTier(tier: number): number {
 }
 
 export function isJobOfferNotice(notice: LifeNotice): boolean {
-  return typeof notice.jobId === "string" && noticeActionList(notice).includes("acceptJob");
+  return noticeJobId(notice) != null && noticeActionList(notice).includes("acceptJob");
 }
 
 function skillLine(template: JobTemplate, catalog: SimCatalog): string {
@@ -56,7 +81,7 @@ function pendingOffers(state: CareerState, day: number): LifeNotice[] {
   return notices.filter((notice) => {
     if (!isJobOfferNotice(notice)) return false;
     if (day >= notice.day + LIFE.job_notice_expire_days) return false;
-    const job = state.player_jobs.find((row) => row.id === notice.jobId);
+    const job = state.player_jobs.find((row) => row.id === noticeJobId(notice));
     return job?.status === "offered";
   });
 }
@@ -69,7 +94,8 @@ function expireJobOffers(state: CareerState, day: number): CareerState {
     if (!isJobOfferNotice(notice)) continue;
     if (day < notice.day + LIFE.job_notice_expire_days) continue;
     drop.add(notice.id);
-    if (notice.jobId) expireJobs.add(notice.jobId);
+    const jobId = noticeJobId(notice);
+    if (jobId) expireJobs.add(jobId);
   }
   if (drop.size === 0) return state;
   return {
@@ -105,7 +131,10 @@ function postOffer(state: CareerState, template: JobTemplate, day: number, minut
     id: `job-${day}-${template.id}-${state.player_jobs.length}`,
     deadline_day: day + days,
   };
-  const actions: StoredNoticeAction[] = ["acceptJob", "dismissNotice"];
+  const actions: NoticeActionButton[] = [
+    { id: "acceptJob", label: NOTICE_ACTION_DEFAULT_LABEL.acceptJob, variant: "primary" },
+    { id: "dismissNotice", label: NOTICE_ACTION_DEFAULT_LABEL.dismissNotice, variant: "secondary" },
+  ];
   const notice: LifeNotice = {
     id: `job-offer-${job.id}`,
     day,
@@ -115,7 +144,7 @@ function postOffer(state: CareerState, template: JobTemplate, day: number, minut
     text: jobOfferText(template, catalog),
     action: "acceptJob",
     actions,
-    jobId: job.id,
+    payload: { jobId: job.id },
     read: false,
   };
   const notices = [...(state.feed?.notices ?? []), notice];
@@ -146,13 +175,18 @@ export function tickJobOffers(
   return postOffer(ready, template, day, minute, catalog);
 }
 
-function noticeById(state: CareerState, noticeId?: string, action?: StoredNoticeAction): LifeNotice | null {
+/** The notice Dev B passed, or the newest row whose buttons include `action`. */
+export function noticeForAction(state: CareerState, action: string, notice?: Notice): LifeNotice | null {
+  return noticeById(state, notice, NOTICE_ACTION_IDS.find((id) => id === action));
+}
+
+function noticeById(state: CareerState, notice?: Notice, action?: NoticeActionId): LifeNotice | null {
   const notices = state.feed?.notices ?? [];
-  if (noticeId) return notices.find((notice) => notice.id === noticeId) ?? null;
+  if (notice?.id) return notices.find((row) => row.id === notice.id) ?? notice;
   for (let i = notices.length - 1; i >= 0; i -= 1) {
-    const notice = notices[i];
-    if (!notice) continue;
-    if (action && noticeActionList(notice).includes(action)) return notice;
+    const row = notices[i];
+    if (!row) continue;
+    if (action && noticeActionList(row).includes(action)) return row;
   }
   return null;
 }
@@ -160,7 +194,7 @@ function noticeById(state: CareerState, noticeId?: string, action?: StoredNotice
 function withoutNotice(state: CareerState, noticeId: string, expireJob: boolean): CareerState {
   const notice = state.feed?.notices.find((row) => row.id === noticeId);
   const notices = (state.feed?.notices ?? []).filter((row) => row.id !== noticeId);
-  const jobId = notice?.jobId;
+  const jobId = noticeJobId(notice);
   return {
     ...state,
     player_jobs:
@@ -174,22 +208,23 @@ function withoutNotice(state: CareerState, noticeId: string, expireJob: boolean)
 }
 
 /** Nhận. The job becomes active and the notice closes. The terminal stays closed. */
-export function acceptJobFromNotice(state: CareerState, noticeId?: string): CareerState {
-  const notice = noticeById(state, noticeId, "acceptJob");
-  if (!notice?.jobId) return state;
-  const job = state.player_jobs.find((row) => row.id === notice.jobId);
-  if (!job || job.status !== "offered") return withoutNotice(state, notice.id, false);
+export function acceptJobFromNotice(state: CareerState, notice?: Notice): CareerState {
+  const picked = noticeById(state, notice, "acceptJob");
+  const jobId = noticeJobId(picked);
+  if (!picked || !jobId) return state;
+  const job = state.player_jobs.find((row) => row.id === jobId);
+  if (!job || job.status !== "offered") return withoutNotice(state, picked.id, false);
   const accepted = state.player_jobs.map((row) =>
     row.id === job.id
       ? { ...row, status: "active" as const, accepted_day: state.players.game_day }
       : row,
   );
-  return withoutNotice({ ...state, player_jobs: accepted }, notice.id, false);
+  return withoutNotice({ ...state, player_jobs: accepted }, picked.id, false);
 }
 
 /** Bỏ qua. The notice closes and an unaccepted job expires. */
-export function dismissNoticeById(state: CareerState, noticeId?: string): CareerState {
-  const notice = noticeById(state, noticeId, "dismissNotice");
-  if (!notice) return state;
-  return withoutNotice(state, notice.id, true);
+export function dismissNoticeById(state: CareerState, notice?: Notice): CareerState {
+  const picked = noticeById(state, notice, "dismissNotice");
+  if (!picked) return state;
+  return withoutNotice(state, picked.id, true);
 }

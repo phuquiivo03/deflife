@@ -18,7 +18,7 @@ import {
   xpNeededForNextLevel,
 } from "../career/actions";
 import { SIM_CATALOG } from "../career/content";
-import type { CareerState } from "../career/types";
+import type { CareerState, Notice, NoticeActionId } from "../career/types";
 import { playCueKey } from "../audio/client";
 import type { CueKey } from "../audio/cues";
 import {
@@ -78,7 +78,7 @@ import type { LifeStep } from "../life/events";
 import { dialogCueKey, noticeCueKey, pickMomentCue, playLifeSound } from "../life/sounds";
 import { pinItem, roomOwned } from "../life/furniture";
 import { buyShopItem } from "../life/store-buy";
-import { acceptJobFromNotice, dismissNoticeById, tickJobOffers } from "../jobs/offers";
+import { acceptJobFromNotice, dismissNoticeById, noticeForAction, tickJobOffers } from "../jobs/offers";
 
 let clockSkip = false;
 let handlingHospital = false;
@@ -211,7 +211,7 @@ type GameState = {
   readNotice: (id: string) => void;
   readAllNotices: () => void;
   dismissDiary: () => void;
-  runNoticeAction: (action: string, noticeId?: string) => void;
+  runNoticeAction: (id: NoticeActionId, notice?: Notice) => void;
   setStoreOpen: (open: boolean) => void;
   setFoodOpen: (open: boolean) => void;
   buyStoreItem: (id: string) => void;
@@ -502,48 +502,46 @@ export const useGameStore = create<GameState>()(
       readNotice: (id) => set({ career: markNoticeRead(get().career, id) }),
       readAllNotices: () => set({ career: markAllNoticesRead(get().career) }),
       dismissDiary: () => set({ career: dismissDiary(get().career) }),
-      runNoticeAction: (action, noticeId) => {
-        if (action === "payRent") {
+      runNoticeAction: (id, notice) => {
+        const picked = noticeForAction(get().career, id, notice);
+        if (id === "payRent") {
           commitLife(payOutstandingRent(get().career));
           get().syncLifeSurface();
           return;
         }
-        if (action === "viewJobs") {
+        if (id === "viewJobs") {
           set({ careerPanel: "jobs" });
           return;
         }
-        if (action === "openJobs") {
-          const notice = noticeId
-            ? get().career.feed?.notices.find((row) => row.id === noticeId)
-            : undefined;
+        if (id === "openJobs") {
           set({ careerPanel: "jobs" });
-          const jobId = notice?.jobId;
+          const jobId = picked?.payload?.jobId;
           if (jobId && get().career.player_jobs.some((job) => job.id === jobId && job.status === "active")) {
             get().openTask(jobId);
           }
           return;
         }
-        if (action === "openStore") {
+        if (id === "openStore") {
           set({ storeOpen: true, career: askStore(get().career) });
           return;
         }
-        if (action === "eat") {
+        if (id === "eat") {
           set({ foodOpen: true });
           return;
         }
-        if (action === "sleep") {
+        if (id === "sleep") {
           get().sleep();
           return;
         }
-        if (action === "acceptJob") {
-          set({ career: acceptJobFromNotice(get().career, noticeId) });
+        if (id === "acceptJob") {
+          set({ career: acceptJobFromNotice(get().career, picked ?? undefined) });
           return;
         }
-        if (action === "dismissNotice") {
-          set({ career: dismissNoticeById(get().career, noticeId) });
+        if (id === "dismissNotice") {
+          set({ career: dismissNoticeById(get().career, picked ?? undefined) });
           return;
         }
-        console.warn(`Unknown notice action "${action}"`);
+        console.warn(`Unknown notice action "${id}"`);
       },
       setStoreOpen: (open) => set({ storeOpen: open }),
       setFoodOpen: (open) => set({ foodOpen: open }),

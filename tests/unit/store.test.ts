@@ -311,7 +311,6 @@ describe("store catalog", () => {
         text: "Lương về.",
         action: null,
         actions: [],
-        jobId: null,
         read: true,
         cue: null,
       },

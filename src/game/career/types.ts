@@ -162,12 +162,36 @@ export type LifeState = {
   jobNoticeSlots: number;
 };
 
+/** Ids the notice panel already maps. Job ids are added on `NoticeActionId`. */
 export type NoticeAction = "payRent" | "viewJobs" | "openStore" | "eat" | "sleep";
 
-/** Job-board buttons. Dev B maps these labels in the notice panel. */
-export type JobNoticeAction = "acceptJob" | "dismissNotice" | "openJobs";
+/** Every id `runNoticeAction` understands. Unknown ids warn and do nothing. */
+export type NoticeActionId = NoticeAction | "acceptJob" | "dismissNotice" | "openJobs";
 
-export type StoredNoticeAction = NoticeAction | JobNoticeAction;
+export type NoticeActionVariant = "primary" | "secondary";
+
+/** One button. `label` is the visible copy. `icon` is an optional asset key. */
+export type NoticeActionButton = {
+  id: NoticeActionId;
+  label: string;
+  icon?: string;
+  variant?: NoticeActionVariant;
+};
+
+export type NoticePayload = {
+  jobId?: string;
+};
+
+export const NOTICE_ACTION_DEFAULT_LABEL: Record<NoticeActionId, string> = {
+  payRent: "Trả trọ",
+  viewJobs: "Xem job",
+  openStore: "Mở store",
+  eat: "Ăn",
+  sleep: "Ngủ",
+  acceptJob: "Nhận",
+  dismissNotice: "Bỏ qua",
+  openJobs: "Làm",
+};
 
 export type NoticeSeverity = "info" | "warn" | "urgent";
 
@@ -178,15 +202,15 @@ export type LifeNotice = {
   severity: NoticeSeverity;
   icon: string;
   text: string;
-  /** First action. Older panels read this single id. */
-  action: StoredNoticeAction | null;
+  /** Legacy single id. A panel that reads one action uses this. */
+  action: NoticeActionId | null;
   /**
-   * Ordered buttons. A job offer is `["acceptJob", "dismissNotice"]`.
+   * Ordered buttons. A job offer is Nhận then Bỏ qua.
    * Absent on a notice built before v17; migration fills it from `action`.
    */
-  actions?: StoredNoticeAction[];
-  /** Job this row acts on. Null for rent, store, and other rows. */
-  jobId?: string | null;
+  actions?: NoticeActionButton[];
+  /** Extra data for the action. A job row sets `jobId`. */
+  payload?: NoticePayload;
   read: boolean;
   /**
    * Specific cue for this row. When set, it replaces the severity ping.
@@ -194,6 +218,9 @@ export type LifeNotice = {
    */
   cue?: string | null;
 };
+
+/** Persisted notice row. Same object as `LifeNotice`. */
+export type Notice = LifeNotice;
 
 export type LifeSnapshot = {
   day: number;

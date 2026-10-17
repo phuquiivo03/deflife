@@ -214,10 +214,10 @@ CREATE TABLE player_notices (
   action text CHECK (
     action IN ('payRent', 'viewJobs', 'openStore', 'eat', 'sleep', 'acceptJob', 'dismissNotice', 'openJobs')
   ),
-  -- Persist v17. Ordered button ids. Older rows copy `action` into this list.
+  -- Persist v17. Buttons `{ id, label, icon?, variant? }`. Older rows copy `action` into one button.
   actions jsonb NOT NULL,
-  -- Persist v17. Null when the row is not about one job.
-  job_id text,
+  -- Persist v17. `{ jobId }` when the row is about one job. Null otherwise.
+  payload jsonb,
   read boolean NOT NULL,
   -- Persist v9. Null keeps the id and severity sound rules.
   cue text CHECK (cue IS NULL OR cue IN ('eventOpen', 'landlordKnock', 'salary', 'sickCough', 'storeBuy', 'diaryFlip')),

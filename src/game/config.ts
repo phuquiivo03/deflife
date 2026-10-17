@@ -32,7 +32,7 @@ export const PERSIST_KEY = "devlife:v1";
  * v14: `feed.purse`. Older saves start the day with an empty purse. Money, skills, and progress stay.
  * v15: `life.slotsSinceMeal`. Older saves start at 0, as if they just ate. Money, skills, and progress stay.
  * v16: `feed.diary.sleptDay` and `feed.diary.sleptAt`. An older diary omits the sleep clock. Money, skills, and progress stay.
- * v17: notice `actions` and `jobId`, plus `life.jobNoticeSlots`. Older notices copy `action` into `actions` and leave `jobId` null. The slot counter starts at 0. Money, skills, and progress stay.
+ * v17: notice `actions` (`{ id, label, icon?, variant? }[]`) and `payload.jobId`, plus `life.jobNoticeSlots`. A legacy `action` string becomes one button. An older string list or `jobId` field is folded in. The slot counter starts at 0. Money, skills, and progress stay.
  */
 export const PERSIST_VERSION = 17;
 

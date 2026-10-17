@@ -38,48 +38,52 @@ describe("job offer notices", () => {
   it("posts one job notice every two slots and keeps the cap at three", () => {
     let state = defaultCareer(1, 8 * 60, "student", SIM_CATALOG);
     state = tickJobOffers(state, 1, 8 * 60);
-    expect(state.feed.notices.filter((notice) => notice.jobId)).toHaveLength(0);
+    expect(state.feed.notices.filter((notice) => notice.payload?.jobId)).toHaveLength(0);
     expect(state.life.jobNoticeSlots).toBe(1);
 
     state = tickJobOffers(state, 1, 10 * 60);
-    const first = state.feed.notices.filter((notice) => notice.actions?.includes("acceptJob"));
+    const first = state.feed.notices.filter((notice) => notice.actions?.some((button) => button.id === "acceptJob"));
     expect(first).toHaveLength(1);
-    expect(first[0]?.actions).toEqual(["acceptJob", "dismissNotice"]);
+    expect(first[0]?.actions).toEqual([
+      { id: "acceptJob", label: "Nhận", variant: "primary" },
+      { id: "dismissNotice", label: "Bỏ qua", variant: "secondary" },
+    ]);
     expect(first[0]?.action).toBe("acceptJob");
+    expect(first[0]?.payload).toEqual({ jobId: expect.any(String) });
     expect(first[0]?.text).toMatch(/· (Dễ|Vừa|Khó) · /);
     expect(first[0]?.text).toMatch(/hạn \d+ ngày/);
-    const job = state.player_jobs.find((row) => row.id === first[0]?.jobId);
+    const job = state.player_jobs.find((row) => row.id === first[0]?.payload?.jobId);
     expect(job?.status).toBe("offered");
 
     for (let i = 0; i < 12; i += 1) state = tickJobOffers(state, 1, 12 * 60);
-    expect(state.feed.notices.filter((notice) => notice.actions?.includes("acceptJob"))).toHaveLength(
+    expect(state.feed.notices.filter((notice) => notice.actions?.some((button) => button.id === "acceptJob"))).toHaveLength(
       LIFE.job_notice_pending_max,
     );
   });
 
   it("drops an unaccepted notice after one day and accepts or dismisses the rest", () => {
     const state = offered(1);
-    const notice = state.feed.notices.find((row) => row.jobId);
+    const notice = state.feed.notices.find((row) => row.payload?.jobId);
     expect(notice).toBeTruthy();
     const expired = tickJobOffers(state, 1 + LIFE.job_notice_expire_days, 8 * 60);
     expect(expired.feed.notices.some((row) => row.id === notice?.id)).toBe(false);
-    expect(expired.player_jobs.find((job) => job.id === notice?.jobId)?.status).toBe("expired");
+    expect(expired.player_jobs.find((job) => job.id === notice?.payload?.jobId)?.status).toBe("expired");
 
     const fresh = offered(3);
-    const row = fresh.feed.notices.find((item) => item.jobId)!;
-    const accepted = acceptJobFromNotice(fresh, row.id);
+    const row = fresh.feed.notices.find((item) => item.payload?.jobId)!;
+    const accepted = acceptJobFromNotice(fresh, row);
     expect(accepted.feed.notices.some((item) => item.id === row.id)).toBe(false);
-    expect(accepted.player_jobs.find((job) => job.id === row.jobId)).toMatchObject({
+    expect(accepted.player_jobs.find((job) => job.id === row.payload?.jobId)).toMatchObject({
       status: "active",
       accepted_day: 3,
     });
     expect(accepted.players.money).toBe(fresh.players.money);
 
     const again = offered(4);
-    const skip = again.feed.notices.find((item) => item.jobId)!;
-    const dismissed = dismissNoticeById(again, skip.id);
+    const skip = again.feed.notices.find((item) => item.payload?.jobId)!;
+    const dismissed = dismissNoticeById(again, skip);
     expect(dismissed.feed.notices.some((item) => item.id === skip.id)).toBe(false);
-    expect(dismissed.player_jobs.find((job) => job.id === skip.jobId)?.status).toBe("expired");
+    expect(dismissed.player_jobs.find((job) => job.id === skip.payload?.jobId)?.status).toBe("expired");
   });
 
   it("keeps eat-less old actions and the new ids through a version 16 load", () => {
@@ -114,9 +118,16 @@ describe("job offer notices", () => {
       xp: 9,
     });
     expect(saved.career.life.jobNoticeSlots).toBe(0);
-    expect(saved.career.feed.notices.map((notice) => [notice.id, notice.actions, notice.jobId])).toEqual([
-      ["rent", ["payRent"], null],
-      ["offer", ["acceptJob", "dismissNotice"], "job-1-landing-html-0"],
+    expect(saved.career.feed.notices.map((notice) => [notice.id, notice.actions, notice.payload ?? null])).toEqual([
+      ["rent", [{ id: "payRent", label: "Trả trọ" }], null],
+      [
+        "offer",
+        [
+          { id: "acceptJob", label: "Nhận" },
+          { id: "dismissNotice", label: "Bỏ qua" },
+        ],
+        { jobId: "job-1-landing-html-0" },
+      ],
       ["nope", [], null],
     ]);
   });
@@ -134,7 +145,7 @@ describe("onHour job offers", () => {
     });
     useGameStore.getState().onHour(10, minute);
     expect(
-      useGameStore.getState().career.feed.notices.some((notice) => notice.actions?.includes("acceptJob")),
+      useGameStore.getState().career.feed.notices.some((notice) => notice.actions?.some((button) => button.id === "acceptJob")),
     ).toBe(true);
   });
 });
@@ -142,7 +153,7 @@ describe("onHour job offers", () => {
 describe("runNoticeAction job ids", () => {
   it("accepts the named notice and warns on an unknown id without paying rent", () => {
     const seeded = offered(1);
-    const notice = seeded.feed.notices.find((row) => row.jobId)!;
+    const notice = seeded.feed.notices.find((row) => row.payload?.jobId)!;
     useGameStore.setState({
       career: {
         ...seeded,
@@ -154,14 +165,14 @@ describe("runNoticeAction job ids", () => {
         },
       },
     });
-    useGameStore.getState().runNoticeAction("acceptJob", notice.id);
+    useGameStore.getState().runNoticeAction("acceptJob", notice);
     const accepted = useGameStore.getState().career;
-    expect(accepted.player_jobs.find((job) => job.id === notice.jobId)?.status).toBe("active");
+    expect(accepted.player_jobs.find((job) => job.id === notice.payload?.jobId)?.status).toBe("active");
     expect(accepted.players.money).toBe(3_000_000);
     expect(useGameStore.getState().taskJobId).toBeNull();
 
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    useGameStore.getState().runNoticeAction("nope");
+    useGameStore.getState().runNoticeAction("nope" as "acceptJob");
     expect(useGameStore.getState().career.players.money).toBe(3_000_000);
     expect(useGameStore.getState().career.life.paidRentKey).toBeNull();
     expect(warn).toHaveBeenCalledWith('Unknown notice action "nope"');
