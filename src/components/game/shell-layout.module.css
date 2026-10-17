@@ -1,4 +1,40 @@
 /*
+ * Room status bar, every width. Numbers come from ROOM_STATUS_BAR.
+ * The shop control stays at the trailing edge when the row wraps.
+ * Column capping stays in the desktop media query below.
+ */
+
+.statusBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  align-self: center;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: var(--room-status-max);
+  margin-bottom: var(--room-status-gap);
+  padding: var(--room-status-pad-y) var(--room-status-pad-x);
+  column-gap: var(--room-status-cluster);
+  row-gap: var(--room-status-wrap);
+  color: var(--foreground);
+  line-height: 1;
+}
+
+.cluster {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--room-status-icon-gap);
+  white-space: nowrap;
+}
+
+.shop {
+  display: inline-flex;
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+/*
  * Desktop only. The breakpoint number is SHELL_LAYOUT.desktopMinPx.
  * Mobile keeps the aside in normal flow (no sticky, no viewport cap).
  */

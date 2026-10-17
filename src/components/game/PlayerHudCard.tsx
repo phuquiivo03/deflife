@@ -15,6 +15,8 @@ import { formatVnd } from "@/lib/format-currency";
 import { PanelCard } from "@/components/ui/panel-card";
 import { StatBar } from "./StatBar";
 import { HUD_ICON_GAP_PX } from "./store-button.config";
+import { ROOM_STATUS_BAR, roomStatusBarVars, roomStatusClockLabel } from "./shell-layout.config";
+import shellStyles from "./shell-layout.module.css";
 import { SleepButton } from "./SleepButton";
 import { StoreButton } from "./StoreButton";
 
@@ -51,18 +53,53 @@ const CAREER_ACTIONS = [
   tone: string;
 }[];
 
-export function PlayerHudCard({ iconFiles = [] }: { iconFiles?: readonly string[] }) {
-  const health = useGameStore((s) => s.career.players.health);
-  const mood = useGameStore((s) => s.career.players.mood);
-  const energy = useGameStore((s) => s.career.players.energy);
+/** Tiền, Ngày/giờ, and Cửa hàng. GameShell places this directly above the room. */
+export function RoomStatusBar({ iconFiles = [] }: { iconFiles?: readonly string[] }) {
   const money = useGameStore((s) => s.career.players.money);
   const day = useGameStore((s) => snapshot(s.totalMinutes).day);
   const clockLabel = useGameStore((s) => snapshot(s.totalMinutes).clockLabel);
   const phaseId = useGameStore((s) => snapshot(s.totalMinutes).phaseId);
   const fastForward = useGameStore((s) => s.fastForward);
+  const setStoreOpen = useGameStore((s) => s.setStoreOpen);
+  const weekdayLabel = calendar(day).weekdayLabel;
+  const phaseLabel = phaseById(phaseId).label;
+
+  return (
+    <PanelCard
+      className={cn(shellStyles.statusBar, "font-galmuri-7 text-galmuri-small")}
+      style={roomStatusBarVars()}
+      data-testid="room-status-bar"
+    >
+      <span className={shellStyles.cluster}>
+        <PixelIcon name="savings" size={ROOM_STATUS_BAR.iconPx} alt="" />
+        <span data-testid="hud-money">{formatVnd(money)}</span>
+      </span>
+      <span
+        className={cn(shellStyles.cluster, fastForward && "fast-forward-flash")}
+        data-testid="game-clock"
+        data-day={day}
+        data-weekday={weekdayLabel}
+        data-holiday={holidayOn(day) ?? ""}
+        data-time={clockLabel}
+        data-phase={phaseId}
+        data-fast-forward={fastForward ? "1" : "0"}
+      >
+        <PhaseMark phaseId={phaseId} iconFiles={iconFiles} />
+        <span>{roomStatusClockLabel(day, weekdayLabel, clockLabel, phaseLabel)}</span>
+      </span>
+      <span className={shellStyles.shop}>
+        <StoreButton onOpen={() => setStoreOpen(true)} />
+      </span>
+    </PanelCard>
+  );
+}
+
+export function PlayerHudCard({ iconFiles = [] }: { iconFiles?: readonly string[] }) {
+  const health = useGameStore((s) => s.career.players.health);
+  const mood = useGameStore((s) => s.career.players.mood);
+  const energy = useGameStore((s) => s.career.players.energy);
   const sleep = useGameStore((s) => s.sleep);
   const canSleep = useGameStore((s) => canSleepAt(s.totalMinutes));
-  const setStoreOpen = useGameStore((s) => s.setStoreOpen);
   const openCareerPanel = useGameStore((s) => s.openCareerPanel);
 
   const energyMax = SIM_CATALOG.config.energy_max;
@@ -102,37 +139,12 @@ export function PlayerHudCard({ iconFiles = [] }: { iconFiles?: readonly string[
           floater={floaters.energy}
         />
       </div>
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        <span className="hud-chip font-galmuri-9 text-galmuri-body text-[var(--foreground)]">
-          <PixelIcon name="savings" size={22} alt="" />
-          <span data-testid="hud-money">{formatVnd(money)}</span>
-        </span>
-        <span
-          className={
-            fastForward
-              ? "hud-chip fast-forward-flash font-galmuri-7 text-galmuri-small text-[var(--foreground)]"
-              : "hud-chip font-galmuri-7 text-galmuri-small text-[var(--foreground)]"
-          }
-          data-testid="game-clock"
-          data-day={day}
-          data-weekday={calendar(day).weekdayLabel}
-          data-holiday={holidayOn(day) ?? ""}
-          data-time={clockLabel}
-          data-phase={phaseId}
-          data-fast-forward={fastForward ? "1" : "0"}
-        >
-          <PhaseMark phaseId={phaseId} iconFiles={iconFiles} />
-          <span>Ngày {day}</span>
-          <span>{calendar(day).weekdayLabel}</span>
-          <span>{clockLabel}</span>
-          <span>{phaseById(phaseId).label}</span>
-        </span>
+      <div className="mt-3 flex items-center">
         <div
           className="inline-flex items-center"
           data-testid="hud-icon-bar"
           style={{ marginLeft: "auto", gap: HUD_ICON_GAP_PX }}
         >
-          <StoreButton onOpen={() => setStoreOpen(true)} />
           <SleepButton canSleep={canSleep} onSleep={sleep} />
         </div>
       </div>
@@ -282,15 +294,17 @@ function PhaseMark({
   iconFiles: readonly string[];
 }) {
   const phase = phaseById(phaseId);
-  const art = resolveShippedIcon(phase.iconKey, 22, iconFiles);
+  const size = ROOM_STATUS_BAR.iconPx;
+  const art = resolveShippedIcon(phase.iconKey, size, iconFiles);
   return (
-    <span className="inline-flex items-center gap-1 text-[var(--foreground)]">
+    <span className="inline-flex items-center text-[var(--foreground)]">
       <span data-icon-key={phase.iconKey} className="inline-flex">
         {art ? (
-          <PixelIcon name={phase.iconKey} size={22} alt="" files={iconFiles} />
+          <PixelIcon name={phase.iconKey} size={size} alt="" files={iconFiles} />
         ) : (
           <span
-            className="inline-flex h-[22px] w-[22px] items-center justify-center text-[16px] leading-4"
+            className="inline-flex items-center justify-center text-[16px] leading-4"
+            style={{ width: size, height: size }}
             role="img"
             aria-label={phase.label}
           >

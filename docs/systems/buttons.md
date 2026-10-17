@@ -58,7 +58,7 @@ The tooltip is `src/components/ui/tooltip.tsx` with the text “Đi ngủ”. Th
 
 The HUD **Cửa hàng** control is `StoreButton` (`src/components/game/StoreButton.tsx`): `PixelButton` variant `icon`, no text. The face is `icon_btn_store` (`icon_btn_store.png` 24×24, `icon_btn_store_x2.png` 48×48) drawn at 2× in the 9-slice center, so the button box is the icon plus the two slice borders. The outer size is read in `src/components/game/store-button.config.ts`.
 
-It sits on the HUD icon bar immediately before **Đi ngủ**. The gap is `HUD_ICON_GAP_PX` (8). The tooltip is the shared tooltip with the text “Cửa hàng”, and the button keeps that `aria-label`.
+It sits at the trailing end of the room status bar, above the canvas, after Tiền and Ngày/giờ. **Đi ngủ** stays on the HUD icon bar. The gap on that bar is `HUD_ICON_GAP_PX` (8). The tooltip is the shared tooltip with the text “Cửa hàng”, and the button keeps that `aria-label`. Bar spacing is `ROOM_STATUS_BAR` in `src/components/game/shell-layout.config.ts`.
 
 The list opens in the shared modal (`src/components/ui/modal.tsx`). The existing store cards, prices, and buy/pin actions are unchanged. Closing is Escape, a backdrop click, or **Đóng**. The notice action “Mở store” still sets `storeOpen`. The Thông báo panel no longer embeds the list.
 

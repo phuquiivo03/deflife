@@ -14,7 +14,7 @@ import { CharacterIntro } from "./CharacterIntro";
 import { CustomizePanel } from "./CustomizePanel";
 import { NotificationsPanel } from "./NotificationsPanel";
 import { PlayerInfoPanel } from "./PlayerInfoPanel";
-import { PlayerHudCard } from "./PlayerHudCard";
+import { PlayerHudCard, RoomStatusBar } from "./PlayerHudCard";
 import { TaskRunOverlay } from "@/components/terminal/TaskRunOverlay";
 import { PanelChamferFrame } from "./PanelChamferFrame";
 import { RoomChamferFrame } from "./RoomChamferFrame";
@@ -30,7 +30,7 @@ import { Label } from "@/components/ui/label";
 import { t } from "@/lib/locale";
 import { STAGE_LABELS } from "@/lib/stage-labels";
 import { cn } from "@/lib/utils";
-import { shellPanelVars } from "./shell-layout.config";
+import { ROOM_VIEWPORT_W, shellPanelVars } from "./shell-layout.config";
 import shellStyles from "./shell-layout.module.css";
 
 const stageIcons: Record<StageId, React.ReactNode> = {
@@ -38,9 +38,6 @@ const stageIcons: Record<StageId, React.ReactNode> = {
   junior: <Monitor className="h-4 w-4" strokeWidth={2} />,
   senior: <Coffee className="h-4 w-4" strokeWidth={2} />,
 };
-
-/** Room viewport stays intentionally small (owner choice); do not upscale to fill center column. */
-const ROOM_VIEWPORT_W = 480;
 
 type SidebarTab = "player" | "edit-room";
 
@@ -211,6 +208,7 @@ export function GameShell({ iconFiles = [] }: { iconFiles?: readonly string[] })
 
         <main className="relative order-1 flex min-h-0 flex-col items-center justify-center px-2 py-4 lg:order-2 lg:justify-start lg:px-0 lg:py-0">
           <div className="room-stage-glow flex w-full flex-col items-center">
+            <RoomStatusBar iconFiles={iconFiles} />
             <RoomChamferFrame
               areaRef={areaRef}
               roomAreaStyle={roomAreaStyle}
