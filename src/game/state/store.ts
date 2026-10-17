@@ -50,9 +50,52 @@ import {
 } from "../time";
 import type { FoodId } from "../life/content";
 import { crossWakingSlot, eatMeal, hoursUntilWake, mealBlocked, resolveMorning } from "../life/logic";
+import { LIFE_EVENTS } from "../life/events-content";
+import {
+  askStore,
+  bannerForDay,
+  captureSnapshot,
+  chooseLifeEvent,
+  dismissDiary,
+  flushDeferred,
+  forceSmallEvent,
+  markAllNoticesRead,
+  markNoticeRead,
+  noteEmptyDay,
+  noticesForBills,
+  openDiary,
+  payOutstandingRent,
+  queueLandlord,
+  resolveHackathon,
+  rollSmallEvent,
+  slotCanRoll,
+  syncLifeSurface as syncLifeSurfaceState,
+} from "../life/events";
+import type { LifeStep } from "../life/events";
 
 let clockSkip = false;
 let handlingHospital = false;
+
+function commitLife(result: LifeStep) {
+  const current = useGameStore.getState();
+  const warns = current.taskJobId ? result.warns : [];
+  useGameStore.setState({
+    career: result.state,
+    terminalLines: warns.length ? [...current.terminalLines, ...warns].slice(-8) : current.terminalLines,
+    lifeBubble: result.bubble
+      ? { text: result.bubble, until: Date.now() + LIFE_EVENTS.bubble_ms }
+      : current.lifeBubble,
+  });
+  emitGame(result.events);
+  maybeHospital(result.skipDays);
+  if (result.skipMinutes > 0) {
+    clockSkip = true;
+    const advanced = advanceMinutes(useGameStore.getState().totalMinutes, result.skipMinutes);
+    useGameStore.setState({ totalMinutes: advanced.totalMinutes });
+    for (const event of advanced.events) timeBus.emit(event);
+    clockSkip = false;
+  }
+}
 
 function emitGame(events: readonly GameEvent[]) {
   for (const event of events) gameBus.emit(event);
@@ -130,6 +173,17 @@ type GameState = {
   catchTaskBug: () => void;
   finishTaskTest: () => void;
   retryTaskRun: () => void;
+  /** Ephemeral life UI. Not persisted. */
+  lifeBubble: { text: string; until: number } | null;
+  lifeBanner: { label: string; until: number } | null;
+  terminalLines: string[];
+  chooseLife: (choiceId: string) => void;
+  readNotice: (id: string) => void;
+  readAllNotices: () => void;
+  dismissDiary: () => void;
+  runNoticeAction: (action: "payRent" | "viewJobs" | "openStore") => void;
+  debugForceEvent: () => void;
+  syncLifeSurface: () => void;
   debugAddMoney: () => void;
   debugFillEnergy: () => void;
   debugLevelUp: () => void;
@@ -226,6 +280,9 @@ export const useGameStore = create<GameState>()(
       career: defaultCareer(1, DEFAULT_START_MINUTES, "student", SIM_CATALOG),
       careerPanel: null,
       taskJobId: null,
+      lifeBubble: null,
+      lifeBanner: null,
+      terminalLines: [],
       fastForward: false,
       openCareerPanel: (panel) => set({ careerPanel: panel }),
       closeCareerPanel: () => set({ careerPanel: null }),
@@ -245,21 +302,34 @@ export const useGameStore = create<GameState>()(
       onDayStarted: (day, totalMinutes) => {
         const current = get();
         const minuteOfDay = snapshot(totalMinutes).minuteOfDay;
-        const result = applyDayStarted(
-          current.career,
-          day,
-          minuteOfDay,
-          current.stage,
-          SIM_CATALOG,
-          { resolveMorning: minuteOfDay === SLEEP_WAKE_MINUTE && !clockSkip },
-        );
-        set({ career: result.state });
-        emitGame(result.events);
-        maybeHospital(result.skipDays);
+        const before = current.career;
+        const result = applyDayStarted(before, day, minuteOfDay, current.stage, SIM_CATALOG, {
+          resolveMorning: minuteOfDay === SLEEP_WAKE_MINUTE && !clockSkip,
+        });
+        const bills = noticesForBills(before, result.state, day, minuteOfDay);
+        const emptied = noteEmptyDay(bills.state, day - 1);
+        const hack = resolveHackathon(emptied, day, SIM_CATALOG, Math.random);
+        const surface = syncLifeSurfaceState(hack.state, day, minuteOfDay, current.taskJobId != null);
+        const banner = bannerForDay(surface.state, day);
+        const landlord = queueLandlord(banner.state, day, minuteOfDay, current.taskJobId != null);
+        if (banner.label) {
+          set({ lifeBanner: { label: banner.label, until: Date.now() + LIFE_EVENTS.banner_ms } });
+          playCueKey("eventOpen");
+        }
+        commitLife({
+          state: landlord.state,
+          events: [...result.events, ...hack.events, ...landlord.events],
+          skipDays: Math.max(result.skipDays ?? 0, hack.skipDays, landlord.skipDays),
+          skipMinutes: 0,
+          bubble: null,
+          warns: [...bills.warns, ...surface.warns, ...landlord.warns],
+        });
       },
       onWake: (fromTotalMinutes) => {
-        const result = applyWake(get().career, hoursUntilWake(snapshot(fromTotalMinutes).minuteOfDay));
-        set({ career: result.state });
+        const diary = openDiary(get().career, SIM_CATALOG);
+        const result = applyWake(diary, hoursUntilWake(snapshot(fromTotalMinutes).minuteOfDay));
+        const snapped = captureSnapshot(result.state, SIM_CATALOG);
+        set({ career: snapped });
         emitGame(result.events);
         maybeHospital(result.skipDays);
       },
@@ -269,15 +339,46 @@ export const useGameStore = create<GameState>()(
         if (snap.minute !== 0 || hour % 2 !== 0) return;
         if (hour === 6) {
           const morning = resolveMorning(get().career, snap.day);
-          set({ career: morning.state });
-          emitGame(morning.events);
-          maybeHospital(morning.skipDays);
+          const surface = syncLifeSurfaceState(morning.state, snap.day, snap.minuteOfDay, get().taskJobId != null);
+          commitLife({
+            state: surface.state,
+            events: [...morning.events, ...surface.events],
+            skipDays: morning.skipDays,
+            skipMinutes: 0,
+            bubble: null,
+            warns: surface.warns,
+          });
           return;
         }
         const crossed = crossWakingSlot(get().career, snap.minuteOfDay);
-        set({ career: crossed.state });
-        emitGame(crossed.events);
-        maybeHospital(crossed.skipDays);
+        let rolled = {
+          state: crossed.state,
+          events: [] as GameEvent[],
+          skipDays: 0,
+          skipMinutes: 0,
+          bubble: null as string | null,
+          warns: [] as string[],
+        };
+        if (slotCanRoll(snap.minuteOfDay)) {
+          rolled = rollSmallEvent(
+            crossed.state,
+            snap.phaseId,
+            snap.day,
+            snap.minuteOfDay,
+            get().taskJobId != null,
+            Math.random,
+            SIM_CATALOG,
+          );
+        }
+        const surface = syncLifeSurfaceState(rolled.state, snap.day, snap.minuteOfDay, get().taskJobId != null);
+        commitLife({
+          state: surface.state,
+          events: [...crossed.events, ...rolled.events, ...surface.events],
+          skipDays: Math.max(crossed.skipDays, rolled.skipDays),
+          skipMinutes: rolled.skipMinutes,
+          bubble: rolled.bubble,
+          warns: [...rolled.warns, ...surface.warns],
+        });
       },
       eat: (foodId) => {
         const current = get().career;
@@ -286,6 +387,7 @@ export const useGameStore = create<GameState>()(
         set({ career: result.state });
         emitGame(result.events);
         maybeHospital(result.skipDays);
+        get().syncLifeSurface();
       },
       buyCourse: (activityId, force = false) => {
         const current = get();
@@ -308,6 +410,7 @@ export const useGameStore = create<GameState>()(
         emitGame(result.events);
         for (const event of advanced.events) timeBus.emit(event);
         maybeHospital(result.skipDays);
+        get().syncLifeSurface();
         window.setTimeout(() => {
           useGameStore.setState({ fastForward: false });
         }, 800);
@@ -329,9 +432,49 @@ export const useGameStore = create<GameState>()(
         set({ career: result.state, careerPanel: null, taskJobId: jobId });
         emitGame(result.events);
         maybeHospital(result.skipDays);
+        get().syncLifeSurface();
       },
       openTask: (jobId) => set({ careerPanel: null, taskJobId: jobId }),
-      closeTask: () => set({ taskJobId: null }),
+      closeTask: () => {
+        set({ taskJobId: null, terminalLines: [] });
+        const snap = snapshot(get().totalMinutes);
+        commitLife(
+          flushDeferred(get().career, snap.phaseId, snap.day, snap.minuteOfDay, Math.random, SIM_CATALOG),
+        );
+      },
+      chooseLife: (choiceId) => {
+        commitLife(chooseLifeEvent(get().career, choiceId, SIM_CATALOG, Math.random));
+        get().syncLifeSurface();
+      },
+      readNotice: (id) => set({ career: markNoticeRead(get().career, id) }),
+      readAllNotices: () => set({ career: markAllNoticesRead(get().career) }),
+      dismissDiary: () => set({ career: dismissDiary(get().career) }),
+      runNoticeAction: (action) => {
+        if (action === "viewJobs") {
+          set({ careerPanel: "jobs" });
+          return;
+        }
+        if (action === "openStore") {
+          set({ career: askStore(get().career) });
+          return;
+        }
+        commitLife(payOutstandingRent(get().career));
+        get().syncLifeSurface();
+      },
+      debugForceEvent: () => {
+        const snap = snapshot(get().totalMinutes);
+        commitLife(forceSmallEvent(get().career, snap.phaseId, snap.day, snap.minuteOfDay, SIM_CATALOG));
+      },
+      syncLifeSurface: () => {
+        const snap = snapshot(get().totalMinutes);
+        const surface = syncLifeSurfaceState(get().career, snap.day, snap.minuteOfDay, get().taskJobId != null);
+        const banner = bannerForDay(surface.state, snap.day);
+        if (banner.label) {
+          set({ lifeBanner: { label: banner.label, until: Date.now() + LIFE_EVENTS.banner_ms } });
+          playCueKey("eventOpen");
+        }
+        commitLife({ ...surface, state: banner.state });
+      },
       chooseTicket: (choice) => {
         const id = get().taskJobId;
         if (!id) return;

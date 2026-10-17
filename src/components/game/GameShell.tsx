@@ -7,6 +7,7 @@ import { STAGES, type StageId } from "@/game/config";
 import { getRoom } from "@/game/content";
 import { useGameStore } from "@/game/state/store";
 import { SceneCanvas } from "./SceneCanvas";
+import { LifeRoomFx, LifeStage } from "./LifeStage";
 import { CustomizePanel } from "./CustomizePanel";
 import { NotificationsPanel } from "./NotificationsPanel";
 import { PlayerInfoPanel } from "./PlayerInfoPanel";
@@ -199,6 +200,7 @@ export function GameShell({ iconFiles = [] }: { iconFiles?: readonly string[] })
               }
             >
               <SceneCanvas areaRef={areaRef} debug={debug} />
+              <LifeRoomFx />
             </RoomChamferFrame>
             <div className="mt-3 flex w-full flex-col items-center gap-3 px-2 lg:px-0">
               <PlayerHudCard iconFiles={iconFiles} />
@@ -206,6 +208,7 @@ export function GameShell({ iconFiles = [] }: { iconFiles?: readonly string[] })
               <CareerChrome iconFiles={iconFiles} showDebug={showTimeDebug} />
             </div>
           </div>
+          <LifeStage />
           <TaskRunOverlay />
         </main>
 

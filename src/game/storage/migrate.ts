@@ -25,6 +25,8 @@ import { snapshot, totalMinutesFromPersisted } from "../time";
 import { clampEnergy } from "../vitals/logic";
 import { LIFE } from "../life/content";
 import { defaultLife } from "../life/logic";
+import { defaultFeed } from "../life/events";
+import type { LifeDiary, LifeFeed, LifeNotice, LifeSnapshot, NoticeAction, NoticeSeverity } from "../career/types";
 
 export type PersistedSave = {
   stage: StageId;
@@ -232,6 +234,12 @@ export function careerFromUnknown(
     player_unlocks: normalizeUnlocks(value.player_unlocks),
     player_events: normalizeEvents(value.player_events),
     life: normalizeLife(value.life, day),
+    feed: normalizeFeed(value.feed, day, {
+      money: Number.isFinite(Number(players.money)) ? Math.trunc(Number(players.money)) : fresh.players.money,
+      health: Number.isFinite(Number(players.health)) ? Number(players.health) : fresh.players.health,
+      mood: Number.isFinite(Number(players.mood)) ? Number(players.mood) : fresh.players.mood,
+      energy: Number.isFinite(Number(players.energy)) ? Number(players.energy) : fresh.players.energy,
+    }),
   };
 }
 
@@ -261,6 +269,102 @@ function normalizeLife(value: unknown, day: number): LifeState {
   };
 }
 
+function normalizeFeed(
+  value: unknown,
+  day: number,
+  vitals: { money: number; health: number; mood: number; energy: number },
+): LifeFeed {
+  const fresh = defaultFeed({ day, money: vitals.money, xp: 0, health: vitals.health, mood: vitals.mood, energy: vitals.energy });
+  if (!isRecord(value)) return fresh;
+  const snapshot = isRecord(value.snapshot) ? normalizeSnapshot(value.snapshot, fresh.snapshot) : fresh.snapshot;
+  return {
+    pity: Math.max(0, Math.min(3, num(value.pity))),
+    pityCountedDay: value.pityCountedDay == null ? null : num(value.pityCountedDay),
+    smallEventDay: value.smallEventDay == null ? null : num(value.smallEventDay),
+    cooldowns: numberMap(value.cooldowns),
+    flags: stringList(value.flags),
+    pendingId: strOrNull(value.pendingId),
+    queuedStoryId: strOrNull(value.queuedStoryId),
+    deferredRoll: value.deferredRoll === true,
+    notices: normalizeNotices(value.notices),
+    nextBugDelta: signed(value.nextBugDelta),
+    hackathonStart: value.hackathonStart == null ? null : num(value.hackathonStart),
+    hackathonResolved: value.hackathonResolved === true,
+    snapshot,
+    diary: normalizeDiary(value.diary),
+    bannerDay: value.bannerDay == null ? null : num(value.bannerDay),
+    landlordTold: num(value.landlordTold),
+    sickOpen: value.sickOpen === true,
+    burnoutOpen: value.burnoutOpen === true,
+    storeAsked: value.storeAsked === true,
+  };
+}
+
+function signed(value: unknown): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? Math.trunc(parsed) : 0;
+}
+
+function normalizeSnapshot(value: Record<string, unknown>, fresh: LifeSnapshot): LifeSnapshot {
+  return {
+    day: value.day == null ? fresh.day : num(value.day, fresh.day),
+    money: Number.isFinite(Number(value.money)) ? Math.trunc(Number(value.money)) : fresh.money,
+    xp: num(value.xp),
+    health: Number.isFinite(Number(value.health)) ? Number(value.health) : fresh.health,
+    mood: Number.isFinite(Number(value.mood)) ? Number(value.mood) : fresh.mood,
+    energy: Number.isFinite(Number(value.energy)) ? Number(value.energy) : fresh.energy,
+  };
+}
+
+function normalizeDiary(value: unknown): LifeDiary | null {
+  if (!isRecord(value)) return null;
+  return {
+    day: num(value.day, 1),
+    money: signed(value.money),
+    xp: signed(value.xp),
+    health: Number(value.health) || 0,
+    mood: Number(value.mood) || 0,
+    energy: Number(value.energy) || 0,
+    line: typeof value.line === "string" ? value.line : "",
+  };
+}
+
+function normalizeNotices(value: unknown): LifeNotice[] {
+  if (!Array.isArray(value)) return [];
+  const notices: LifeNotice[] = [];
+  for (const row of value) {
+    if (!isRecord(row) || typeof row.id !== "string" || typeof row.text !== "string") continue;
+    const severity: NoticeSeverity = row.severity === "warn" || row.severity === "urgent" ? row.severity : "info";
+    const action: NoticeAction | null =
+      row.action === "payRent" || row.action === "viewJobs" || row.action === "openStore" ? row.action : null;
+    notices.push({
+      id: row.id,
+      day: num(row.day, 1),
+      minute: num(row.minute),
+      severity,
+      icon: typeof row.icon === "string" ? row.icon : "icon_notif_event.png",
+      text: row.text,
+      action,
+      read: row.read === true,
+    });
+  }
+  return notices;
+}
+
+function numberMap(value: unknown): Record<string, number> {
+  if (!isRecord(value)) return {};
+  const out: Record<string, number> = {};
+  for (const [key, entry] of Object.entries(value)) {
+    if (Number.isFinite(Number(entry))) out[key] = Math.trunc(Number(entry));
+  }
+  return out;
+}
+
+function stringList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((entry): entry is string => typeof entry === "string" && entry.length > 0);
+}
+
 function finite(value: unknown): number {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
@@ -275,7 +379,8 @@ function strOrNull(value: unknown): string | null {
  * a fresh career document. Version 3 keeps the career tables. Versions before
  * 4 have no course history, so every course is still uncompleted. Versions
  * before 5 have no task_run; normalize stores null. Versions before 6 have no
- * health, mood, or life counters; those gain the defaults.
+ * health, mood, or life counters; those gain the defaults. Versions before 7
+ * have no event feed; normalize adds an empty one.
  */
 export function migrateSave(persisted: unknown, version: number): PersistedSave {
   const prev = isRecord(persisted) ? persisted : {};

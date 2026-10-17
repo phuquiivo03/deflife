@@ -53,7 +53,8 @@ export type CueKey =
   | "energyLow"
   | "energyRestored"
   | "typingLoop"
-  | "typingLoopFast";
+  | "typingLoopFast"
+  | "eventOpen";
 
 export const CUE_KEYS = [
   "phaseMorning",
@@ -85,6 +86,7 @@ export const CUE_KEYS = [
   "energyRestored",
   "typingLoop",
   "typingLoopFast",
+  "eventOpen",
 ] as const satisfies readonly CueKey[];
 
 /**
@@ -122,6 +124,8 @@ export const CUE_IDS: Record<CueKey, readonly string[]> = {
   energyRestored: ["sfx_energy_restored"],
   typingLoop: ["sfx_typing_loop"],
   typingLoopFast: ["sfx_typing_loop_fast"],
+  /** Important-day banner. Missing from the pack, so the call stays silent. */
+  eventOpen: ["sfx_event_open"],
 };
 
 /** Play the low-energy sting only when energy crosses down through this point. */

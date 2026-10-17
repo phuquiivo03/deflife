@@ -1,6 +1,6 @@
-# Life sim (M5 phase 1)
+# Life sim (M5)
 
-Time slots, vitals, and bills. The spec is [docs/specs/M5_life_sim.md](../specs/M5_life_sim.md). Random events, the notification tab, the store, and personality are later phases. Sound keys are declared in `src/game/life/sounds.ts` and no-op until files exist. Placeholder art is `public/ui/m5/` under the spec's asset keys.
+Time slots, vitals, bills, small events, and the Thông báo panel. The spec is [docs/specs/M5_life_sim.md](../specs/M5_life_sim.md). The store and personality are later phases. Sound keys in `src/game/life/sounds.ts` still no-op. The important-day banner asks for `sfx_event_open`; that id is not in the audio pack, so the call stays silent. Phase 2 art (portraits, notice icons, emotes, dialog, diary, banner, speech bubble, unread badge) is the native PNG in `public/ui/m5/`. Store and trait files there are still placeholders.
 
 Numbers live in [config/life_sim.json](../../config/life_sim.json). Starting money stays in `config/game_config.json` (`3000000`).
 
@@ -10,7 +10,7 @@ Day 1 is Monday. A month is 28 days, a year is 12 months. One slot is 2 hours. A
 
 Staying into a slot past that budget costs 4 health immediately and queues −5 mood for the next 06:00.
 
-Dated holidays: Tết (month 1, days 1–3), 30/4 as the last day of month 4, 1/5 as month 5 day 1, Trung thu month 8 day 15, Black Friday month 11 day 26 (the 4th Friday when day 1 is Monday). Finals and salary review have no dates yet, so they are not on the calendar. Friday is flagged as a deploy day for a later event. None of these change stats in this phase except the Monday mood.
+Dated holidays: Tết (month 1, days 1–3), 30/4 as the last day of month 4, 1/5 as month 5 day 1, Trung thu month 8 day 15, Black Friday month 11 day 26 (the 4th Friday when day 1 is Monday). Finals and salary review have no dates yet, so they are not on the calendar. Friday is a deploy day, used by the hackathon. Holiday banners do not change stats. Monday still costs the morning mood.
 
 ## Stats
 
@@ -28,10 +28,20 @@ Thresholds: energy under 15 blocks taking a job. Energy under an action's cost b
 
 Rent and utilities are due on day 1 of a month. Salary is paid on day 10: Junior 15,000,000, Senior 45,000,000 (the low end of the spec ranges). Student has no salary. The opening day does not emit `dayStarted`, so the first charge is the next month's day 1.
 
-If rent does not clear, each day of that unpaid month costs 3 mood and increments the debt counter. Day 3 and day 7 of the debt are recorded for the later landlord events; this phase does not open those events. Utilities that do not clear are skipped. Paying a later month's rent clears the counter.
+If rent does not clear, each day of that unpaid month costs 3 mood and increments the debt counter. Debt day 3 opens “Chủ trọ nhắc khéo tiền nhà.” Debt day 7 opens “Chủ trọ gõ cửa.” Those two dialogs do not use the daily small-event slot and do not reset pity. **Trả trọ** pays the outstanding rent when the player can afford it; otherwise the dialog stays open. Utilities that do not clear are skipped. Paying a later month's rent clears the counter.
 
 Food, from the character panel: mì 8,000 (health −3), cơm nhà 25,000, cơm tấm 35,000. Three meals a day. Freelance payout is `base × (1 + 0.1 × tier) × (0.8 + reputation / 250)`, rounded. `base` is the template pay.
 
+## Events
+
+One small event can fire per day, at the end of a slot from 10:00 onward. Chance is `0.12 + min(pity, 3) × 0.05`. An empty day adds 1 pity, capped at 3. A fired event resets pity to 0 and cools that event down for 5 days. Mood under 30 multiplies a good event's weight by 1.5. Effects add and clamp. Event XP uses the same mood ×0.7 floor as job XP. A lost slot jumps the clock 2 hours without another roll. While the task terminal is open, the roll waits and flushes when the terminal closes.
+
+Choice copy is the one-line spec text. Đồ án is student only. Prod, họp, headhunter, and đồng nghiệp are junior and senior. Karaoke and mất điện are evening and night. Hackathon is Friday only and resolves the Monday after: win chance `0.10 + 0.03 × max skill level`, prize 20,000,000 and 200 XP on the highest skill. “Mở store” records the ask and says the shop opens in a later phase.
+
+## Thông báo and UX
+
+The left column is the notice list, newest first. Unread rows show `ui_badge_unread.png`. Empty copy is “Chưa có thông báo.” Warn and urgent lines also print `> WARN:` in the task terminal. Stat changes float on the HUD bars. Health under 30, mood under 15, and energy under 15 blink, and the room shows cough, cloud, or sweat. A holiday banner uses `ui_banner.png` for 2 seconds. Sleep opens the diary against the morning snapshot, then the snapshot is recaptured.
+
 ## Save
 
-Persist version 6. Older saves keep money and energy and gain health 70, mood 70, and empty life counters.
+Persist version 7. Older saves keep money and energy and gain health 70, mood 70, empty life counters, and an empty event feed.

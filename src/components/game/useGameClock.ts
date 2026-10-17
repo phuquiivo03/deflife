@@ -13,7 +13,10 @@ export function useGameClock(active: boolean) {
       getTotalMinutes: () => useGameStore.getState().totalMinutes,
       setTotalMinutes: (minutes) => useGameStore.getState().setTotalMinutes(minutes),
       getSpeed: () => useGameStore.getState().clockSpeed,
-      isPaused: () => useGameStore.getState().clockPaused,
+      isPaused: () => {
+        const state = useGameStore.getState();
+        return state.clockPaused || state.career.feed?.pendingId != null;
+      },
       emit: (event) => timeBus.emit(event),
     });
 

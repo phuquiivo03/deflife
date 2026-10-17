@@ -17,6 +17,7 @@ import {
 } from "../jobs/logic";
 import { applyMoney, clampEnergy } from "../vitals/logic";
 import { LIFE } from "../life/content";
+import { defaultFeed } from "../life/events";
 import {
   applyActionStats,
   applyLifeDayStart,
@@ -105,6 +106,14 @@ export function defaultCareer(
     player_unlocks: [],
     player_events: [],
     life: defaultLife(day),
+    feed: defaultFeed({
+      day,
+      money: config.starting_money,
+      xp: 0,
+      health: LIFE.starting_health,
+      mood: LIFE.starting_mood,
+      energy: clampEnergy(config.starting_energy, config.energy_max),
+    }),
   };
 }
 

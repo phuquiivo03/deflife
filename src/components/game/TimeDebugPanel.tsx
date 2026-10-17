@@ -12,6 +12,7 @@ export function TimeDebugPanel() {
   const setSpeed = useGameStore((s) => s.setClockSpeed);
   const setPaused = useGameStore((s) => s.setClockPaused);
   const jumpToPhase = useGameStore((s) => s.jumpToPhase);
+  const debugForceEvent = useGameStore((s) => s.debugForceEvent);
   const phaseId = useGameStore((s) => snapshot(s.totalMinutes).phaseId);
 
   return (
@@ -52,6 +53,16 @@ export function TimeDebugPanel() {
           <span className="font-galmuri-7 text-galmuri-small text-[var(--foreground)]">
             Nhảy pha
           </span>
+          <Button
+            type="button"
+            size="sm"
+            showArrow={false}
+            variant="outline"
+            data-testid="debug-force-event"
+            onClick={debugForceEvent}
+          >
+            Sự kiện
+          </Button>
           {PHASES.map((phase) => (
             <Button
               key={phase.id}
