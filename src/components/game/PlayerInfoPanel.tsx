@@ -13,6 +13,7 @@ import { hungerLabel, hungerLevel } from "@/game/life/hunger";
 import { traitDef, traitDetail, traitIconSrc, traitOf } from "@/game/life/traits";
 import { snapshot } from "@/game/time";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { StageId } from "@/game/config";
 import { STAGE_LABELS } from "@/lib/stage-labels";
 import { PanelCard } from "@/components/ui/panel-card";
@@ -23,6 +24,9 @@ import { FoodPopup } from "./FoodPopup";
 import { StatBar } from "./StatBar";
 
 const goal = freelanceGoal(SIM_CATALOG.milestones);
+
+/** Same CSS size as the Danh tiếng and Freelance icons on this card. */
+const TRAIT_ICON_PX = 22;
 
 export function PlayerInfoPanel({ iconFiles = [] }: { iconFiles?: readonly string[] }) {
   const p = STUB_PLAYER;
@@ -63,26 +67,35 @@ export function PlayerInfoPanel({ iconFiles = [] }: { iconFiles?: readonly strin
         >
           {STAGE_LABELS[stage as StageId]} · {overall.label}
         </p>
-        <div
-          className="mt-2 flex w-full items-center gap-2 text-left"
-          data-testid="player-trait"
-          data-trait={trait.id}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element -- trait icons stay pixelated */}
-          <img
-            src={traitIconSrc(trait.icon)}
-            width={32}
-            height={32}
-            alt=""
-            className="pixel-img h-8 w-8 shrink-0"
-          />
-          <span className="min-w-0 flex-1">
-            <span className="block font-galmuri-9 text-galmuri-body text-[var(--foreground)]">{trait.name}</span>
-            <span className="block font-galmuri-7 text-galmuri-small text-[var(--muted-foreground)]">
-              {traitDetail(trait)}
+        <Tooltip>
+          <TooltipTrigger
+            className="mt-2 flex w-full cursor-pointer items-center gap-2 border-0 bg-transparent p-0 text-left font-inherit text-inherit pointer-coarse:min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2"
+            data-testid="player-trait"
+            data-trait={trait.id}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element -- trait icons stay pixelated */}
+            <img
+              src={traitIconSrc(trait.icon)}
+              width={TRAIT_ICON_PX}
+              height={TRAIT_ICON_PX}
+              alt=""
+              draggable={false}
+              className="pixelated size-auto max-w-none shrink-0"
+              style={{
+                width: TRAIT_ICON_PX,
+                height: TRAIT_ICON_PX,
+                minWidth: TRAIT_ICON_PX,
+                minHeight: TRAIT_ICON_PX,
+              }}
+            />
+            <span className="min-w-0 flex-1 font-galmuri-9 text-galmuri-body text-[var(--foreground)]">
+              {trait.name}
             </span>
-          </span>
-        </div>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" data-testid="player-trait-tip">
+            {traitDetail(trait)}
+          </TooltipContent>
+        </Tooltip>
         {sick ? (
           <p className="mt-1 font-galmuri-7 text-galmuri-small text-[var(--accent-coral)]" data-testid="life-sick">
             Đang ốm

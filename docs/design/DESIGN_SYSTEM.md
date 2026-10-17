@@ -124,7 +124,7 @@ Use `PixelAvatar` + `resolveAvatarAsset()` with the same integer-scale rule.
 - Same card: money chip, `Ngày` + clock + phase icon, **Đi ngủ**, then **Học** / **Việc làm** / **Kỹ năng**. The Kỹ năng icon is `icon_skills.png`, chosen by `SKILL_MENU_ICON` in `PlayerHudCard.tsx`.
 - Audio row on that card: mute button (**Tắt tiếng** / **Bật tiếng**) and two sliders, **Nhạc** and **Hiệu ứng**. Mute uses `icon_sound_on` / `icon_sound_off` (44×44 native only, shown at 22px, `image-rendering: pixelated`). Each slider puts `icon_volume_low` and `icon_volume_high` at its ends the same way. Defaults live in `game_config.json`: sound on, Nhạc 0.5, Hiệu ứng 0.8. The choice is stored in `localStorage` (`devlife:audio:v2`), separate from the career save. A `devlife:audio:v1` payload is unmuted once and rewritten as v2; a later mute stays muted. SFX play from one preloaded Web Audio sprite. Music starts after the first tap or key, during idle, so it does not block the first paint. On iOS the context uses the media playback channel, so the ring/silent switch does not mute the game; if the sprite cannot be decoded, SFX fall back to per-file audio.
 - **Học** panel has two tabs: **Khóa học** (courses still available to buy) and **Đã học** (finished courses, read-only: skill, XP granted, day completed). Empty states: “Không còn khóa để học.” and “Chưa học khóa nào.” A non-repeatable course moves to **Đã học** after one purchase.
-- **Nhân vật** panel: avatar, name, stage, overall rank badge (rounded mean of the five skill levels), **Danh tiếng**, Freelance `n/100` with a bar, then the five catalog skills from `skillProgressList` (icon, name, rank badge, `Junior 60%`, bar). No stub skill percents.
+- **Nhân vật** panel: avatar, name, stage, overall rank badge (rounded mean of the five skill levels), trait row (icon at 22px and the trait name; the bonus line is a tooltip), **Danh tiếng**, Freelance `n/100` with a bar, then the five catalog skills from `skillProgressList` (icon, name, rank badge, `Junior 60%`, bar). No stub skill percents. The trait icon uses the same 22px box as Danh tiếng and Freelance.
 - Bars: 1px border, fill coral / mint / sky per vital. A vital under its warning line blinks a coral inset; a change floats above that bar. `prefers-reduced-motion` keeps the inset and drops the blink.
 - Event dialog and speech bubble sit on the native M5 frames (`ui_dialog_frame`, `ui_speech_bubble`) as a 9-slice at 2×. The sleep diary is a notepad window on `ui_window_notepad` (`public/ui/m5_1/`, native and `_x2`). The store list uses `ui_store_frame` the same way, and each item sits on `ui_store_card` at 2× (192×240). Portraits and emotes use the native PNG at integer scale with `image-rendering: pixelated`. The room canvas is unchanged.
 
@@ -161,6 +161,21 @@ Canvas sizing `ref` stays on the room-size cap box; the visible frame wraps the 
 The **Canvas2D room renderer** is not restyled (integer scale, nearest-neighbour, no CSS shadows on canvas pixels). Debug route `/debug` unchanged.
 
 ---
+
+## Tooltips
+
+Chrome hints use `src/components/ui/tooltip.tsx`. Numbers live in `src/components/ui/tooltip.config.ts` (`TOOLTIP`):
+
+| Key | Default | Meaning |
+|-----|---------|---------|
+| `openDelayMs` | 300 | Hover delay on a fine pointer |
+| `skipDelayMs` | 120 | How long the next tip in the same provider skips that delay |
+| `sideOffsetPx` | 8 | Gap between the trigger and the tip |
+| `collisionPaddingPx` | 8 | Viewport inset before the tip flips |
+| `enterMs` | 120 | Fade and 4px slide. `prefers-reduced-motion` skips it |
+| `disableHoverableContent` | true | Leaving the trigger closes the tip. The tip has no controls |
+
+Hover opens the tip after `openDelayMs`. Keyboard focus opens it immediately and sets `aria-describedby` on the trigger while the tip is open. A coarse pointer opens it on tap; a tap outside, or Escape, closes it. The character-card trait row uses this for the bonus line.
 
 ## Motion & a11y
 
