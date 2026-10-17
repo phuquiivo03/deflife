@@ -582,9 +582,10 @@ body {
 
 .life-notepad-title {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  justify-content: flex-end;
+  gap: 0;
   margin: -4px -4px 0;
   background: #4a3f8c;
   color: #fff;

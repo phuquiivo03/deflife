@@ -124,7 +124,7 @@ export function LifeStage() {
         <div className="absolute inset-0 z-40 flex items-center justify-center p-3" data-testid="life-diary">
           <div className="life-notepad w-full max-w-sm p-3">
             <div className="life-notepad-title font-galmuri-7 text-galmuri-small">
-              <p className="min-w-0 truncate" data-testid="diary-title">
+              <p className="w-full" data-testid="diary-title">
                 nhat_ky_ngay_{diary.day}.txt
               </p>
               <div className="flex shrink-0">
