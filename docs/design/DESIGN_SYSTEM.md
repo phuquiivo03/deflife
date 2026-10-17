@@ -173,6 +173,7 @@ Chrome hints use `src/components/ui/tooltip.tsx`. Numbers live in `src/component
 | `sideOffsetPx` | 8 | Gap between the trigger and the tip |
 | `collisionPaddingPx` | 8 | Viewport inset before the tip flips |
 | `enterMs` | 120 | Fade and 4px slide. `prefers-reduced-motion` skips it |
+| `disableHoverableContent` | true | Leaving the trigger closes the tip. The tip has no controls |
 
 Hover opens the tip after `openDelayMs`. Keyboard focus opens it immediately and sets `aria-describedby` on the trigger while the tip is open. A coarse pointer opens it on tap; a tap outside, or Escape, closes it. The character-card trait row uses this for the bonus line.
 

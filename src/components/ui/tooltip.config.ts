@@ -14,4 +14,9 @@ export const TOOLTIP = {
   collisionPaddingPx: 8,
   /** Fade and slide length. `prefers-reduced-motion` skips the animation. */
   enterMs: 120,
+  /**
+   * The tip has no interactive content, so leaving the trigger closes it.
+   * A hoverable tip would stay open until the pointer moved again.
+   */
+  disableHoverableContent: true,
 } as const;

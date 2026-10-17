@@ -804,7 +804,9 @@ body {
   }
 
   .hunger-blink,
-  .ui-tooltip {
+  .ui-tooltip,
+  .ui-tooltip[data-state="instant-open"],
+  .ui-tooltip[data-state="delayed-open"] {
     animation: none;
   }
 }

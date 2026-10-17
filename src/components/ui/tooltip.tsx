@@ -19,6 +19,7 @@ function isOpenState(state: string | null) {
 export function TooltipProvider({
   delayDuration = TOOLTIP.openDelayMs,
   skipDelayDuration = TOOLTIP.skipDelayMs,
+  disableHoverableContent = TOOLTIP.disableHoverableContent,
   children,
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Provider>) {
@@ -26,6 +27,7 @@ export function TooltipProvider({
     <TooltipPrimitive.Provider
       delayDuration={delayDuration}
       skipDelayDuration={skipDelayDuration}
+      disableHoverableContent={disableHoverableContent}
       {...props}
     >
       {children}
@@ -70,6 +72,7 @@ export function Tooltip({
           open={open}
           onOpenChange={setOpen}
           delayDuration={delayDuration}
+          disableHoverableContent={TOOLTIP.disableHoverableContent}
         >
           {children}
         </TooltipPrimitive.Root>
@@ -91,6 +94,11 @@ export const TooltipTrigger = React.forwardRef<
       onPointerDown={(event) => {
         touch?.onPointerDown(event);
         props.onPointerDown?.(event);
+      }}
+      onPointerLeave={(event) => {
+        // A lifted finger emits pointerleave. That must not dismiss a tap-opened tip.
+        if (event.pointerType === "touch") event.preventDefault();
+        props.onPointerLeave?.(event);
       }}
       onClick={(event) => {
         touch?.onClick(event);
