@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { SIM_CATALOG } from "@/game/career/content";
+import { defaultCareer } from "@/game/career/actions";
 import { acceptedJobs, daysUntilDeadline, deadlineIsUrgent } from "@/game/jobs/logic";
 import { LIFE } from "@/game/life/content";
 import type { PlayerJob } from "@/game/career/types";
+import { startTask } from "@/game/task-run/apply";
 
 function job(status: PlayerJob["status"], id = "job-1"): PlayerJob {
   return {
@@ -33,6 +36,19 @@ describe("job management board", () => {
     expect(deadlineIsUrgent(1, LIFE.job_remind_days)).toBe(true);
     expect(deadlineIsUrgent(2, LIFE.job_remind_days)).toBe(false);
     expect(daysUntilDeadline(null, 2)).toBeNull();
+  });
+
+  it("opens the terminal for an accepted job that has not started", () => {
+    const base = defaultCareer(1, 8 * 60, "student", SIM_CATALOG);
+    const row = job("active");
+    const started = startTask({ ...base, player_jobs: [row] }, row.id, SIM_CATALOG);
+    expect(started.error).toBeNull();
+    expect(started.state.player_jobs.find((item) => item.id === row.id)).toMatchObject({
+      status: "active",
+      progress_hours: 0,
+      pay: row.pay,
+      task_run: { step: "ticket" },
+    });
   });
 
   it("opens from Việc làm as a modal and starts the existing terminal from Làm", () => {

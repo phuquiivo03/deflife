@@ -25,6 +25,7 @@ export function JobManageBoard({
   const jobs = useGameStore((s) => s.career.player_jobs);
   const day = useGameStore((s) => snapshot(s.totalMinutes).day);
   const openTask = useGameStore((s) => s.openTask);
+  const acceptJob = useGameStore((s) => s.acceptJob);
   const accepted = acceptedJobs(jobs);
 
   return (
@@ -67,7 +68,7 @@ export function JobManageBoard({
                   type="button"
                   variant="secondary"
                   data-testid={`job-do-${job.id}`}
-                  onClick={() => openTask(job.id)}
+                  onClick={() => (job.task_run ? openTask(job.id) : acceptJob(job.id))}
                 >
                   Làm
                 </PixelButton>
