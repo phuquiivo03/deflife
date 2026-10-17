@@ -414,7 +414,7 @@ export const useGameStore = create<GameState>()(
         };
         if (slotCanRoll(snap.minuteOfDay)) {
           rolled = rollSmallEvent(
-            crossed.state,
+            offered,
             snap.phaseId,
             snap.day,
             snap.minuteOfDay,

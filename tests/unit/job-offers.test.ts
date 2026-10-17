@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { SIM_CATALOG } from "@/game/career/content";
 import { defaultCareer } from "@/game/career/actions";
+import { slotCanRoll } from "@/game/life/events";
 import { LIFE } from "@/game/life/content";
 import {
   acceptJobFromNotice,
@@ -118,6 +119,23 @@ describe("job offer notices", () => {
       ["offer", ["acceptJob", "dismissNotice"], "job-1-landing-html-0"],
       ["nope", [], null],
     ]);
+  });
+});
+
+describe("onHour job offers", () => {
+  it("keeps the offer when the same slot rolls a life event", () => {
+    const minute = 10 * 60;
+    expect(slotCanRoll(minute)).toBe(true);
+    const base = defaultCareer(1, minute, "student", SIM_CATALOG);
+    useGameStore.setState({
+      career: { ...base, life: { ...base.life, jobNoticeSlots: LIFE.job_notice_every_slots - 1 } },
+      taskJobId: null,
+      totalMinutes: minute,
+    });
+    useGameStore.getState().onHour(10, minute);
+    expect(
+      useGameStore.getState().career.feed.notices.some((notice) => notice.actions?.includes("acceptJob")),
+    ).toBe(true);
   });
 });
 
