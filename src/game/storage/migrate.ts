@@ -24,6 +24,7 @@ import type { Loadout } from "../types";
 import { snapshot, totalMinutesFromPersisted } from "../time";
 import { clampEnergy } from "../vitals/logic";
 import { LIFE } from "../life/content";
+import { normalizeShop } from "../life/furniture";
 import { defaultLife } from "../life/logic";
 import { defaultFeed } from "../life/events";
 import type { LifeDiary, LifeFeed, LifeNotice, LifeSnapshot, NoticeAction, NoticeSeverity } from "../career/types";
@@ -234,6 +235,7 @@ export function careerFromUnknown(
     player_unlocks: normalizeUnlocks(value.player_unlocks),
     player_events: normalizeEvents(value.player_events),
     life: normalizeLife(value.life, day),
+    shop: normalizeShop(value.shop),
     feed: normalizeFeed(value.feed, day, {
       money: Number.isFinite(Number(players.money)) ? Math.trunc(Number(players.money)) : fresh.players.money,
       health: Number.isFinite(Number(players.health)) ? Number(players.health) : fresh.players.health,
@@ -326,6 +328,7 @@ function normalizeDiary(value: unknown): LifeDiary | null {
     mood: Number(value.mood) || 0,
     energy: Number(value.energy) || 0,
     line: typeof value.line === "string" ? value.line : "",
+    pin: typeof value.pin === "string" ? value.pin : "Chưa ghim món.",
   };
 }
 
@@ -380,11 +383,13 @@ function strOrNull(value: unknown): string | null {
  * 4 have no course history, so every course is still uncompleted. Versions
  * before 5 have no task_run; normalize stores null. Versions before 6 have no
  * health, mood, or life counters; those gain the defaults. Versions before 7
- * have no event feed; normalize adds an empty one.
+ * have no event feed; normalize adds an empty one. Versions before 8 have no
+ * store, so they own nothing and wake in the student room.
  */
 export function migrateSave(persisted: unknown, version: number): PersistedSave {
   const prev = isRecord(persisted) ? persisted : {};
-  const stage = isStage(prev.stage) ? prev.stage : "student";
+  let stage = isStage(prev.stage) ? prev.stage : "student";
+  if (version < 8 && stage !== "student") stage = "student";
   const loadouts = isRecord(prev.loadouts)
     ? {
         student: isRecord(prev.loadouts.student)

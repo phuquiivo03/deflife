@@ -1,4 +1,4 @@
-/** Paths stay on the spec keys. Phase 2 files are final art; store and trait files stay placeholders. */
+/** Paths stay on the spec keys. Trait icons stay placeholders until that phase. */
 export const M5_ASSET_KEYS = [
   "ui_dialog_frame.png",
   "ui_diary_page.png",
@@ -40,13 +40,16 @@ export const M5_ASSET_KEYS = [
   "item_aircon.png",
   "item_ergo_chair.png",
   "item_monitor2.png",
-  "item_mattress.png",
+  "item_mattress_student.png",
+  "item_mattress_junior.png",
   "icon_store_plant.png",
   "icon_store_fan.png",
   "icon_store_aircon.png",
   "icon_store_ergo_chair.png",
   "icon_store_monitor2.png",
   "icon_store_mattress.png",
+  "icon_store_room_junior.png",
+  "icon_store_room_senior.png",
   "icon_trait_night_owl.png",
   "icon_trait_diligent.png",
   "icon_trait_extrovert.png",

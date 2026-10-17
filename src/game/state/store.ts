@@ -73,7 +73,9 @@ import {
   syncLifeSurface as syncLifeSurfaceState,
 } from "../life/events";
 import type { LifeStep } from "../life/events";
-import { dialogCueKey, noticeCueKey } from "../life/sounds";
+import { dialogCueKey, noticeCueKey, playLifeSound } from "../life/sounds";
+import { pinItem, roomOwned } from "../life/furniture";
+import { buyShopItem } from "../life/store-buy";
 
 let clockSkip = false;
 let handlingHospital = false;
@@ -196,6 +198,7 @@ type GameState = {
   finishTaskTest: () => void;
   retryTaskRun: () => void;
   /** Ephemeral life UI. Not persisted. */
+  storeOpen: boolean;
   lifeBubble: { text: string; until: number } | null;
   lifeBanner: { label: string; until: number } | null;
   terminalLines: string[];
@@ -204,6 +207,9 @@ type GameState = {
   readAllNotices: () => void;
   dismissDiary: () => void;
   runNoticeAction: (action: "payRent" | "viewJobs" | "openStore") => void;
+  setStoreOpen: (open: boolean) => void;
+  buyStoreItem: (id: string) => void;
+  pinStoreItem: (id: string | null) => void;
   debugForceEvent: () => void;
   syncLifeSurface: () => void;
   debugAddMoney: () => void;
@@ -229,12 +235,15 @@ export const useGameStore = create<GameState>()(
       customizeOpen: false,
       _hasHydrated: false,
       setHasHydrated: (v) => set({ _hasHydrated: v }),
-      setStage: (s) =>
-        set((st) => ({
+      setStage: (s) => {
+        const current = get();
+        if (!roomOwned(current.career, s) || current.stage === s) return;
+        set({
           stage: s,
           selectedSlot: null,
-          career: { ...st.career, players: { ...st.career.players, stage: s } },
-        })),
+          career: { ...current.career, players: { ...current.career.players, stage: s } },
+        });
+      },
       setSlotItem: (slotId, itemId) => {
         const stage = get().stage;
         set((st) => ({
@@ -302,6 +311,7 @@ export const useGameStore = create<GameState>()(
       career: defaultCareer(1, DEFAULT_START_MINUTES, "student", SIM_CATALOG),
       careerPanel: null,
       taskJobId: null,
+      storeOpen: false,
       lifeBubble: null,
       lifeBanner: null,
       terminalLines: [],
@@ -478,10 +488,28 @@ export const useGameStore = create<GameState>()(
           return;
         }
         if (action === "openStore") {
-          set({ career: askStore(get().career) });
+          set({ storeOpen: true, career: askStore(get().career) });
           return;
         }
         commitLife(payOutstandingRent(get().career));
+        get().syncLifeSurface();
+      },
+      setStoreOpen: (open) => set({ storeOpen: open }),
+      buyStoreItem: (id) => {
+        const bought = buyShopItem(get().career, id);
+        if (bought.error) return;
+        playLifeSound("sfx_store_buy");
+        const stage = bought.moveTo ?? get().stage;
+        set({
+          stage,
+          selectedSlot: bought.moveTo ? null : get().selectedSlot,
+          career: bought.state,
+        });
+        emitGame(bought.events);
+        get().syncLifeSurface();
+      },
+      pinStoreItem: (id) => {
+        set({ career: pinItem(get().career, id) });
         get().syncLifeSurface();
       },
       debugForceEvent: () => {

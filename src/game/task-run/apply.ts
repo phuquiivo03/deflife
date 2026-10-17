@@ -8,6 +8,7 @@ import {
 import { applyMoney } from "../vitals/logic";
 import { LIFE } from "../life/content";
 import { takePendingBugDelta } from "../life/events";
+import { jobEnergyFactor, scaleWorkXp } from "../life/furniture";
 import {
   applyActionStats,
   energyCost,
@@ -111,6 +112,7 @@ function gateFor(state: CareerState): JobGate {
     workStreak: life.workStreak,
     minEnergy: LIFE.low_energy_job,
     blockFreelance: life.burnoutDay === state.players.game_day,
+    energyFactor: jobEnergyFactor(state),
   };
 }
 
@@ -142,7 +144,7 @@ export function startTask(
   }
 
   const spent = applyActionStats(state, {
-    energy: -template.energy,
+    energy: -template.energy * jobEnergyFactor(state),
     health: force && check.energyShort ? LIFE.force_health : 0,
   });
   const nextJob: PlayerJob = {
@@ -281,10 +283,11 @@ export function retryTask(state: CareerState, jobId: string, catalog: SimCatalog
   const found = requireRun(state, jobId);
   if (typeof found === "string") return fail(state, found);
   if (!canRetry(found.run, TASK_RUN.max_retries)) return fail(state, "Hết lượt làm lại");
-  const cost = energyCost(TASK_RUN.retry_energy, lifeOf(state).workStreak);
+  const retryEnergy = TASK_RUN.retry_energy * jobEnergyFactor(state);
+  const cost = energyCost(retryEnergy, lifeOf(state).workStreak);
   if (state.players.energy < cost) return fail(state, "Không đủ năng lượng");
 
-  const spent = applyActionStats(state, { energy: -TASK_RUN.retry_energy });
+  const spent = applyActionStats(state, { energy: -retryEnergy });
   const run = applyRetry(found.run);
   return {
     ...ok(
@@ -352,7 +355,7 @@ export function grantTaskSuccess(
   const grants = catalog.jobTemplateXp.filter((row) => row.template_id === template.id);
   for (const grant of grants) {
     const skill = skillById(next.player_skills, grant.skill_id);
-    const amount = grantedXp(grant.xp, skill.level, "job", catalog.config);
+    const amount = scaleWorkXp(grantedXp(grant.xp, skill.level, "job", catalog.config), next);
     const applied = grantToSkill(next, grant.skill_id, amount, catalog);
     next = applied.state;
     events.push(...applied.events);

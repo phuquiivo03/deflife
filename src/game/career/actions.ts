@@ -18,6 +18,7 @@ import {
 import { applyMoney, clampEnergy } from "../vitals/logic";
 import { LIFE } from "../life/content";
 import { defaultFeed } from "../life/events";
+import { defaultShop, scaleWorkXp } from "../life/furniture";
 import {
   applyActionStats,
   applyLifeDayStart,
@@ -106,6 +107,7 @@ export function defaultCareer(
     player_unlocks: [],
     player_events: [],
     life: defaultLife(day),
+    shop: defaultShop(),
     feed: defaultFeed({
       day,
       money: config.starting_money,
@@ -293,7 +295,7 @@ export function applyStudy(
   let xpShown = 0;
   for (const grant of grants) {
     const skill = skillById(next.player_skills, grant.skill_id);
-    const amount = grantedXp(grant.xp, skill.level, "study", catalog.config);
+    const amount = scaleWorkXp(grantedXp(grant.xp, skill.level, "study", catalog.config), next);
     const applied = grantToSkill(next, grant.skill_id, amount, catalog);
     next = applied.state;
     events.push(...applied.events);

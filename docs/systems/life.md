@@ -1,8 +1,8 @@
 # Life sim (M5)
 
-Time slots, vitals, bills, small events, and the Thông báo panel. The spec is [docs/specs/M5_life_sim.md](../specs/M5_life_sim.md). The store and personality are later phases. Phase 2 art (portraits, notice icons, emotes, dialog, diary, banner, speech bubble, unread badge) is the native PNG in `public/ui/m5/`. Store and trait files there are still placeholders. The life-sim one-shots are in the SFX sprite. A new notice plays its severity cue. Salary, the sick threshold, and the day-7 landlord knock use their own cues. The important-day banner and an opening event play `sfx_event_open`. Sleep plays `sfx_diary_flip`. `sfx_store_buy` is in the pack and stays silent until the store can sell something.
+Time slots, vitals, bills, small events, the Thông báo panel, and the store. The spec is [docs/specs/M5_life_sim.md](../specs/M5_life_sim.md). Personality is the next phase. Trait icons in `public/ui/m5/` stay placeholders. The other M5 art there is the approved native PNG, including store furniture placed from `src/game/life/placement.json`. The life-sim one-shots are in the SFX sprite. A new notice plays its severity cue. Salary, the sick threshold, and the day-7 landlord knock use their own cues. The important-day banner and an opening event play `sfx_event_open`. Sleep plays `sfx_diary_flip`. A successful purchase plays `sfx_store_buy` and the existing money-spend cue.
 
-Numbers live in [config/life_sim.json](../../config/life_sim.json). Starting money stays in `config/game_config.json` (`3000000`).
+Numbers live in [config/life_sim.json](../../config/life_sim.json) and [config/store.json](../../config/store.json). Starting money stays in `config/game_config.json` (`3000000`).
 
 ## Calendar
 
@@ -14,13 +14,13 @@ Dated holidays: Tết (month 1, days 1–3), 30/4 as the last day of month 4, 1/
 
 ## Stats
 
-Energy, health, and mood are floats from 0 to 100. The HUD rounds them. An action applies, in order: base, diminishing on a positive mood (`× 0.6^times today`, reset at 06:00), personality `× 1`, furniture `+ 0`, then a work-streak energy cost `× 1.2` when the streak is at least 3, then clamp, then thresholds. An event effect only adds and clamps.
+Energy, health, and mood are floats from 0 to 100. The HUD rounds them. An action applies, in order: base, diminishing on a positive mood (`× 0.6^times today`, reset at 06:00), personality `× 1`, furniture, then a work-streak energy cost `× 1.2` when the streak is at least 3, then clamp, then thresholds. An event effect only adds and clamps. At most 3 furniture contributions apply to one stat; the largest are kept.
 
 Each waking slot: mood −1. If the work streak is at least 3, another −2.
 
-End of the calendar day (midnight, or sleep if the player skipped midnight): fewer than 2 meals costs 5 health, exactly 3 meals restores 2. Mood moves 10% of the way toward 60. Three work days in a row with fewer than 2 fun slots costs 3 mood. A finished course or a finished job counts as work. This phase has no fun action, so fun slots stay 0.
+End of the calendar day (midnight, or sleep if the player skipped midnight): fewer than 2 meals costs 5 health, exactly 3 meals restores 2. Owned furniture then adds its daily health and mood. Mood moves 10% of the way toward 60. Three work days in a row with fewer than 2 fun slots costs 3 mood. A finished course or a finished job counts as work. This phase has no fun action, so fun slots stay 0.
 
-Sleep of `h` hours: energy max is 70 while health is under 30, otherwise 100. Energy becomes `min(max, energy + 12.5h)`. Under 6 hours, health loses `4 × (6 − h)` and the next morning loses 5 mood.
+Sleep of `h` hours: energy max is 70 while health is under 30, otherwise 100. Energy becomes `min(max, energy + 12.5h + sleep bonus)`. Under 6 hours, health loses `4 × (6 − h)` and the next morning loses 5 mood.
 
 Thresholds: energy under 15 blocks taking a job. Energy under an action's cost blocks it; **Cố làm** spends 5 health and does it anyway (not available under the 15 floor). Mood under 30 multiplies XP by 0.7 (floored) and adds 1 bug. Mood under 15 schedules a freelance lock for the next day. Health under 10 is a hospital stay: health returns to 10, money −1,000,000, the clock jumps 2 days to 06:00, and those skipped days do not run the meal check.
 
@@ -36,7 +36,15 @@ Food, from the character panel: mì 8,000 (health −3), cơm nhà 25,000, cơm 
 
 One small event can fire per day, at the end of a slot from 10:00 onward. Chance is `0.12 + min(pity, 3) × 0.05`. An empty day adds 1 pity, capped at 3. A fired event resets pity to 0 and cools that event down for 5 days. Mood under 30 multiplies a good event's weight by 1.5. Effects add and clamp. Event XP uses the same mood ×0.7 floor as job XP. A lost slot jumps the clock 2 hours without another roll. While the task terminal is open, the roll waits and flushes when the terminal closes.
 
-Choice copy is the one-line spec text. Đồ án is student only. Prod, họp, headhunter, and đồng nghiệp are junior and senior. Karaoke and mất điện are evening and night. Hackathon is Friday only and resolves the Monday after: win chance `0.10 + 0.03 × max skill level`, prize 20,000,000 and 200 XP on the highest skill. “Mở store” records the ask and says the shop opens in a later phase.
+Choice copy is the one-line spec text. Đồ án is student only. Prod, họp, headhunter, and đồng nghiệp are junior and senior. Karaoke and mất điện are evening and night. Hackathon is Friday only and resolves the Monday after: win chance `0.10 + 0.03 × max skill level`, prize 20,000,000 and 200 XP on the highest skill. “Mở store” opens the cửa hàng.
+
+## Store
+
+Rooms and furniture are bought from **Cửa hàng** on the Thông báo panel. Junior is 25,000,000 and needs one skill at level 3 plus 30 reputation. Senior is 180,000,000 and needs two skills at level 8. The header, the 1/2/3 keys, and `?stage=` stay on a room until it is bought. Student is the start and stays available. Buying a room moves the player there. Rent, utilities, and salary follow that room.
+
+A room's sleep, mood, and health bonuses apply only while the player lives in it. A bought item's bonus applies in every room. The plant is +2 mood a day. The fan and air conditioner add 5 and 10 sleep energy. The mattress is +1 health a day. The ergo chair multiplies job accept and retry energy by 0.9 before the work streak. The second monitor multiplies study and job XP by 1.1, floored, before the mood multiplier, and it stays locked until the Junior room is owned. Event XP is unchanged.
+
+Black Friday multiplies prices by 0.9. One pinned item shows `label percent%` on the sleep diary, using that day's price. When money covers the pin, one notice says “Đủ tiền …”. Floor sprites replace `student.mattress`, `junior.office_chair`, and `junior.bed` and draw their shadow under the placement anchor. `item_mattress.png` is not used.
 
 ## Thông báo and UX
 
@@ -44,4 +52,4 @@ The left column is the notice list, newest first. Unread rows show `ui_badge_unr
 
 ## Save
 
-Persist version 7. Older saves keep money and energy and gain health 70, mood 70, empty life counters, and an empty event feed.
+Persist version 8. Older saves keep money and energy and gain health 70, mood 70, empty life counters, and an empty event feed. A save from before the store owns nothing and wakes in the student room.

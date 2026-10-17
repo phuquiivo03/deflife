@@ -32,6 +32,8 @@ export type JobGate = {
   /** Hard floor. Below this, freelance and remote both stay locked. */
   minEnergy?: number;
   blockFreelance?: boolean;
+  /** Ergo chair. Applied before the work-streak multiplier. */
+  energyFactor?: number;
 };
 
 export function jobRequirementsFor(
@@ -63,7 +65,7 @@ export function jobEligibility(
   if (player.reputation < template.min_reputation) {
     missing.push(`Cần ${template.min_reputation} uy tín`);
   }
-  const cost = energyCost(template.energy, gate.workStreak ?? 0);
+  const cost = energyCost(template.energy * (gate.energyFactor ?? 1), gate.workStreak ?? 0);
   if (gate.minEnergy != null && player.energy < gate.minEnergy) {
     missing.push("Dưới 15 năng lượng, chưa nhận việc");
   } else if (player.energy < cost) {

@@ -127,6 +127,10 @@ export type DrawEntry = {
   key: string;
   slotId?: string;
   sprite: string;
+  /** Native PNG blitted in room pixels. Atlas frames leave this unset. */
+  bitmap?: string;
+  bitmapW?: number;
+  bitmapH?: number;
   x: number;
   y: number;
   srcX?: number;
@@ -165,4 +169,6 @@ export type ViewState = {
 export type ResolveSceneOptions = {
   showCharacter: boolean;
   slotIndex: Record<string, number>;
+  /** Keep the slot for seating, and skip its atlas sprite. Store art replaces it. */
+  suppressItemIds?: ReadonlySet<string>;
 };

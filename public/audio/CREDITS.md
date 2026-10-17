@@ -26,4 +26,4 @@ Nine more cues, approved for the life sim, use the same synthesis as batch 1 (sq
 - `sfx_salary` — payday
 - `sfx_diary_flip` — the sleep diary
 - `sfx_sick_cough` — health dropping under 30
-- `sfx_store_buy` — in the pack for the store phase; nothing plays it yet
+- `sfx_store_buy` — a successful store purchase. The money-spend cue still plays for that spend.

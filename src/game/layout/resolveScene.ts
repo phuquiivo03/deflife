@@ -181,6 +181,7 @@ export function resolveScene(
       seatItem = item;
     }
 
+    const hideArt = opts.suppressItemIds?.has(p.itemId) === true;
     const frame = frames(item.sprite);
     const { x, y } = drawPos(p.anchor, frame);
 
@@ -200,20 +201,22 @@ export function resolveScene(
       sortSub = [0, slotIndex, 0];
     }
 
-    entries.push({
-      key: `${p.slotId}:sprite`,
-      slotId: p.slotId,
-      sprite: item.sprite,
-      x,
-      y,
-      layer,
-      sortBaseline: p.baseline + (item.zBias ?? 0),
-      sortSub,
-      anchor: p.anchor,
-      hitTest: true,
-    });
+    if (!hideArt) {
+      entries.push({
+        key: `${p.slotId}:sprite`,
+        slotId: p.slotId,
+        sprite: item.sprite,
+        x,
+        y,
+        layer,
+        sortBaseline: p.baseline + (item.zBias ?? 0),
+        sortSub,
+        anchor: p.anchor,
+        hitTest: true,
+      });
+    }
 
-    if (item.shadow && (p.kind === "floor" || p.kind === "seat")) {
+    if (!hideArt && item.shadow && (p.kind === "floor" || p.kind === "seat")) {
       const sh = frames(item.shadow);
       const so = item.shadowOffset ?? [0, 0];
       entries.push({
@@ -284,7 +287,7 @@ export function resolveScene(
         hitTest: false,
       });
 
-      if (seatPlacement && seatItem && seatItem.overlayFromY !== undefined) {
+      if (!opts.suppressItemIds?.has(seatItem?.id ?? "") && seatPlacement && seatItem && seatItem.overlayFromY !== undefined) {
         const chairFrame = frames(seatItem.sprite);
         const cutY = chairFrame.h + seatItem.overlayFromY;
         if (cutY > 0 && cutY < chairFrame.h) {

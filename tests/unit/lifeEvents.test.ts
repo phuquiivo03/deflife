@@ -273,7 +273,7 @@ describe("life events", () => {
 });
 
 describe("life event art", () => {
-  it("uses the approved native files and leaves store art as a placeholder", () => {
+  it("uses the approved native files for events and the store", () => {
     for (const [name, [w, h]] of Object.entries(P2_SIZES)) {
       expect(pngSize(name)).toMatchObject({ w, h });
     }
@@ -281,14 +281,17 @@ describe("life event art", () => {
       expect(pngSize(name)).toMatchObject({ w: 16, h: 16 });
       expect(pngSize(name).bytes).toBeGreaterThan(150);
     }
-    expect(pngSize("item_plant.png")).toEqual({ w: 32, h: 32, bytes: 115 });
-    expect(pngSize("ui_store_frame.png").bytes).toBeLessThan(200);
+    expect(pngSize("item_plant.png")).toMatchObject({ w: 22, h: 36 });
+    expect(pngSize("ui_store_frame.png")).toMatchObject({ w: 24, h: 24 });
+    expect(pngSize("ui_store_card.png")).toMatchObject({ w: 96, h: 120 });
+    expect(pngSize("item_mattress_student.png").bytes).toBeGreaterThan(200);
     const names = readdirSync(ART);
     expect(names.some((name) => name.includes("_x2"))).toBe(false);
     expect(names).not.toContain("placement.json");
+    expect(names).not.toContain("item_mattress.png");
   });
 
-  it("resolves the life cues and keeps the store purchase silent", () => {
+  it("resolves the life cues, including the store purchase", () => {
     expect(CUE_IDS.eventOpen[0]).toBe("sfx_event_open");
     const cues = parseManifest(JSON.parse(readFileSync(join(process.cwd(), "public/audio/manifest.json"), "utf8")));
     const ids = cues.map((cue) => cue.id);

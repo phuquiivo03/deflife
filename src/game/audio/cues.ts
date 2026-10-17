@@ -149,7 +149,7 @@ export const CUE_IDS: Record<CueKey, readonly string[]> = {
   salary: ["sfx_salary"],
   diaryFlip: ["sfx_diary_flip"],
   sickCough: ["sfx_sick_cough"],
-  /** In the pack for the store phase. No caller until a purchase exists. */
+  /** Successful store purchase. The money-spend cue still plays for the same spend. */
   storeBuy: ["sfx_store_buy"],
 };
 
