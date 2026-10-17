@@ -709,6 +709,24 @@ body {
   animation: hunger-blink 1.2s steps(2, end) infinite;
 }
 
+@keyframes ui-tooltip-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.ui-tooltip[data-state="instant-open"],
+.ui-tooltip[data-state="delayed-open"] {
+  animation-name: ui-tooltip-in;
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
+}
+
 @keyframes ff-flash {
   0%,
   100% {
@@ -785,7 +803,8 @@ body {
     background-color: transparent;
   }
 
-  .hunger-blink {
+  .hunger-blink,
+  .ui-tooltip {
     animation: none;
   }
 }
