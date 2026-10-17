@@ -17,6 +17,7 @@ import { StatBar } from "./StatBar";
 import { HUD_ICON_GAP_PX } from "./store-button.config";
 import { ROOM_STATUS_BAR, roomStatusBarVars, roomStatusClockLabel } from "./shell-layout.config";
 import shellStyles from "./shell-layout.module.css";
+import { HungerDock } from "./FoodPopup";
 import { SleepButton } from "./SleepButton";
 import { StoreButton } from "./StoreButton";
 
@@ -141,10 +142,11 @@ export function PlayerHudCard({ iconFiles = [] }: { iconFiles?: readonly string[
       </div>
       <div className="mt-3 flex items-center">
         <div
-          className="inline-flex items-center"
+          className="inline-flex max-w-full flex-wrap items-center justify-end"
           data-testid="hud-icon-bar"
           style={{ marginLeft: "auto", gap: HUD_ICON_GAP_PX }}
         >
+          <HungerDock />
           <SleepButton canSleep={canSleep} onSleep={sleep} />
         </div>
       </div>

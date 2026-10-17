@@ -718,29 +718,6 @@ body {
   animation-fill-mode: forwards, forwards;
 }
 
-.food-bowl {
-  display: block;
-  width: var(--food-px);
-  height: var(--food-px);
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  line-height: 0;
-  cursor: pointer;
-}
-
-.food-bowl img {
-  display: block;
-  width: var(--food-px);
-  height: var(--food-px);
-}
-
-.food-bowl:focus-visible {
-  outline: 2px solid var(--accent-violet);
-  outline-offset: 2px;
-}
-
 @keyframes intro-flash {
   0%,
   100% {
