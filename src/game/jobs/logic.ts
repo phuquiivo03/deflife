@@ -172,6 +172,21 @@ export function boardHasToday(
   );
 }
 
+/** Jobs the management board lists. Finished jobs have already left. */
+export function acceptedJobs(jobs: readonly PlayerJob[]): PlayerJob[] {
+  return jobs.filter((job) => job.status === "active");
+}
+
+/** Days remaining until `deadlineDay`. Null when the job has no deadline. */
+export function daysUntilDeadline(deadlineDay: number | null, today: number): number | null {
+  if (deadlineDay == null) return null;
+  return deadlineDay - today;
+}
+
+export function deadlineIsUrgent(daysLeft: number | null, remindDays: number): boolean {
+  return daysLeft != null && daysLeft <= remindDays;
+}
+
 export function visibleBoardJobs(
   jobs: readonly PlayerJob[],
   day: number,

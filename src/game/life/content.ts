@@ -96,7 +96,7 @@ export type LifeConfig = {
   job_late_reputation: number;
   /** Mood change when an accepted job misses its deadline. */
   job_late_mood: number;
-  /** Reminder fires when this many days remain. */
+  /** Reminder fires, and the board deadline turns red, when this many days or fewer remain. */
   job_remind_days: number;
   foods: FoodDef[];
   weekdays: string[];
