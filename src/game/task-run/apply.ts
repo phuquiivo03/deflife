@@ -5,6 +5,7 @@ import {
   jobRequirementsFor,
   skillNameMap,
 } from "../jobs/logic";
+import { notePurse } from "../life/purse";
 import { applyMoney } from "../vitals/logic";
 import { LIFE } from "../life/content";
 import { takePendingBugDelta } from "../life/events";
@@ -381,7 +382,7 @@ export function grantTaskSuccess(
       freelanceCompleted: freelance_completed,
     });
   }
-  return ok(next, events);
+  return ok(notePurse(next, pay, "earn"), events);
 }
 
 function grantTaskFail(

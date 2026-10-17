@@ -29,8 +29,9 @@ export const PERSIST_KEY = "devlife:v1";
  * v11: `players.trait` and `life.homeDays`. That version wrote Cẩn thận. Home days start at 0.
  * v12: `players.traitRolled`. A save that has not been rolled gets one random trait, including a v11 Cẩn thận. A real non-careful v11 trait, or a save already marked rolled, is kept. Home days from v11 stay.
  * v13: `players.introSeen`. Older saves have already started, so the creation popup stays closed.
+ * v14: `feed.purse`. Older saves start the day with an empty purse. Money, skills, and progress stay.
  */
-export const PERSIST_VERSION = 13;
+export const PERSIST_VERSION = 14;
 
 export const CHAR_POSE_SIT_BACK = "character/derived/char_sit_back";
 export const ATLAS_URL = "/atlas/devlife.png";

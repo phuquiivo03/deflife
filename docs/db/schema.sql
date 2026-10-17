@@ -183,6 +183,8 @@ CREATE TABLE player_life_feed (
   snapshot_mood double precision NOT NULL,
   snapshot_energy double precision NOT NULL,
   diary jsonb,
+  -- Persist v14. Empty for an older save. Spent fields are positive amounts.
+  purse jsonb NOT NULL,
   banner_day integer,
   landlord_told integer NOT NULL CHECK (landlord_told >= 0),
   sick_open boolean NOT NULL,

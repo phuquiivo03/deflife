@@ -7,6 +7,7 @@ import { LIFE_EVENTS, lifeEventById } from "@/game/life/events-content";
 import { m51AssetPath, m5AssetPath, type M5AssetKey } from "@/game/life/assets";
 import { useGameStore } from "@/game/state/store";
 import { Button } from "@/components/ui/button";
+import { formatVnd } from "@/lib/format-currency";
 
 function art(key: string): string {
   return m5AssetPath(key as M5AssetKey);
@@ -121,10 +122,42 @@ export function LifeStage() {
       ) : null}
       {diary ? (
         <div className="absolute inset-0 z-40 flex items-center justify-center p-3" data-testid="life-diary">
-          <div className="life-diary w-full max-w-sm p-4">
-            <p className="font-galmuri-9 text-galmuri-body text-[var(--foreground)]">Nhật ký</p>
-            <ul className="mt-2 space-y-1 font-galmuri-7 text-galmuri-small text-[var(--muted-foreground)]">
-              <li>Tiền {signed(diary.money)}đ</li>
+          <div className="life-notepad w-full max-w-sm p-3">
+            <div className="life-notepad-title font-galmuri-7 text-galmuri-small">
+              <p className="min-w-0 truncate" data-testid="diary-title">
+                nhat_ky_ngay_{diary.day}.txt
+              </p>
+              <div className="flex shrink-0">
+                <Button type="button" size="icon" variant="ghost" className="min-h-11 min-w-11 text-white" aria-label="Thu nhỏ" data-testid="diary-min">
+                  _
+                </Button>
+                <Button type="button" size="icon" variant="ghost" className="min-h-11 min-w-11 text-white" aria-label="Phóng to" data-testid="diary-max">
+                  □
+                </Button>
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  className="min-h-11 min-w-11 text-white"
+                  aria-label="Đóng"
+                  data-testid="life-diary-close"
+                  onClick={dismissDiary}
+                >
+                  x
+                </Button>
+              </div>
+            </div>
+            <ul className="mt-2 space-y-1 font-galmuri-7 text-galmuri-small text-[var(--foreground)]">
+              <li data-testid="diary-earned" className="text-[var(--accent-mint)]">
+                Kiếm được +{formatVnd(diary.earned)}
+              </li>
+              <li data-testid="diary-spent" className="text-[var(--accent-coral)]">
+                Đã tiêu −{formatVnd(diary.spent)}
+              </li>
+              {diary.food > 0 ? <li data-testid="diary-food">Ăn −{formatVnd(diary.food)}</li> : null}
+              {diary.rent > 0 ? <li data-testid="diary-rent">Trọ −{formatVnd(diary.rent)}</li> : null}
+              {diary.shop > 0 ? <li data-testid="diary-shop">Mua đồ −{formatVnd(diary.shop)}</li> : null}
+              <li data-testid="diary-left">Còn lại {formatVnd(diary.remaining)}</li>
               <li>XP {signed(diary.xp)}</li>
               <li>Sức khỏe {signed(diary.health)}</li>
               <li>Tinh thần {signed(diary.mood)}</li>
@@ -132,9 +165,6 @@ export function LifeStage() {
               <li data-testid="diary-pin">{diary.pin || "Chưa ghim món."}</li>
             </ul>
             <p className="mt-2 font-galmuri-7 text-galmuri-small text-[var(--foreground)]">{diary.line}</p>
-            <Button type="button" size="sm" showArrow={false} className="mt-3 min-h-11" data-testid="life-diary-close" onClick={dismissDiary}>
-              Gấp lại
-            </Button>
           </div>
         </div>
       ) : null}

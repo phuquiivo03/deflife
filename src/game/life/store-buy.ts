@@ -3,6 +3,7 @@ import type { StageId } from "../config";
 import type { GameEvent } from "../events/types";
 import { buyBlock, shopOf, STORE, storeItem, storePrice } from "./furniture";
 import { applyActionStats } from "./logic";
+import { notePurse } from "./purse";
 import { scaleShoppingMood } from "./traits";
 
 export type BuyResult = {
@@ -25,13 +26,17 @@ export function buyShopItem(state: CareerState, id: string): BuyResult {
   const spent = applyActionStats(state, { money: -price, mood });
   const shop = shopOf(spent.state);
   const moveTo = item.stage ?? null;
-  const next: CareerState = {
-    ...spent.state,
-    shop: { ...shop, owned: [...shop.owned, item.id] },
-    players: {
-      ...spent.state.players,
-      stage: moveTo ?? spent.state.players.stage,
+  const next: CareerState = notePurse(
+    {
+      ...spent.state,
+      shop: { ...shop, owned: [...shop.owned, item.id] },
+      players: {
+        ...spent.state.players,
+        stage: moveTo ?? spent.state.players.stage,
+      },
     },
-  };
+    -price,
+    "shop",
+  );
   return { state: next, events: spent.events, skipDays: spent.skipDays, error: null, moveTo };
 }

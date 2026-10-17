@@ -4,6 +4,7 @@ import type { GameEvent } from "../events/types";
 import { applyMoney } from "../vitals/logic";
 import { LIFE, foodById, type FoodId } from "./content";
 import { furnitureDailyHealth, furnitureDailyMood, furnitureSleepBonus } from "./furniture";
+import { notePurse } from "./purse";
 import { foodPrice, traitDecay, traitHomeMood, traitMoodFloor, traitMorningEnergy } from "./traits";
 
 export type Calendar = {
@@ -187,6 +188,7 @@ function finish(
   const floor = traitMoodFloor(state);
   if (floor != null) mood = Math.max(mood, floor);
   let money = applyMoney(0, next.money);
+  const beforeHospital = money;
   let skipDays = 0;
   let nextLife = life;
 
@@ -243,8 +245,11 @@ function finish(
     });
   }
 
+  const hospitalDelta = money - beforeHospital;
+  let written = writeVitals(state, after, nextLife);
+  if (hospitalDelta !== 0) written = notePurse(written, hospitalDelta, "other");
   return {
-    state: writeVitals(state, after, nextLife),
+    state: written,
     events: [...events, ...deltaEvents],
     skipDays,
   };
@@ -344,7 +349,7 @@ export function eatMeal(state: CareerState, foodId: FoodId): LifeResult {
     { money: -price, health: food.health },
     { ...life, mealsToday: life.mealsToday + 1 },
   );
-  return spent;
+  return { ...spent, state: notePurse(spent.state, -price, "food") };
 }
 
 export function mealBlocked(state: CareerState, foodId: FoodId): string | null {
@@ -404,6 +409,9 @@ export function settleCalendarDay(state: CareerState, day: number, stage: string
   const key = monthKey(day);
   let money = 0;
   let mood = 0;
+  let rentPaid = 0;
+  let utilitiesPaid = 0;
+  let salaryPaid = 0;
   const next = { ...life };
 
   if (cal.dayOfMonth === LIFE.bill_day && next.rentIssuedKey !== key) {
@@ -411,6 +419,7 @@ export function settleCalendarDay(state: CareerState, day: number, stage: string
     const rent = stageBill(LIFE.rent, stage);
     if (state.players.money + money >= rent) {
       money -= rent;
+      rentPaid = rent;
       next.paidRentKey = key;
       next.rentDebtDays = 0;
     } else {
@@ -419,6 +428,7 @@ export function settleCalendarDay(state: CareerState, day: number, stage: string
     const utilities = stageBill(LIFE.utilities, stage);
     if (next.paidUtilitiesKey !== key && state.players.money + money >= utilities) {
       money -= utilities;
+      utilitiesPaid = utilities;
       next.paidUtilitiesKey = key;
     }
   } else if (next.rentIssuedKey === key && next.paidRentKey !== key) {
@@ -433,6 +443,7 @@ export function settleCalendarDay(state: CareerState, day: number, stage: string
     const salary = stageBill(LIFE.salary, stage);
     if (salary > 0) {
       money += salary;
+      salaryPaid = salary;
       next.paidSalaryKey = key;
     }
   }
@@ -444,10 +455,14 @@ export function settleCalendarDay(state: CareerState, day: number, stage: string
   }
   next.settledDay = day;
 
+  let noted = state;
+  if (rentPaid) noted = notePurse(noted, -rentPaid, "rent");
+  if (utilitiesPaid) noted = notePurse(noted, -utilitiesPaid, "rent");
+  if (salaryPaid) noted = notePurse(noted, salaryPaid, "earn");
   if (money === 0 && mood === 0) {
-    return { state: { ...state, life: next }, events: [], skipDays: 0 };
+    return { state: { ...noted, life: next }, events: [], skipDays: 0 };
   }
-  return applyDirect({ ...state, life: next }, { money, mood }, next);
+  return applyDirect({ ...noted, life: next }, { money, mood }, next);
 }
 
 /**
