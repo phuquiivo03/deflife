@@ -436,6 +436,8 @@ Resolution rules (`resolveScene`):
 
 Zustand with `persist` → localStorage key `devlife:v1`. Include a `version` and `migrate` from day one. **Version 2** adds the in-game clock (`totalMinutes`). v1 saves migrate to day 1, 08:00. See [`docs/systems/time.md`](systems/time.md).
 
+Every schema change bumps `PERSIST_VERSION` and adds a migration in `src/game/storage/migrate.ts` that keeps money, skills, and progress and defaults new fields. Players never need to clear storage. The standing rule is [`docs/systems/save.md`](systems/save.md).
+
 ```ts
 type GameState = {
   stage: StageId;                                    // default 'student'

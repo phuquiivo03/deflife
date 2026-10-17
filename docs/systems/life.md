@@ -52,4 +52,4 @@ The left column is the notice list, newest first. Unread rows show `ui_badge_unr
 
 ## Save
 
-Persist version 8. Older saves keep money and energy and gain health 70, mood 70, empty life counters, and an empty event feed. A save from before the store owns nothing and wakes in the student room.
+Persist version 9. A notice may carry `cue`; a save from version 8 keeps its money, skills, shop, and progress, and its notices get `cue` null. Older saves keep money and energy and gain health 70, mood 70, empty life counters, and an empty event feed. A save from before the store owns nothing and wakes in the student room. The standing migration rule is [docs/systems/save.md](save.md).

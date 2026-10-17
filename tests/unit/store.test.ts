@@ -160,6 +160,91 @@ describe("store catalog", () => {
     expect(saved.career.shop).toEqual({ owned: [], pin: null });
     expect(saved.career.players.money).toBe(42);
   });
+
+  it("keeps a v8 save's money, skills, and progress and defaults notice cues", () => {
+    const saved = migrateSave(
+      {
+        stage: "junior",
+        totalMinutes: 20_000,
+        showCharacter: true,
+        career: {
+          players: { money: 2_850_000, energy: 40, health: 70, mood: 66, freelance_completed: 2 },
+          player_skills: [{ skill_id: "frontend", level: 3, xp: 12 }],
+          player_jobs: [
+            {
+              id: "job-1",
+              template_id: "landing",
+              job_type: "freelance",
+              status: "active",
+              hours_required: 4,
+              progress_hours: 2,
+              pay: 500_000,
+              offered_day: 3,
+            },
+          ],
+          player_study_completions: [
+            { activity_id: "html", skill_id: "frontend", xp_gained: 80, completed_day: 2 },
+          ],
+          shop: { owned: ["plant"], pin: "fan" },
+          life: { workStreak: 2, paidSalaryKey: "1-1" },
+          feed: {
+            pity: 2,
+            smallEventDay: 4,
+            notices: [
+              {
+                id: "salary-1-1",
+                day: 10,
+                minute: 360,
+                severity: "info",
+                icon: "icon_notif_salary.png",
+                text: "Lương về.",
+                action: null,
+                read: true,
+              },
+            ],
+          },
+        },
+      },
+      8,
+    );
+    expect(saved.stage).toBe("junior");
+    expect(saved.totalMinutes).toBe(20_000);
+    expect(saved.career.players.money).toBe(2_850_000);
+    expect(saved.career.players.energy).toBe(40);
+    expect(saved.career.players.freelance_completed).toBe(2);
+    expect(saved.career.player_skills.find((row) => row.skill_id === "frontend")).toEqual({
+      skill_id: "frontend",
+      level: 3,
+      xp: 12,
+    });
+    expect(saved.career.player_jobs[0]).toMatchObject({
+      id: "job-1",
+      status: "active",
+      progress_hours: 2,
+      pay: 500_000,
+    });
+    expect(saved.career.player_study_completions).toEqual([
+      { activity_id: "html", skill_id: "frontend", xp_gained: 80, completed_day: 2 },
+    ]);
+    expect(saved.career.shop).toEqual({ owned: ["plant"], pin: "fan" });
+    expect(saved.career.life.workStreak).toBe(2);
+    expect(saved.career.life.paidSalaryKey).toBe("1-1");
+    expect(saved.career.feed.pity).toBe(2);
+    expect(saved.career.feed.smallEventDay).toBe(4);
+    expect(saved.career.feed.notices).toEqual([
+      {
+        id: "salary-1-1",
+        day: 10,
+        minute: 360,
+        severity: "info",
+        icon: "icon_notif_salary.png",
+        text: "Lương về.",
+        action: null,
+        read: true,
+        cue: null,
+      },
+    ]);
+  });
 });
 
 describe("store placement", () => {

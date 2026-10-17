@@ -204,6 +204,7 @@ CREATE TABLE player_notices (
   body text NOT NULL,
   action text CHECK (action IN ('payRent', 'viewJobs', 'openStore')),
   read boolean NOT NULL,
+  -- Persist v9. Null keeps the id and severity sound rules.
   cue text CHECK (cue IS NULL OR cue IN ('eventOpen', 'landlordKnock', 'salary', 'sickCough', 'storeBuy', 'diaryFlip')),
   PRIMARY KEY (player_id, id)
 );
